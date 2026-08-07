@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agranda/Repuestos y productos Agricolas</title>
+    <link rel="stylesheet" href="productos.css">
+</head>
+<body>
+
+<header>
+  <h1>Agranda</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="productos.html">productos</a>
+      <a href="carrito.html"class="carrito-link">carrito de compras<span class="icono-carrito">🛒<span id="cart-count">0</span></span></a>
+      <a href="contacto.html">Contactos</a>
+    </nav>
+</header>
+<main class="productosm">
+<section class="busqueda">
+    <input 
+        type="text" 
+        id="buscador" 
+        placeholder="Buscar producto..."
+    >
+    <button id="btnBuscar" onclick="accionBusqueda()">Buscar</button>
+    
+
+    <p id="mensaje" style="display:none; color:black; margin-top:10px;">
+        No se encontraron productos
+    </p>
+</section>
+
+<section class="productos">
+    <div class="grid">
+
+        <div class="card producto" data-categoria="maquinaria">
+            <img src="sigueñal.jpg" alt="sigueñal">
+            <h4 class="nombre">correa t1</h4>
+            <p class="precio">1200</p>
+            <button class="btn-agregar">Agregar al carrito</button>
+        </div>
+
+        <div class="card producto" data-categoria="maquinaria">
+            <img src="sigueñal.jpg" alt="sigueñal">
+            <h4 class="nombre">correa t2</h4>
+            <p class="precio">40000</p>
+            <button class="btn-agregar">Agregar al carrito</button>
+        </div>
+
+         <div class="card producto" data-categoria="maquinaria">
+            <img src="sigueñal.jpg" alt="sigueñal">
+            <h4 class="nombre">sigueñal t2</h4>
+            <p class="precio">30000</p>
+            <button class="btn-agregar">Agregar al carrito</button>
+        </div>
+
+         <div class="card producto" data-categoria="maquinaria">
+            <img src="sigueñal.jpg" alt="sigueñal">
+            <h4 class="nombre">sigueñal t1</h4>
+            <p class="precio">8000</p>
+            <button class="btn-agregar">Agregar al carrito</button>
+        </div>
+
+         <div class="card producto" data-categoria="electrico">
+            <img src="sigueñal.jpg" alt="sigueñal">
+            <h4 class="nombre">pantalla t2</h4>
+            <p class="precio">900000</p>
+            <button class="btn-agregar">Agregar al carrito</button>
+        </div>
+
+         <div class="card producto" data-categoria="electrico">
+            <img src="sigueñal.jpg" alt="sigueñal">
+            <h4 class="nombre">pantalla t1</h4>
+            <p class="precio">7000</p>
+            <button class="btn-agregar">Agregar al carrito</button>
+        </div>
+
+         <div class="card producto" data-categoria="hidraulico">
+            <img src="sigueñal.jpg" alt="sigueñal">
+            <h4 class="nombre">hidraulico t2</h4>
+            <p class="precio">80000</p>
+            <button class="btn-agregar">Agregar al carrito</button>
+        </div>
+
+         <div class="card producto" data-categoria="hidraulico">
+            <img src="sigueñal.jpg" alt="sigueñal">
+            <h4 class="nombre">hidraulico t1</h4>
+            <p class="precio">600</p>
+            <button class="btn-agregar">Agregar al carrito</button>
+        </div>
+
+         <div class="card producto" data-categoria="aceites">
+            <img src="sigueñal.jpg" alt="sigueñal">
+            <h4 class="nombre">aceite t2</h4>
+            <p class="precio">1500</p>
+            <button class="btn-agregar">Agregar al carrito</button>
+        </div>
+
+         <div class="card producto" data-categoria="aceites">
+            <img src="sigueñal.jpg" alt="sigueñal">
+            <h4 class="nombre">aceite t1</h4>
+            <p class="precio">654450</p>
+            <button class="btn-agregar">Agregar al carrito</button>
+        </div>
+
+    </div>  
+</section>
+</main>
+<!--el pie pagina-->
+<footer>
+    <p>@ 2026 Agranda -todos los derechos reservados</p>
+</footer>
+
+</body>
+<script src="tienda.js" defer></script>
+</html>
