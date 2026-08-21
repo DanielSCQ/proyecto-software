@@ -1,0 +1,19 @@
+# Configuración local / credenciales
+.env
+.env.*
+
+# Archivos temporales de Windows
+Thumbs.db
+desktop.ini
+
+# Archivos temporales de editores
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp

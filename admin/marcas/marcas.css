@@ -1,0 +1,649 @@
+/*=================================
+    ESTILOS GENERALES
+=================================*/
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    color:#333;
+    height:100vh;
+    overflow:hidden;
+}
+
+
+/*=================================
+    CONTENEDOR PRINCIPAL
+=================================*/
+
+.contenedor-dashboard{
+    display:flex;
+    height:100vh;
+}
+
+
+/*=================================
+    MENÚ LATERAL
+=================================*/
+
+.menu-lateral{
+    width:270px;
+    background:#1f5f28;
+    color:white;
+    padding:25px;
+    height:100vh;
+    position:sticky;
+    top:0;
+    overflow-y:auto;
+    flex-shrink:0;
+}
+
+.logo-panel{
+    margin-bottom:35px;
+}
+
+.logo-panel h1{
+    font-size:34px;
+}
+
+.logo-panel p{
+    color:#d9f5dc;
+}
+
+
+/*=================================
+    MENÚ DE NAVEGACIÓN
+=================================*/
+
+.menu-lateral ul{
+    list-style:none;
+}
+
+.menu-lateral li{
+    margin:10px 0;
+}
+
+.menu-lateral a{
+    color:white;
+    text-decoration:none;
+    display:block;
+    padding:12px 15px;
+    border-radius:8px;
+    transition:.3s;
+}
+
+.menu-lateral a:hover{
+    background:#2e7d32;
+}
+
+.menu-lateral a.activo{
+    background:#2e7d32;
+    font-weight:bold;
+}
+
+/*=================================
+    CONTENIDO PRINCIPAL
+=================================*/
+
+.contenido{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    overflow:hidden;
+}
+
+
+/*=================================
+    ENCABEZADO
+=================================*/
+
+.encabezado{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:white;
+    padding:20px 30px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    margin-bottom:30px;
+    position:sticky;
+    top:0;
+    z-index:100;
+    flex-shrink:0;
+}
+
+.titulo-panel h2{
+    color:#2e7d32;
+    font-size:30px;
+}
+
+.titulo-panel p{
+    color:#666;
+    margin-top:5px;
+}
+
+.panel-usuario{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.fecha-hora{
+    text-align:right;
+    color:#666;
+    font-size:14px;
+}
+
+.usuario{
+    background:#f2f2f2;
+    padding:10px 18px;
+    border-radius:30px;
+    font-weight:bold;
+}
+
+.btn-salir{
+    background:#c62828;
+    color:white;
+    padding:10px 18px;
+    text-decoration:none;
+    border-radius:8px;
+    transition:.3s;
+}
+
+.btn-salir:hover{
+    background:#8e0000;
+}
+
+
+/*=================================
+    CONTENEDOR DE MARCAS
+=================================*/
+
+.resumen{
+    background:white;
+    padding:30px;
+    margin:0 30px 30px 30px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    overflow:auto;
+    flex:1;
+}
+
+
+/*=================================
+    TÍTULO DE MARCAS
+=================================*/
+
+.resumen h2{
+    color:#2e7d32;
+    font-size:28px;
+    margin-bottom:10px;
+}
+
+.resumen > p{
+    color:#666;
+    font-size:15px;
+    margin-bottom:25px;
+}
+
+
+/*=================================
+    FORMULARIO DE MARCAS
+=================================*/
+
+.formulario-marcas{
+    background:white;
+    padding:20px;
+    max-width:850px;
+    border-radius:12px;
+    border:1px solid #e5e7eb;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+    margin-bottom:30px;
+}
+
+.formulario-marcas label{
+    display:block;
+    margin-top:15px;
+    margin-bottom:7px;
+    font-weight:bold;
+    color:#333;
+    font-size:15px;
+}
+
+.formulario-marcas input,
+.formulario-marcas textarea,
+.formulario-marcas select{
+    width:100%;
+    padding:11px 13px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    font-size:15px;
+    font-family:Arial, Helvetica, sans-serif;
+    outline:none;
+    background:white;
+    color:#333;
+    transition:.2s;
+}
+
+.formulario-marcas input:focus,
+.formulario-marcas textarea:focus,
+.formulario-marcas select:focus{
+    border-color:#2e7d32;
+    box-shadow: 0 0 0 3px rgba(46,125,50,.10);
+}
+
+.formulario-marcas textarea{
+    resize:vertical;
+    min-height:100px;
+}
+
+
+/*=================================
+    BOTÓN GUARDAR MARCA
+=================================*/
+
+.formulario-marcas .btn-nuevo{
+    display:inline-block;
+    background:#2e7d32;
+    color:white;
+    border:none;
+    text-decoration:none;
+    padding:12px 20px;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.formulario-marcas .btn-nuevo:hover{
+    background:#256728;
+    transform:translateY(-1px);
+}
+
+
+/*=================================
+    SEPARADOR
+=================================*/
+
+.resumen hr{
+    border:none;
+    border-top:1px solid #e5e7eb;
+    margin:25px 0;
+}
+
+
+/*=================================
+    TABLA DE MARCAS
+=================================*/
+
+.tabla-marcas{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+.tabla-marcas thead{
+    background:#1f5f28;
+    color:white;
+}
+
+.tabla-marcas th{
+    padding:15px;
+    text-align:left;
+    font-size:14px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.tabla-marcas td{
+    padding:14px;
+    border-bottom:1px solid #eeeeee;
+    font-size:14px;
+    color:#444;
+    vertical-align:middle;
+}
+
+.tabla-marcas tbody tr{
+    transition:.2s;
+}
+
+.tabla-marcas tbody tr:hover{
+    background:#f8faf8;
+}
+
+
+/*=================================
+    ESTADO ACTIVO
+=================================*/
+
+.estado-activo{
+    display:inline-block;
+    background:#e8f5e9;
+    color:#2e7d32;
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+
+/*=================================
+    ESTADO INACTIVO
+=================================*/
+
+.estado-inactivo{
+    display:inline-block;
+    background:#ffebee;
+    color:#c62828;
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+
+/*=================================
+    ACCIONES
+=================================*/
+
+.acciones{
+    text-align:center;
+    white-space:nowrap;
+    width:120px;
+}
+
+.btn-editar,
+.btn-eliminar{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;
+    height:34px;
+    border-radius:7px;
+    text-decoration:none;
+    font-size:15px;
+    margin:0 4px;
+    transition:.25s;
+}
+
+
+/*=================================
+    BOTÓN EDITAR
+=================================*/
+
+.btn-editar{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.btn-editar:hover{
+    background:#ffe69c;
+    transform:translateY(-1px);
+}
+
+
+/*=================================
+    BOTÓN ELIMINAR
+=================================*/
+
+.btn-eliminar{
+    background:#ffebee;
+    color:#c62828;
+}
+
+.btn-eliminar:hover{
+    background:#ffcdd2;
+    transform:translateY(-1px);
+}
+
+
+/*=================================
+    RESPONSIVE
+=================================*/
+
+@media(max-width:1000px){
+
+    .menu-lateral{
+        width:230px;
+        padding:20px;
+    }
+
+    .encabezado{
+        padding:18px 20px;
+    }
+
+    .titulo-panel h2{
+        font-size:25px;
+    }
+
+    .resumen{
+        margin:0 20px 20px 20px;
+        padding:25px;
+    }
+
+}
+
+
+/*=================================
+    RESPONSIVE CELULAR
+=================================*/
+
+@media(max-width:700px){
+
+    body{
+        overflow:auto;
+    }
+
+    .contenedor-dashboard{
+        min-height:100vh;
+    }
+
+    .menu-lateral{
+        width:210px;
+        padding:15px;
+    }
+
+    .logo-panel h1{
+        font-size:28px;
+    }
+
+    .logo-panel{
+        margin-bottom:20px;
+    }
+
+    .menu-lateral li{
+        margin:7px 0;
+    }
+
+    .menu-lateral a{
+        padding:10px;
+        font-size:14px;
+    }
+
+    .encabezado{
+        margin:0 10px 20px;
+        padding:15px;
+        border-radius:10px;
+    }
+
+    .titulo-panel h2{
+        font-size:20px;
+    }
+
+    .titulo-panel p{
+        font-size:13px;
+    }
+
+    .fecha-hora{
+        display:none;
+    }
+
+    .usuario{
+        padding:8px 12px;
+        font-size:13px;
+    }
+
+    .btn-salir{
+        padding:8px 12px;
+        font-size:13px;
+    }
+
+    .resumen{
+        margin:0 10px 20px;
+
+        padding:20px;
+    }
+
+    .resumen h2{
+        font-size:23px;
+    }
+
+    .formulario-marcas{
+        padding:20px;
+    }
+
+}
+
+/*=================================
+    EDITAR MARCA
+=================================*/
+
+.principal{
+    flex:1;
+    overflow-y:auto;
+    padding:0 30px 30px 30px;
+}
+
+.titulo-formulario{
+    color:#2e7d32;
+    font-size:28px;
+    margin-bottom:20px;
+}
+
+.principal form{
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    max-width:800px;
+}
+
+.principal form label{
+    display:block;
+    margin-top:15px;
+    margin-bottom:7px;
+    font-weight:bold;
+    color:#333;
+}
+
+.principal form input,
+.principal form textarea,
+.principal for select{
+    width:100%;
+    padding:11px 13px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    font-size:15px;
+    font-family:Arial, Helvetica, sans-serif;
+    outline:none;
+    background:white;
+    color:#333;
+    transition:.2s;
+}
+
+.principal form input:focus,
+.principal form textarea:focus,
+.principal form select:focus{
+    border-color:#2e7d32;
+    box-shadow: 0 0 0 3px rgba(46,125,50,.10);
+}
+
+.principal form textarea{
+    resize:vertical;
+    min-height:100px;
+    line-height:1.5;
+}
+
+
+/*=================================
+    BOTÓN ACTUALIZAR
+=================================*/
+
+.btn-actualizar{
+    display:inline-block;
+    margin-top:20px;
+    background:#2e7d32;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.btn-actualizar:hover{
+    background:#256728;
+    transform:translateY(-1px);
+}
+
+
+/*=================================
+    BOTÓN CANCELAR
+=================================*/
+
+.btn-cancelar{
+    display:inline-block;
+    margin-left:10px;
+    padding:12px 20px;
+    background:#757575;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.btn-cancelar:hover{
+    background:#555;
+    transform:translateY(-1px);
+}
+
+
+/*=================================
+    RESPONSIVE EDITAR MARCA
+=================================*/
+
+@media(max-width:700px){
+
+    .principal{
+        padding:0 10px 20px 10px;
+    }
+
+    .principal form{
+        padding:20px;
+        border-radius:10px;
+    }
+
+    .titulo-formulario{
+        font-size:23px;
+    }
+
+    .btn-actualizar,
+    .btn-cancelar{
+        width:100%;
+        text-align:center;
+        margin-left:0;
+        margin-top:10px;
+    }
+
+}

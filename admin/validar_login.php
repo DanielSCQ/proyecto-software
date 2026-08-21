@@ -50,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 $_SESSION["intentos"]=0;
 
-                header("Location:dashboard.php");exit();
+                header("Location:dashboard/dashboard.php");exit();
 
 
                 // Después aquí irá el dashboard

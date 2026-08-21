@@ -1,0 +1,492 @@
+/*=================================
+    ESTILOS GENERALES
+=================================*/
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    color:#333;
+    height:100vh;
+    overflow:hidden;
+}
+
+
+/*=================================
+    CONTENEDOR PRINCIPAL
+=================================*/
+
+.contenedor-dashboard{
+    display:flex;
+    height:100vh;
+}
+
+
+/*=================================
+    MENÚ LATERAL
+=================================*/
+
+.menu-lateral{
+    width:270px;
+    background:#1f5f28;
+    color:white;
+    padding:25px;
+    height:100vh;
+    position:sticky;
+    top:0;
+    overflow-y:auto;
+    flex-shrink:0;
+}
+
+.logo-panel{
+    margin-bottom:35px;
+}
+
+.logo-panel h1{
+    font-size:34px;
+}
+
+.logo-panel p{
+    color:#d9f5dc;
+}
+
+
+/*=================================
+    MENÚ
+=================================*/
+
+.menu-lateral ul{
+    list-style:none;
+}
+
+.menu-lateral li{
+    margin:10px 0;
+}
+
+.menu-lateral a{
+    color:white;
+    text-decoration:none;
+    display:block;
+    padding:12px 15px;
+    border-radius:8px;
+    transition:.3s;
+}
+
+.menu-lateral a:hover{
+    background:#2e7d32;
+}
+
+.menu-lateral a.activo{
+    background:#2e7d32;
+    font-weight:bold;
+}
+
+
+/*=================================
+    CONTENIDO PRINCIPAL
+=================================*/
+
+.contenido{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    overflow:hidden;
+}
+
+
+/*=================================
+    ENCABEZADO
+=================================*/
+
+.encabezado{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:white;
+    padding:20px 30px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    margin-bottom:30px;
+    position:sticky;
+    top:0;
+    z-index:100;
+    flex-shrink:0;
+}
+
+.titulo-panel h2{
+    color:#2e7d32;
+    font-size:30px;
+}
+
+.titulo-panel p{
+    color:#666;
+}
+
+.panel-usuario{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.fecha-hora{
+    text-align:right;
+    color:#666;
+    font-size:14px;
+}
+
+.usuario{
+    background:#f2f2f2;
+    padding:10px 18px;
+    border-radius:30px;
+    font-weight:bold;
+}
+
+.btn-salir{
+    background:#c62828;
+    color:white;
+    padding:10px 18px;
+    text-decoration:none;
+    border-radius:8px;
+    transition:.3s;
+}
+
+.btn-salir:hover{
+    background:#8e0000;
+}
+
+
+/*=================================
+    CONTENIDO CONTACTOS
+=================================*/
+
+.contenido-contactos{
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    overflow-y:auto;
+    flex:1;
+}
+
+
+/*=================================
+    ENCABEZADO CONTACTOS
+=================================*/
+
+.encabezado-contactos{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.encabezado-contactos h2{
+    color:#2e7d32;
+    margin-bottom:10px;
+}
+
+.encabezado-contactos p{
+    color:#666;
+    margin-bottom:0;
+}
+
+
+/*=================================
+    TARJETAS DE ESTADÍSTICAS
+=================================*/
+
+.tarjetas-estadisticas{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.estadistica{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.estadistica-icono{
+    font-size:30px;
+}
+
+.estadistica-titulo{
+    display:block;
+    color:#777;
+    font-size:13px;
+    margin-bottom:5px;
+}
+
+.estadistica strong{
+    display:block;
+    font-size:20px;
+    color:#2e7d32;
+}
+
+
+/*=================================
+    BARRA DE HERRAMIENTAS
+=================================*/
+
+.barra-contactos{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.barra-contactos form{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    margin:0;
+}
+
+.buscar-cliente{
+    width:300px;
+    padding:11px 15px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:15px;
+    outline:none;
+    transition:.3s;
+}
+
+.buscar-cliente:focus{
+    border-color:#2e7d32;
+    box-shadow:0 0 0 2px rgba(46,125,50,.1);
+}
+
+.barra-contactos select{
+    padding:11px 15px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    background:white;
+    font-size:14px;
+    outline:none;
+    cursor:pointer;
+}
+
+.barra-contactos select:focus{
+    border-color:#2e7d32;
+}
+
+
+/*=================================
+    BOTÓN VER / BUSCAR
+=================================*/
+
+.btn-ver{
+    display:inline-block;
+    padding:8px 12px;
+    border:none;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:bold;
+    background:#2e7d32;
+    color:white;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.btn-ver:hover{
+    background:#256728;
+}
+
+
+/*=================================
+    TABLA CONTACTOS
+=================================*/
+
+.contenedor-tabla{
+    width:100%;
+    overflow-x:auto;
+}
+
+.tabla-contactos{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+.tabla-contactos thead{
+    background:#2e7d32;
+    color:white;
+}
+
+.tabla-contactos th{
+    padding:15px;
+    text-align:left;
+}
+
+.tabla-contactos td{
+    padding:14px;
+    border-bottom:1px solid #ddd;
+}
+
+.tabla-contactos tbody tr:hover{
+    background:#f5f5f5;
+}
+
+
+/*=================================
+    ESTADOS
+=================================*/
+
+.estado-cliente{
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:bold;
+    background:#e3f2fd;
+    color:#1976d2;
+}
+
+.estado-inactivo{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.estado-activo{
+    background:#d9f5dc;
+    color:#2e7d32;
+}
+
+
+/*=================================
+    MENSAJE SIN CONTACTOS
+=================================*/
+
+.sin-clientes{
+    text-align:center;
+    padding:30px !important;
+    color:#777;
+    font-style:italic;
+}
+
+
+/*=================================
+    ACCIONES CONTACTOS
+=================================*/
+
+.acciones-contacto{
+    display:flex;
+    gap:8px;
+}
+
+
+/*=================================
+    RESPONSIVE
+=================================*/
+
+@media(max-width:1100px){
+
+    .tarjetas-estadisticas{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+
+@media(max-width:900px){
+
+    .menu-lateral{
+        width:220px;
+        padding:20px;
+    }
+
+    .panel-usuario{
+        gap:10px;
+    }
+
+    .fecha-hora{
+        display:none;
+    }
+
+    .contenido-contactos{
+        padding:20px;
+    }
+
+    .barra-contactos{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .barra-contactos form{
+        width:100%;
+    }
+
+    .buscar-cliente{
+        width:100%;
+    }
+
+    .barra-contactos select{
+        width:100%;
+    }
+
+}
+
+
+@media(max-width:700px){
+
+    .menu-lateral{
+        display:none;
+    }
+
+    .encabezado{
+        border-radius:0;
+        margin-bottom:15px;
+        padding:15px;
+    }
+
+    .titulo-panel h2{
+        font-size:22px;
+    }
+
+    .contenido-contactos{
+        padding:20px;
+    }
+
+    .tarjetas-estadisticas{
+        grid-template-columns:1fr;
+    }
+
+    .barra-contactos form{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .buscar-cliente{
+        width:100%;
+    }
+
+    .btn-ver{
+        width:100%;
+        text-align:center;
+    }
+
+    .tabla-contactos{
+        font-size:13px;
+    }
+
+    .tabla-contactos th,
+    .tabla-contactos td{
+        padding:10px;
+    }
+
+}
