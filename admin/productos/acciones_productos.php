@@ -2,7 +2,10 @@
 
 session_start();
 
-// Verificar que el usuario haya iniciado sesión
+// =================================
+// VERIFICAR SESIÓN
+// =================================
+
 if (!isset($_SESSION["id_usuario"])) {
 
     header("Location: ../login.php");
@@ -10,191 +13,784 @@ if (!isset($_SESSION["id_usuario"])) {
 
 }
 
-// Mostrar errores (solo durante el desarrollo)
+// =================================
+// MOSTRAR ERRORES - SOLO DESARROLLO
+// =================================
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Conexión a la base de datos
+// =================================
+// CONEXIÓN
+// =================================
+
 require_once("../../config/conexion.php");
 
-// Verificar que el formulario se haya enviado por POST
-if ($_SERVER["REQUEST_METHOD"] != "POST") {
+// =================================
+// VERIFICAR MÉTODO POST
+// =================================
+
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 
     header("Location: productos.php");
     exit();
 
 }
 
-// Verificar la acción
-if (!isset($_POST["accion"]) || $_POST["accion"] != "agregar") {
+// =================================
+// VERIFICAR ACCIÓN
+// =================================
+
+if (!isset($_POST["accion"]) || $_POST["accion"] !== "agregar") {
 
     header("Location: productos.php");
     exit();
 
 }
 
-// Recibir los datos del formulario
+// =================================
+// RECIBIR DATOS
+// =================================
 
-$nombre = trim($_POST["nombre"]);
-$codigo_producto = trim($_POST["codigo_producto"]);
-$id_categoria = $_POST["id_categoria"];
-$id_marca = $_POST["id_marca"];
-$id_proveedor = $_POST["id_proveedor"];
-$precio = $_POST["precio"];
-$precio_compra = $_POST["precio_compra"];
-$stockActual = $_POST["stock_actual"];
-$stockMinimo = $_POST["stock_minimo"];
-$peso = !empty($_POST["peso"]) ? $_POST["peso"] : NULL;
-$descripcion = trim($_POST["descripcion"]);
-$estado = $_POST["estado"];
-$destacado = $_POST["destacado"];
+$nombre = trim($_POST["nombre"] ?? "");
+$codigo_producto = trim($_POST["codigo_producto"] ?? "");
 
-// Validar los campos obligatorios
+$id_categoria = $_POST["id_categoria"] ?? "";
+$id_marca = $_POST["id_marca"] ?? "";
+$id_proveedor = $_POST["id_proveedor"] ?? "";
+
+$codigo_proveedor = trim($_POST["codigo_proveedor"] ?? "");
+
+$precio = trim($_POST["precio"] ?? "");
+$precio_compra = trim($_POST["precio_compra"] ?? "");
+
+$stockActual = $_POST["stock_actual"] ?? "";
+$stockMinimo = $_POST["stock_minimo"] ?? "";
+
+$peso = trim($_POST["peso"] ?? "");
+
+$descripcion = trim($_POST["descripcion"] ?? "");
+
+$estado = $_POST["estado"] ?? "";
+$destacado = $_POST["destacado"] ?? "";
+
+$errores = [];
+
+// =================================
+// VALIDAR NOMBRE
+// =================================
+
+if ($nombre === "") {
+
+    $errores[] = "El nombre del producto es obligatorio.";
+
+} elseif (mb_strlen($nombre) > 150) {
+
+    $errores[] = "El nombre del producto no puede superar los 150 caracteres.";
+
+}
+
+// =================================
+// VALIDAR CÓDIGO DEL PRODUCTO
+// =================================
+
+if ($codigo_producto === "") {
+
+    $errores[] = "El código del producto es obligatorio.";
+
+} elseif (mb_strlen($codigo_producto) > 50) {
+
+    $errores[] = "El código del producto no puede superar los 50 caracteres.";
+
+}
+
+// =================================
+// VALIDAR DESCRIPCIÓN
+// =================================
+
+// La columna es TEXT.
+// No tiene un límite VARCHAR definido.
+// Se valida que no sea excesivamente grande.
+
+if (mb_strlen($descripcion) > 300) {
+
+    $errores[] = "La descripción no puede superar los 300 caracteres.";
+
+}
+
+// =================================
+// VALIDAR CATEGORÍA
+// =================================
+
+if (!filter_var($id_categoria, FILTER_VALIDATE_INT, [
+    "options" => ["min_range" => 1]
+])) {
+
+    $errores[] = "La categoría seleccionada no es válida.";
+
+} else {
+
+    $id_categoria = (int) $id_categoria;
+
+}
+
+// =================================
+// VALIDAR MARCA
+// =================================
+
+if (!filter_var($id_marca, FILTER_VALIDATE_INT, [
+    "options" => ["min_range" => 1]
+])) {
+
+    $errores[] = "La marca seleccionada no es válida.";
+
+} else {
+
+    $id_marca = (int) $id_marca;
+
+}
+
+// =================================
+// VALIDAR PROVEEDOR
+// =================================
+
+if (!filter_var($id_proveedor, FILTER_VALIDATE_INT, [
+    "options" => ["min_range" => 1]
+])) {
+
+    $errores[] = "El proveedor seleccionado no es válido.";
+
+} else {
+
+    $id_proveedor = (int) $id_proveedor;
+
+}
+
+// =================================
+// VALIDAR CÓDIGO DEL PROVEEDOR
+// =================================
+
+if ($codigo_proveedor !== "" && mb_strlen($codigo_proveedor) > 50) {
+
+    $errores[] = "El código del proveedor no puede superar los 50 caracteres.";
+
+}
+
+// =================================
+// VALIDAR PRECIO DE VENTA
+// =================================
+
+if ($precio === "") {
+
+    $errores[] = "El precio de venta es obligatorio.";
+
+} elseif (!is_numeric($precio)) {
+
+    $errores[] = "El precio de venta debe ser un número válido.";
+
+} elseif ((float) $precio < 0) {
+
+    $errores[] = "El precio de venta no puede ser negativo.";
+
+} elseif (strlen(explode(".", $precio)[0]) > 8) {
+
+    $errores[] = "El precio de venta es demasiado grande.";
+
+} elseif (isset(explode(".", $precio)[1]) && strlen(explode(".", $precio)[1]) > 2) {
+
+    $errores[] = "El precio de venta solo puede tener máximo 2 decimales.";
+
+} else {
+
+    $precio = (float) $precio;
+
+}
+
+// =================================
+// VALIDAR PRECIO DE COMPRA
+// =================================
+
+if ($precio_compra === "") {
+
+    $errores[] = "El precio de compra es obligatorio.";
+
+} elseif (!is_numeric($precio_compra)) {
+
+    $errores[] = "El precio de compra debe ser un número válido.";
+
+} elseif ((float) $precio_compra < 0) {
+
+    $errores[] = "El precio de compra no puede ser negativo.";
+
+} elseif (strlen(explode(".", $precio_compra)[0]) > 8) {
+
+    $errores[] = "El precio de compra es demasiado grande.";
+
+} elseif (isset(explode(".", $precio_compra)[1]) && strlen(explode(".", $precio_compra)[1]) > 2) {
+
+    $errores[] = "El precio de compra solo puede tener máximo 2 decimales.";
+
+} else {
+
+    $precio_compra = (float) $precio_compra;
+
+}
+
+// =================================
+// VALIDAR STOCK ACTUAL
+// =================================
 
 if (
-    empty($nombre) ||
-    empty($codigo_producto) ||
-    empty($id_categoria) ||
-    empty($id_marca) ||
-    empty($id_proveedor) ||
-    empty($precio) ||
-    empty($precio_compra)
+    filter_var($stockActual, FILTER_VALIDATE_INT) === false ||
+    (int) $stockActual < 0
 ) {
 
-    die("Error: Debe completar todos los campos obligatorios.");
+    $errores[] = "El stock inicial debe ser un número entero igual o mayor que 0.";
+
+} else {
+
+    $stockActual = (int) $stockActual;
 
 }
 
-// Insertar el producto
+// =================================
+// VALIDAR STOCK MÍNIMO
+// =================================
 
-$sql = "INSERT INTO productos
-(
-    id_categoria,
-    id_marca,
-    nombre,
-    descripcion,
-    codigo_producto,
-    precio,
-    peso,
-    estado,
-    destacado
-)
-VALUES
-(
-    ?, ?, ?, ?, ?, ?, ?, ?, ?
-)";
+if (
+    filter_var($stockMinimo, FILTER_VALIDATE_INT) === false ||
+    (int) $stockMinimo < 0
+) {
 
-$stmt = $conexion->prepare($sql);
+    $errores[] = "El stock mínimo debe ser un número entero igual o mayor que 0.";
 
-$stmt->bind_param(
-    "iisssdsii",
-    $id_categoria,
-    $id_marca,
-    $nombre,
-    $descripcion,
-    $codigo_producto,
-    $precio,
-    $peso,
-    $estado,
-    $destacado
-);
+} else {
 
-if (!$stmt->execute()) {
-
-    die("Error al guardar el producto: " . $stmt->error);
+    $stockMinimo = (int) $stockMinimo;
 
 }
 
-// Obtener el ID del producto recién creado
-$id_producto = $conexion->insert_id;
+// =================================
+// VALIDAR PESO
+// =================================
 
-// Relacionar el producto con el proveedor
+if ($peso !== "") {
 
-$sqlProveedor = "INSERT INTO proveedor_producto
-(
-    id_proveedor,
-    id_producto,
-    precio_compra
-)
-VALUES
-(
-    ?, ?, ?
-)";
+    if (!is_numeric($peso)) {
 
-$stmtProveedor = $conexion->prepare($sqlProveedor);
+        $errores[] = "El peso debe ser un número válido.";
 
-$stmtProveedor->bind_param(
-    "iid",
-    $id_proveedor,
-    $id_producto,
-    $precio_compra
-);
+    } elseif ((float) $peso < 0) {
 
-if (!$stmtProveedor->execute()) {
+        $errores[] = "El peso no puede ser negativo.";
 
-    die("Error al guardar el proveedor del producto: " . $stmtProveedor->error);
+    } elseif (strlen(explode(".", $peso)[0]) > 6) {
 
-}
+        $errores[] = "El peso es demasiado grande.";
 
-// Crear el registro en inventario
+    } elseif (
+        isset(explode(".", $peso)[1]) &&
+        strlen(explode(".", $peso)[1]) > 2
+    ) {
 
-$sqlInventario = "INSERT INTO inventario
-(
-    id_producto,
-    stock_actual,
-    stock_minimo
-)
-VALUES
-(
-    ?, ?, ?
-)";
+        $errores[] = "El peso solo puede tener máximo 2 decimales.";
 
-$stmtInventario = $conexion->prepare($sqlInventario);
+    } else {
 
-$stmtInventario->bind_param(
-    "iii",
-    $id_producto,
-    $stockActual,
-    $stockMinimo
-);
+        $peso = (float) $peso;
 
-if (!$stmtInventario->execute()) {
+    }
 
-    die("Error al crear el inventario: " . $stmtInventario->error);
+} else {
+
+    $peso = null;
 
 }
 
-// Guardar la imagen del producto (si se seleccionó una)
+// =================================
+// VALIDAR ESTADO
+// =================================
 
-if (isset($_FILES["imagen"]) && $_FILES["imagen"]["error"] == 0) {
+if ($estado !== "0" && $estado !== "1") {
+
+    $errores[] = "El estado seleccionado no es válido.";
+
+}
+
+// =================================
+// VALIDAR DESTACADO
+// =================================
+
+if ($destacado !== "0" && $destacado !== "1") {
+
+    $errores[] = "El valor de producto destacado no es válido.";
+
+}
+
+// =================================
+// VALIDAR CATEGORÍA EN LA BD
+// =================================
+
+if (empty($errores)) {
+
+    $sqlCategoria = "
+        SELECT id_categoria
+        FROM categorias
+        WHERE id_categoria = ?
+        AND estado = 1
+        LIMIT 1
+    ";
+
+    $stmtCategoria = $conexion->prepare($sqlCategoria);
+
+    if (!$stmtCategoria) {
+
+        $errores[] = "No fue posible verificar la categoría.";
+
+    } else {
+
+        $stmtCategoria->bind_param("i", $id_categoria);
+        $stmtCategoria->execute();
+
+        $resultadoCategoria = $stmtCategoria->get_result();
+
+        if ($resultadoCategoria->num_rows === 0) {
+
+            $errores[] = "La categoría seleccionada no existe o está inactiva.";
+
+        }
+
+        $stmtCategoria->close();
+
+    }
+
+}
+
+// =================================
+// VALIDAR MARCA EN LA BD
+// =================================
+
+if (empty($errores)) {
+
+    $sqlMarca = "
+        SELECT id_marca
+        FROM marcas
+        WHERE id_marca = ?
+        AND estado = 1
+        LIMIT 1
+    ";
+
+    $stmtMarca = $conexion->prepare($sqlMarca);
+
+    if (!$stmtMarca) {
+
+        $errores[] = "No fue posible verificar la marca.";
+
+    } else {
+
+        $stmtMarca->bind_param("i", $id_marca);
+        $stmtMarca->execute();
+
+        $resultadoMarca = $stmtMarca->get_result();
+
+        if ($resultadoMarca->num_rows === 0) {
+
+            $errores[] = "La marca seleccionada no existe o está inactiva.";
+
+        }
+
+        $stmtMarca->close();
+
+    }
+
+}
+
+// =================================
+// VALIDAR PROVEEDOR EN LA BD
+// =================================
+
+if (empty($errores)) {
+
+    $sqlProveedor = "
+        SELECT id_proveedor
+        FROM proveedores
+        WHERE id_proveedor = ?
+        AND estado = 1
+        LIMIT 1
+    ";
+
+    $stmtProveedor = $conexion->prepare($sqlProveedor);
+
+    if (!$stmtProveedor) {
+
+        $errores[] = "No fue posible verificar el proveedor.";
+
+    } else {
+
+        $stmtProveedor->bind_param("i", $id_proveedor);
+        $stmtProveedor->execute();
+
+        $resultadoProveedor = $stmtProveedor->get_result();
+
+        if ($resultadoProveedor->num_rows === 0) {
+
+            $errores[] = "El proveedor seleccionado no existe o está inactivo.";
+
+        }
+
+        $stmtProveedor->close();
+
+    }
+
+}
+
+// =================================
+// VALIDAR CÓDIGO ÚNICO
+// =================================
+
+if (empty($errores)) {
+
+    $sqlCodigo = "
+        SELECT id_producto
+        FROM productos
+        WHERE codigo_producto = ?
+        LIMIT 1
+    ";
+
+    $stmtCodigo = $conexion->prepare($sqlCodigo);
+
+    if (!$stmtCodigo) {
+
+        $errores[] = "No fue posible verificar el código del producto.";
+
+    } else {
+
+        $stmtCodigo->bind_param("s", $codigo_producto);
+        $stmtCodigo->execute();
+
+        $resultadoCodigo = $stmtCodigo->get_result();
+
+        if ($resultadoCodigo->num_rows > 0) {
+
+            $errores[] = "Ya existe un producto con ese código.";
+
+        }
+
+        $stmtCodigo->close();
+
+    }
+
+}
+
+// =================================
+// VALIDAR IMAGEN
+// =================================
+
+$archivoImagen = null;
+$tipoMime = null;
+
+if (isset($_FILES["imagen"]) && $_FILES["imagen"]["error"] !== UPLOAD_ERR_NO_FILE) {
+
+    if ($_FILES["imagen"]["error"] !== UPLOAD_ERR_OK) {
+
+        $errores[] = "Ocurrió un error al subir la imagen.";
+
+    } else {
+
+        $archivoImagen = $_FILES["imagen"];
+
+        // Máximo 2 MB
+        $tamanoMaximo = 2 * 1024 * 1024;
+
+        if ($archivoImagen["size"] > $tamanoMaximo) {
+
+            $errores[] = "La imagen no puede superar los 2 MB.";
+
+        }
+
+        // Comprobar MIME real
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+
+        if ($finfo === false) {
+
+            $errores[] = "No fue posible verificar el tipo de imagen.";
+
+        } else {
+
+            $tipoMime = finfo_file(
+                $finfo,
+                $archivoImagen["tmp_name"]
+            );
+
+            finfo_close($finfo);
+
+            $tiposPermitidos = [
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            ];
+
+            if (!in_array($tipoMime, $tiposPermitidos, true)) {
+
+                $errores[] = "La imagen debe ser JPG, JPEG, PNG o WEBP.";
+
+            }
+
+        }
+
+    }
+
+}
+
+// =================================
+// SI HAY ERRORES → VOLVER AL FORMULARIO
+// =================================
+
+if (!empty($errores)) {
+
+    // Guardar errores para mostrarlos en el formulario
+    $_SESSION["errores_producto"] = $errores;
+
+    // Guardar los datos escritos por el usuario
+    $_SESSION["datos_producto"] = $_POST;
+
+    // Volver al formulario
+    header("Location: agregar_producto.php");
+    exit();
+
+}
+
+// =================================
+// PREPARAR IMAGEN
+// =================================
+
+$rutaDestino = null;
+$rutaImagen = null;
+
+if ($archivoImagen !== null) {
 
     $carpeta = "../../uploads/productos/";
 
-        if (!is_dir($carpeta)) {
-            mkdir($carpeta, 0777, true);
+    if (!is_dir($carpeta)) {
+
+        if (!mkdir($carpeta, 0755, true)) {
+
+            die("No fue posible crear la carpeta de imágenes.");
+
         }
 
-        $nombreImagen = time() . "_" . basename($_FILES["imagen"]["name"]);
+    }
 
-        $rutaFisica = $carpeta . $nombreImagen;
+    $extension = match ($tipoMime) {
 
-        $rutaImagen = "uploads/productos/" . $nombreImagen;
+        "image/jpeg" => "jpg",
+        "image/png" => "png",
+        "image/webp" => "webp"
 
-    if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $rutaFisica)) {
+    };
 
-        $sqlImagen = "INSERT INTO imagenes_producto
+    $nombreImagen = bin2hex(random_bytes(16)) . "." . $extension;
+
+    $rutaDestino = $carpeta . $nombreImagen;
+
+    $rutaImagen = "uploads/productos/" . $nombreImagen;
+
+}
+
+// =================================
+// INICIAR TRANSACCIÓN
+// =================================
+
+$conexion->begin_transaction();
+
+// Variable para saber si se llegó a mover una imagen
+$imagenMovida = false;
+
+try {
+
+    // =================================
+    // INSERTAR PRODUCTO
+    // =================================
+
+    $sql = "
+        INSERT INTO productos
         (
-            id_producto,
-            ruta_imagen,
-            principal
+            id_categoria,
+            id_marca,
+            nombre,
+            descripcion,
+            codigo_producto,
+            precio,
+            peso,
+            estado,
+            destacado
         )
         VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ";
+
+    $stmt = $conexion->prepare($sql);
+
+    if (!$stmt) {
+
+        throw new Exception(
+            "No fue posible preparar el registro del producto."
+        );
+
+    }
+
+    $stmt->bind_param(
+        "iisssdsii",
+        $id_categoria,
+        $id_marca,
+        $nombre,
+        $descripcion,
+        $codigo_producto,
+        $precio,
+        $peso,
+        $estado,
+        $destacado
+    );
+
+    if (!$stmt->execute()) {
+
+        throw new Exception(
+            "No fue posible guardar el producto."
+        );
+
+    }
+
+    $stmt->close();
+
+    // Obtener ID
+    $id_producto = $conexion->insert_id;
+
+    // =================================
+    // INSERTAR PROVEEDOR
+    // =================================
+
+    $sqlProveedor = "
+        INSERT INTO proveedor_producto
         (
-            ?, ?, 1
-        )";
+            id_proveedor,
+            id_producto,
+            precio_compra,
+            codigo_proveedor
+        )
+        VALUES
+        (?, ?, ?, ?)
+    ";
+
+    $stmtProveedor = $conexion->prepare($sqlProveedor);
+
+    if (!$stmtProveedor) {
+
+        throw new Exception(
+            "No fue posible preparar el proveedor del producto."
+        );
+
+    }
+
+    $stmtProveedor->bind_param(
+        "iids",
+        $id_proveedor,
+        $id_producto,
+        $precio_compra,
+        $codigo_proveedor
+    );
+
+    if (!$stmtProveedor->execute()) {
+
+        throw new Exception(
+            "No fue posible guardar el proveedor del producto."
+        );
+
+    }
+
+    $stmtProveedor->close();
+
+    // =================================
+    // CREAR INVENTARIO
+    // =================================
+
+    $sqlInventario = "
+        INSERT INTO inventario
+        (
+            id_producto,
+            stock_actual,
+            stock_minimo
+        )
+        VALUES
+        (?, ?, ?)
+    ";
+
+    $stmtInventario = $conexion->prepare($sqlInventario);
+
+    if (!$stmtInventario) {
+
+        throw new Exception(
+            "No fue posible preparar el inventario."
+        );
+
+    }
+
+    $stmtInventario->bind_param(
+        "iii",
+        $id_producto,
+        $stockActual,
+        $stockMinimo
+    );
+
+    if (!$stmtInventario->execute()) {
+
+        throw new Exception(
+            "No fue posible crear el inventario."
+        );
+
+    }
+
+    $stmtInventario->close();
+
+    // =================================
+    // GUARDAR IMAGEN
+    // =================================
+
+    if ($archivoImagen !== null) {
+
+        if (!move_uploaded_file(
+            $archivoImagen["tmp_name"],
+            $rutaDestino
+        )) {
+
+            throw new Exception(
+                "No fue posible guardar la imagen."
+            );
+
+        }
+
+        $imagenMovida = true;
+
+        $sqlImagen = "
+            INSERT INTO imagenes_producto
+            (
+                id_producto,
+                ruta_imagen,
+                principal
+            )
+            VALUES
+            (?, ?, 1)
+        ";
 
         $stmtImagen = $conexion->prepare($sqlImagen);
+
+        if (!$stmtImagen) {
+
+            throw new Exception(
+                "No fue posible preparar la imagen."
+            );
+
+        }
 
         $stmtImagen->bind_param(
             "is",
@@ -204,13 +800,67 @@ if (isset($_FILES["imagen"]) && $_FILES["imagen"]["error"] == 0) {
 
         if (!$stmtImagen->execute()) {
 
-            die("Error al guardar la imagen: " . $stmtImagen->error);
+            throw new Exception(
+                "No fue posible guardar la imagen en la base de datos."
+            );
 
         }
 
+        $stmtImagen->close();
+
     }
 
-}
+    // =================================
+    // CONFIRMAR TRANSACCIÓN
+    // =================================
 
-header("Location: productos.php");
-exit();
+    $conexion->commit();
+
+    // =================================
+    // REDIRECCIONAR
+    // =================================
+
+    header("Location: productos.php");
+    exit();
+
+} catch (Exception $e) {
+
+    // =================================
+    // DESHACER CAMBIOS
+    // =================================
+
+    $conexion->rollback();
+
+    // Si la imagen ya se había guardado físicamente,
+    // eliminarla porque la BD hizo rollback.
+
+    if (
+        $imagenMovida &&
+        $rutaDestino !== null &&
+        file_exists($rutaDestino)
+    ) {
+
+        unlink($rutaDestino);
+
+    }
+
+    // =================================
+    // MOSTRAR ERROR
+    // =================================
+
+    echo "<h2>No fue posible guardar el producto.</h2>";
+
+    echo "<p>" .
+        htmlspecialchars(
+            $e->getMessage(),
+            ENT_QUOTES,
+            "UTF-8"
+        ) .
+        "</p>";
+
+    echo '<a href="agregar_producto.php">Volver</a>';
+
+    exit();
+
+}
+?>

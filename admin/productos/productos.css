@@ -188,14 +188,6 @@ body{
     margin-bottom:25px;
 }
 
-.btn-nuevo{
-    background:#2e7d32;
-    color:white;
-    border:none;
-    padding:12px 20px;
-    border-radius:8px
-}
-
 /* ===============================
    FORMULARIO PRODUCTOS
 ================================= */
@@ -484,4 +476,13 @@ form{
 .sin-promocion {
     color: #777;
     font-size: 13px;
+}
+
+/*=================================
+    DESPLAZAMIENTO PRODUCTOS
+=================================*/
+
+.pagina-productos{
+    overflow-y:auto;
+    overflow-x:hidden;
 }

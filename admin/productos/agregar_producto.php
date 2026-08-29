@@ -136,13 +136,27 @@ require_once("../../config/conexion.php");
                 <input
                     type="text"
                     name="nombre"
+                    id="nombre"
+                    maxlength="150"
                     required>
+
+                    <div id="contador-nombre"
+                    style="text-align:right;margin-top:5px;color:#666;font-size:13px;">
+                        0 / 150 caracteres
+                    </div>    
 
                 <label>Código del producto</label>
                 <input
                     type="text"
                     name="codigo_producto"
+                    id="codigo_producto"
+                    maxlength="50"
                     required>
+
+                    <div id="contador-codigo"
+                    style="text-align:right;margin-top:5px;color:#666;font-size:13px;">
+                        0 / 50 caracteres
+                    </div>
 
                 <label>Categoría</label>
 
@@ -275,13 +289,21 @@ require_once("../../config/conexion.php");
 
                 </div>
 
-
                 <label>Descripción</label>
 
                 <textarea
                     name="descripcion"
-                    rows="5"></textarea>
+                    id="descripcion"
+                    maxlength="300"
+                    rows="5"
+                    placeholder="Descripción del producto..."
+                ></textarea>
 
+                <div
+                    id="contador-descripcion"
+                    style="text-align:right;margin-top:5px;color:#666;font-size:13px;">
+                    0 / 300 caracteres
+                </div>
 
                 <label>Imagen del producto</label>
 
@@ -289,7 +311,6 @@ require_once("../../config/conexion.php");
                     type="file"
                     name="imagen"
                     accept="image/*">
-
 
                 <label>Estado</label>
 
@@ -300,7 +321,6 @@ require_once("../../config/conexion.php");
                     <option value="0">Inactivo</option>
 
                 </select>
-
 
                 <label>Producto destacado</label>
 
@@ -337,7 +357,119 @@ require_once("../../config/conexion.php");
     </div>
 
     <script src="../dashboard/dashboard.js"></script>
+<script>
 
+const nombre = document.getElementById("nombre");
+const contadorNombre = document.getElementById("contador-nombre");
+
+const codigo = document.getElementById("codigo_producto");
+const contadorCodigo = document.getElementById("contador-codigo");
+
+const descripcion = document.getElementById("descripcion");
+const contadorDescripcion = document.getElementById("contador-descripcion");
+
+
+/*
+=================================
+    CONTADOR DEL NOMBRE
+=================================
+*/
+
+function actualizarContadorNombre() {
+
+    const cantidad = nombre.value.length;
+
+    contadorNombre.textContent = cantidad + " / 150 caracteres";
+
+    if (cantidad >= 150) {
+
+        contadorNombre.style.color = "#c62828";
+        contadorNombre.style.fontWeight = "bold";
+
+    } else {
+
+        contadorNombre.style.color = "#666";
+        contadorNombre.style.fontWeight = "normal";
+
+    }
+
+}
+
+
+/*
+=================================
+    CONTADOR DEL CÓDIGO
+=================================
+*/
+
+function actualizarContadorCodigo() {
+
+    const cantidad = codigo.value.length;
+
+    contadorCodigo.textContent = cantidad + " / 50 caracteres";
+
+    if (cantidad >= 50) {
+
+        contadorCodigo.style.color = "#c62828";
+        contadorCodigo.style.fontWeight = "bold";
+
+    } else {
+
+        contadorCodigo.style.color = "#666";
+        contadorCodigo.style.fontWeight = "normal";
+
+    }
+
+}
+
+/*
+=================================
+    CONTADOR DE LA DESCRIPCIÓN
+=================================
+*/
+
+function actualizarContadorDescripcion() {
+
+    const cantidad = descripcion.value.length;
+
+    contadorDescripcion.textContent =
+        cantidad + " / 300 caracteres";
+
+    if (cantidad >= 300) {
+
+        contadorDescripcion.style.color = "#c62828";
+        contadorDescripcion.style.fontWeight = "bold";
+
+    } else {
+
+        contadorDescripcion.style.color = "#666";
+        contadorDescripcion.style.fontWeight = "normal";
+
+    }
+
+}
+
+/*
+=================================
+    ACTUALIZAR AL ESCRIBIR
+=================================
+*/
+
+nombre.addEventListener("input", actualizarContadorNombre);
+
+codigo.addEventListener("input", actualizarContadorCodigo);
+
+descripcion.addEventListener("input", actualizarContadorDescripcion);
+
+/*
+=================================
+    ACTUALIZAR AL CARGAR
+=================================
+*/
+actualizarContadorNombre();
+actualizarContadorCodigo();
+actualizarContadorDescripcion();
+
+</script>
 </body>
-
 </html>

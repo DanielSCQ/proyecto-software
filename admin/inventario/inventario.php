@@ -188,9 +188,14 @@ $resultado = $stmt->get_result();
                     📥 Ingresos
                 </a>
 
+                <a href="lista_ingresos.php" class="btn-secundario">
+                    ✏️ Editar ingresos
+                </a>
+
                 <a href="historial_inventario.php" class="btn-secundario">
                     📜 Historial General
                 </a>
+
                 <form method="GET">
 
                     <input

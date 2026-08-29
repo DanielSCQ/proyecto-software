@@ -151,7 +151,7 @@ $resultado = $conexion->query($sql);
              CONTENIDO PRINCIPAL
         ================================== -->
 
-        <main class="contenido">
+        <main class="contenido pagina-productos">
 
             <!-- =================================
                  ENCABEZADO

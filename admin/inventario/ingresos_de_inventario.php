@@ -11,134 +11,390 @@ require_once("../../config/conexion.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $id_proveedor = $_POST["id_proveedor"];
-    $fecha = $_POST["fecha"];
-    $documento = trim($_POST["documento"]);
-    $referencia = trim($_POST["referencia"]);
-    $id_producto = $_POST["id_producto"];
-    $cantidad = $_POST["cantidad"];
-    $precio_compra = $_POST["precio_compra"];
-    $observacion = trim($_POST["observacion"]);
+    $errores = [];
 
-    $total_compra = $cantidad * $precio_compra;
+    // ================================
+    // RECIBIR DATOS
+    // ================================
 
-    // Crear ingreso
+    $id_proveedor = filter_input(INPUT_POST, "id_proveedor", FILTER_VALIDATE_INT);
+    $fecha = trim($_POST["fecha"] ?? "");
+    $documento = trim($_POST["documento"] ?? "");
+    $referencia = trim($_POST["referencia"] ?? "");
+    $id_producto = filter_input(INPUT_POST, "id_producto", FILTER_VALIDATE_INT);
+    $cantidad = trim($_POST["cantidad"] ?? "");
+    $precio_compra = trim($_POST["precio_compra"] ?? "");
+    $observacion = trim($_POST["observacion"] ?? "");
 
-    $sqlIngreso = "INSERT INTO ingresos_inventario
-    (
-        id_proveedor,
-        fecha,
-        documento,
-        referencia,
-        total_compra,
-        id_usuario,
-        estado
-    )
-    VALUES
-    (
-        ?, ?, ?, ?, ?, ?, 'Recibido'
-    )";
+    $id_usuario = (int)$_SESSION["id_usuario"];
 
-    $stmtIngreso = $conexion->prepare($sqlIngreso);
 
-    $stmtIngreso->bind_param(
-        "isssdi",
-        $id_proveedor,
-        $fecha,
-        $documento,
-        $referencia,
-        $total_compra,
-        $_SESSION["id_usuario"]
-    );
+    // ================================
+    // VALIDAR PROVEEDOR
+    // ================================
 
-    $stmtIngreso->execute();
+    if ($id_proveedor === false || $id_proveedor === null || $id_proveedor <= 0) {
 
-    $id_ingreso = $conexion->insert_id;
+        $errores[] = "Debes seleccionar un proveedor.";
 
-    // Guardar detalle del ingreso
+    } else {
 
-    $subtotal = $cantidad * $precio_compra;
+        $sqlProveedor = "SELECT id_proveedor
+                         FROM proveedores
+                         WHERE id_proveedor = ?
+                         AND estado = 1";
 
-    $sqlDetalle = "INSERT INTO detalle_ingreso
-    (
-        id_ingreso,
-        id_producto,
-        cantidad,
-        precio_compra,
-        subtotal
-    )
-    VALUES
-    (
-        ?, ?, ?, ?, ?
-    )";
+        $stmtProveedor = $conexion->prepare($sqlProveedor);
+        $stmtProveedor->bind_param("i", $id_proveedor);
+        $stmtProveedor->execute();
 
-    $stmtDetalle = $conexion->prepare($sqlDetalle);
+        $resultadoProveedor = $stmtProveedor->get_result();
 
-    $stmtDetalle->bind_param(
-        "iiidd",
-        $id_ingreso,
-        $id_producto,
-        $cantidad,
-        $precio_compra,
-        $subtotal
-    );
+        if ($resultadoProveedor->num_rows === 0) {
 
-    $stmtDetalle->execute();
+            $errores[] = "El proveedor seleccionado no es válido.";
 
-    // Actualizar el stock
+        }
 
-    $sqlStock = "UPDATE inventario
-                 SET stock_actual = stock_actual + ?
-                 WHERE id_producto = ?";
+    }
 
-    $stmtStock = $conexion->prepare($sqlStock);
 
-    $stmtStock->bind_param(
-        "ii",
-        $cantidad,
-        $id_producto
-    );
+    // ================================
+    // VALIDAR FECHA
+    // ================================
 
-    $stmtStock->execute();
+    if ($fecha === "") {
 
-    // Registrar movimiento en el historial
+        $errores[] = "La fecha es obligatoria.";
 
-    $sqlMovimiento = "INSERT INTO movimientos_inventario
-    (
-        id_producto,
-        tipo,
-        cantidad,
-        motivo,
-        observacion,
-        id_proveedor,
-        id_usuario
-    )
-    VALUES
-    (
-        ?, 'Entrada', ?, ?, ?, ?, ?
-    )";
+    } else {
 
-    $motivo = "Ingreso de inventario";
+        $fechaValida = DateTime::createFromFormat("Y-m-d", $fecha);
 
-    $stmtMovimiento = $conexion->prepare($sqlMovimiento);
+        if (
+            !$fechaValida ||
+            $fechaValida->format("Y-m-d") !== $fecha
+        ) {
 
-    $stmtMovimiento->bind_param(
-        "iissii",
-        $id_producto,
-        $cantidad,
-        $motivo,
-        $observacion,
-        $id_proveedor,
-        $_SESSION["id_usuario"]
-    );
+            $errores[] = "La fecha ingresada no es válida.";
 
-    $stmtMovimiento->execute();
+        }
 
-    header("Location: inventario.php");
-    exit();
+    }
+
+
+    // ================================
+    // VALIDAR DOCUMENTO
+    // ================================
+
+    if (mb_strlen($documento) > 100) {
+
+        $errores[] = "El documento no puede superar los 100 caracteres.";
+
+    }
+
+    if (preg_match('/[\x00-\x1F\x7F]/', $documento)) {
+
+        $errores[] = "El documento contiene caracteres no permitidos.";
+
+    }
+
+
+    // ================================
+    // VALIDAR REFERENCIA
+    // ================================
+
+    if (mb_strlen($referencia) > 100) {
+
+        $errores[] = "La referencia no puede superar los 100 caracteres.";
+
+    }
+
+    if (preg_match('/[\x00-\x1F\x7F]/', $referencia)) {
+
+        $errores[] = "La referencia contiene caracteres no permitidos.";
+
+    }
+
+
+    // ================================
+    // VALIDAR PRODUCTO
+    // ================================
+
+    if ($id_producto === false || $id_producto === null || $id_producto <= 0) {
+
+        $errores[] = "Debes seleccionar un producto.";
+
+    } else {
+
+        $sqlProducto = "SELECT id_producto
+                        FROM productos
+                        WHERE id_producto = ?
+                        AND estado = 1";
+
+        $stmtProducto = $conexion->prepare($sqlProducto);
+        $stmtProducto->bind_param("i", $id_producto);
+        $stmtProducto->execute();
+
+        $resultadoProducto = $stmtProducto->get_result();
+
+        if ($resultadoProducto->num_rows === 0) {
+
+            $errores[] = "El producto seleccionado no es válido.";
+
+        }
+
+    }
+
+
+    // ================================
+    // VALIDAR CANTIDAD
+    // ================================
+
+    if (
+        $cantidad === "" ||
+        !ctype_digit($cantidad) ||
+        (int)$cantidad <= 0
+    ) {
+
+        $errores[] = "La cantidad debe ser un número entero mayor que cero.";
+
+    } elseif ((int)$cantidad > 1000000) {
+
+        $errores[] = "La cantidad no puede superar 1.000.000 unidades.";
+
+
+    } else {
+
+        $cantidad = (int)$cantidad;
+
+    }
+
+
+    // ================================
+    // VALIDAR PRECIO DE COMPRA
+    // ================================
+
+    if ($precio_compra === "") {
+
+        $errores[] = "El precio de compra es obligatorio.";
+
+    } elseif (!is_numeric($precio_compra)) {
+
+        $errores[] = "El precio de compra debe ser un número válido.";
+
+    } elseif ((float)$precio_compra <= 0) {
+
+        $errores[] = "El precio de compra debe ser mayor que cero.";
+
+    } elseif ((float)$precio_compra > 999999999.99) {
+
+        $errores[] = "El precio de compra supera el límite permitido.";
+
+    } elseif (!preg_match('/^\d+(\.\d{1,2})?$/', $precio_compra)) {
+
+        $errores[] = "El precio de compra puede tener máximo 2 decimales.";
+
+    } else {
+
+        $precio_compra = (float)$precio_compra;
+
+    }
+
+
+    // ================================
+    // VALIDAR OBSERVACIÓN
+    // ================================
+
+    if (mb_strlen($observacion) > 500) {
+
+        $errores[] = "La observación no puede superar los 500 caracteres.";
+
+    }
+
+    if (preg_match('/[\x00-\x1F\x7F]/', $observacion)) {
+
+        $errores[] = "La observación contiene caracteres no permitidos.";
+
+    }
+
+
+    // ================================
+    // SI HAY ERRORES, NO GUARDAR
+    // ================================
+
+    if (empty($errores)) {
+
+        try {
+
+            $conexion->begin_transaction();
+
+
+            // ================================
+            // CALCULAR TOTAL
+            // ================================
+
+            $total_compra = $cantidad * $precio_compra;
+
+
+            // ================================
+            // CREAR INGRESO
+            // ================================
+
+            $sqlIngreso = "INSERT INTO ingresos_inventario
+            (
+                id_proveedor,
+                fecha,
+                documento,
+                referencia,
+                total_compra,
+                id_usuario,
+                estado
+            )
+            VALUES
+            (
+                ?, ?, ?, ?, ?, ?, 'Recibido'
+            )";
+
+            $stmtIngreso = $conexion->prepare($sqlIngreso);
+
+            $stmtIngreso->bind_param(
+                "isssdi",
+                $id_proveedor,
+                $fecha,
+                $documento,
+                $referencia,
+                $total_compra,
+                $id_usuario
+            );
+
+            $stmtIngreso->execute();
+
+            $id_ingreso = $conexion->insert_id;
+
+
+            // ================================
+            // DETALLE DEL INGRESO
+            // ================================
+
+            $subtotal = $cantidad * $precio_compra;
+
+            $sqlDetalle = "INSERT INTO detalle_ingreso
+            (
+                id_ingreso,
+                id_producto,
+                cantidad,
+                precio_compra,
+                subtotal
+            )
+            VALUES
+            (
+                ?, ?, ?, ?, ?
+            )";
+
+            $stmtDetalle = $conexion->prepare($sqlDetalle);
+
+            $stmtDetalle->bind_param(
+                "iiidd",
+                $id_ingreso,
+                $id_producto,
+                $cantidad,
+                $precio_compra,
+                $subtotal
+            );
+
+            $stmtDetalle->execute();
+
+
+            // ================================
+            // ACTUALIZAR STOCK
+            // ================================
+
+            $sqlStock = "UPDATE inventario
+                         SET stock_actual = stock_actual + ?
+                         WHERE id_producto = ?";
+
+            $stmtStock = $conexion->prepare($sqlStock);
+
+            $stmtStock->bind_param(
+                "ii",
+                $cantidad,
+                $id_producto
+            );
+
+            $stmtStock->execute();
+
+
+            if ($stmtStock->affected_rows === 0) {
+
+                throw new Exception(
+                    "No se pudo actualizar el inventario del producto."
+                );
+
+            }
+
+
+            // ================================
+            // REGISTRAR MOVIMIENTO
+            // ================================
+
+            $sqlMovimiento = "INSERT INTO movimientos_inventario
+            (
+                id_producto,
+                tipo,
+                cantidad,
+                motivo,
+                observacion,
+                id_proveedor,
+                id_usuario
+            )
+            VALUES
+            (
+                ?, 'Entrada', ?, ?, ?, ?, ?
+            )";
+
+            $motivo = "Ingreso de inventario";
+
+            $stmtMovimiento = $conexion->prepare($sqlMovimiento);
+
+            $stmtMovimiento->bind_param(
+                "iissii",
+                $id_producto,
+                $cantidad,
+                $motivo,
+                $observacion,
+                $id_proveedor,
+                $id_usuario
+            );
+
+            if (!$stmtMovimiento->execute()) {
+
+                throw new Exception(
+                    "No se pudo registrar el movimiento."
+                );
+            }
+            
+            // ================================
+            // CONFIRMAR TODO
+            // ================================
+
+            $conexion->commit();
+
+            header("Location: inventario.php");
+            exit();
+
+
+        } catch (Exception $e) {
+
+            $conexion->rollback();
+
+            $errores[] = "No se pudo registrar el ingreso. No se realizaron cambios en el inventario.";
+
+        }
+
+    }
 
 }
-
 // Obtener proveedores
 
 $sqlProveedores = "SELECT
@@ -367,14 +623,16 @@ $resultado = $stmt->get_result();
                     <input
                         type="text"
                         name="documento"
-                        placeholder="Factura o documento">
+                        placeholder="Factura o documento"
+                        maxlength="100">
 
                     <label>Referencia</label>
 
                     <input
                         type="text"
                         name="referencia"
-                        placeholder="Referencia del ingreso">
+                        placeholder="Referencia del ingreso"
+                        maxlength="100">
 
                     <label>Producto</label>
 
@@ -403,6 +661,7 @@ $resultado = $stmt->get_result();
                         type="number"
                         name="cantidad"
                         min="1"
+                        step="1"
                         required>
 
                     <label>Precio de compra</label>
@@ -418,7 +677,14 @@ $resultado = $stmt->get_result();
 
                     <textarea
                         name="observacion"
-                        rows="4"></textarea>
+                        id="observacion"
+                        rows="4"
+                        maxlength="500"><?php echo htmlspecialchars($observacion ?? "", ENT_QUOTES, "UTF-8"); ?></textarea>
+
+                    <div class="contador-caracteres">
+                        <span id="contador-observacion">0</span> / 500
+                    </div>
+
                     <br><br>
 
                     <button
@@ -440,5 +706,33 @@ $resultado = $stmt->get_result();
         </section>
 
 <script src="../dashboard/dashboard.js"></script>
+
+<script>
+
+const observacion = document.getElementById("observacion");
+const contadorObservacion = document.getElementById("contador-observacion");
+
+function actualizarContador() {
+
+    const longitud = observacion.value.length;
+
+    contadorObservacion.textContent = longitud;
+
+    if (longitud >= 500) {
+
+        contadorObservacion.classList.add("limite");
+
+    } else {
+
+        contadorObservacion.classList.remove("limite");
+
+    }
+
+}
+
+observacion.addEventListener("input", actualizarContador);
+actualizarContador();
+
+</script>
 </body>
 </html>

@@ -25,6 +25,7 @@ $sqlHistorial = "SELECT
 
                     mi.fecha,
                     p.nombre AS producto,
+                    pr.nombre AS proveedor,
                     mi.tipo,
                     mi.cantidad,
                     mi.motivo,
@@ -35,6 +36,9 @@ $sqlHistorial = "SELECT
 
                 INNER JOIN productos p
                 ON mi.id_producto = p.id_producto
+
+                LEFT JOIN proveedores pr
+                ON mi.id_proveedor = pr.id_proveedor
 
                 INNER JOIN usuarios u
                 ON mi.id_usuario = u.id_usuario
@@ -147,6 +151,7 @@ $resultadoHistorial = $conexion->query($sqlHistorial);
                 <tr>
                     <th>Fecha</th>
                     <th>Producto</th>
+                    <th>Proveedor</th>
                     <th>Tipo</th>
                     <th>Cantidad</th>
                     <th>Motivo</th>
@@ -168,6 +173,18 @@ $resultadoHistorial = $conexion->query($sqlHistorial);
 
                     <td>
                         <?php echo $movimiento["producto"]; ?>
+                    </td>
+
+                    <td>
+                        <?php
+                            echo !empty($movimiento["proveedor"])
+                                ? htmlspecialchars(
+                                    $movimiento["proveedor"],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                )
+                                : "Sin proveedor";
+                        ?>
                     </td>
 
                     <td>

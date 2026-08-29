@@ -74,6 +74,7 @@ $errores = [];
 $nombre = $categoria["nombre"];
 $descripcion = $categoria["descripcion"];
 $estado = (string) $categoria["estado"];
+$imagenActual = $categoria["imagen"] ?? null;
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -81,7 +82,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre = trim($_POST["nombre"] ?? "");
     $descripcion = trim($_POST["descripcion"] ?? "");
     $estado = $_POST["estado"] ?? "";
+    $archivoImagen = null;
+    $tipoMime = null;
 
+if (isset($_FILES["imagen"]) && $_FILES["imagen"]["error"] !== UPLOAD_ERR_NO_FILE) {
+
+    if ($_FILES["imagen"]["error"] !== UPLOAD_ERR_OK) {
+
+        $errores[] = "Ocurrió un error al subir la imagen.";
+
+    } else {
+
+        $archivoImagen = $_FILES["imagen"];
+
+        $tamanoMaximo = 2 * 1024 * 1024;
+
+        if ($archivoImagen["size"] > $tamanoMaximo) {
+
+            $errores[] = "La imagen no puede superar los 2 MB.";
+
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+
+        if ($finfo === false) {
+
+            $errores[] = "No fue posible verificar el tipo de imagen.";
+
+        } else {
+
+            $tipoMime = finfo_file(
+                $finfo,
+                $archivoImagen["tmp_name"]
+            );
+
+            finfo_close($finfo);
+
+            $tiposPermitidos = [
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            ];
+
+            if (!in_array($tipoMime, $tiposPermitidos, true)) {
+
+                $errores[] = "La imagen debe ser JPG, JPEG, PNG o WEBP.";
+
+            }
+        }
+    }
+}
 
     /*
     =================================
@@ -125,6 +175,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     }
 
+    $rutaDestino = null;
+    $rutaImagen = null;
+
+    if ($archivoImagen !== null) {
+
+        $carpeta = "../../uploads/categorias/";
+
+        if (!is_dir($carpeta)) {
+
+            if (!mkdir($carpeta, 0755, true)) {
+
+                $errores[] = "No fue posible crear la carpeta de imágenes.";
+
+            }
+
+        }
+
+        if (empty($errores)) {
+
+            $extension = match ($tipoMime) {
+
+                "image/jpeg" => "jpg",
+                "image/png" => "png",
+                "image/webp" => "webp"
+
+            };
+
+            $nombreImagen = bin2hex(random_bytes(16)) . "." . $extension;
+
+            $rutaDestino = $carpeta . $nombreImagen;
+
+            $rutaImagen = "uploads/categorias/" . $nombreImagen;
+
+        }
+
+    }
+
 
     /*
     =================================
@@ -134,11 +221,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (empty($errores)) {
 
-        $sql = "UPDATE categorias
-                SET nombre = ?,
-                    descripcion = ?,
-                    estado = ?
-                WHERE id_categoria = ?";
+        if ($archivoImagen !== null) {
+
+            $sql = "UPDATE categorias
+                    SET nombre = ?,
+                        descripcion = ?,
+                        estado = ?,
+                        imagen = ?
+                    WHERE id_categoria = ?";
+
+        } else {
+
+            $sql = "UPDATE categorias
+                    SET nombre = ?,
+                        descripcion = ?,
+                        estado = ?
+                    WHERE id_categoria = ?";
+
+        }
 
         $stmt = $conexion->prepare($sql);
 
@@ -151,13 +251,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $estadoInt = (int) $estado;
 
-            $stmt->bind_param(
-                "ssii",
-                $nombre,
-                $descripcion,
-                $estadoInt,
-                $id_categoria
-            );
+            if ($archivoImagen !== null) {
+
+                $stmt->bind_param(
+                    "ssisi",
+                    $nombre,
+                    $descripcion,
+                    $estadoInt,
+                    $rutaImagen,
+                    $id_categoria
+                );
+
+            } else {
+
+                $stmt->bind_param(
+                    "ssii",
+                    $nombre,
+                    $descripcion,
+                    $estadoInt,
+                    $id_categoria
+                );
+
+            }
+
+            if ($archivoImagen !== null) {
+
+                if (!move_uploaded_file(
+                    $archivoImagen["tmp_name"],
+                    $rutaDestino
+                )) {
+
+                    $errores[] = "No fue posible guardar la nueva imagen.";
+
+                }
+
+            }
 
 
             if ($stmt->execute()) {
@@ -323,8 +451,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php } ?>
 
 
-            <form method="POST">
-
+            <form method="POST" enctype="multipart/form-data">
 
                 <!-- NOMBRE -->
 
@@ -394,6 +521,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 >
                     0 / 300 caracteres
                 </div>
+
+                <label>Imagen actual</label>
+
+                    <?php if (!empty($imagenActual)) { ?>
+
+                        <img
+                            src="../../<?php echo htmlspecialchars($imagenActual, ENT_QUOTES, "UTF-8"); ?>"
+                            alt="Imagen de la categoría"
+                            width="160">
+
+                    <?php } else { ?>
+
+                        <p>Esta categoría no tiene imagen.</p>
+
+                    <?php } ?>
+
+                    <br><br>
+
+                    <label>Cambiar imagen</label>
+
+                    <input
+                        type="file"
+                        name="imagen"
+                        accept="image/jpeg,image/png,image/webp">
 
                 <!-- ESTADO -->
 

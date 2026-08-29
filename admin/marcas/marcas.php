@@ -14,36 +14,77 @@ require_once("../../config/conexion.php");
 
 <?php
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST") { 
 
-    $nombre = $_POST["nombre"];
-    $descripcion = $_POST["descripcion"];
-    $estado = $_POST["estado"];
+    $nombre = trim($_POST["nombre"] ?? "");
+    $descripcion = trim($_POST["descripcion"] ?? "");
+    $estado = $_POST["estado"] ?? "";
 
-    $sql = "INSERT INTO marcas (nombre, descripcion, estado)
+    $errores = [];
+
+    if ($nombre === "") {
+
+        $errores[] = "El nombre de la marca es obligatorio.";
+
+        } elseif (mb_strlen($nombre) > 150) {
+
+            $errores[] = "El nombre de la marca no puede superar los 150 caracteres.";
+
+        }
+
+        if (mb_strlen($descripcion) > 300) {
+
+            $errores[] = "La descripción no puede superar los 300 caracteres.";
+
+        }
+
+        if ($estado !== "0" && $estado !== "1") {
+
+            $errores[] = "El estado seleccionado no es válido.";
+
+        }
+
+    if (empty($errores)) {
+
+        $sql = "INSERT INTO marcas (nombre, descripcion, estado)
             VALUES (?, ?, ?)";
 
-    $stmt = $conexion->prepare($sql);
+        $stmt = $conexion->prepare($sql);
 
-    $stmt->bind_param("ssi", $nombre, $descripcion, $estado);
+        if (!$stmt) {
 
-    if ($stmt->execute()) {
+            $errores[] = "No fue posible preparar el registro de la marca.";
 
-        header("Location: marcas.php");
-        exit();
+        } else {
 
-    } else {
+            $estadoInt = (int) $estado;
 
-        echo "Error al guardar la marca.";
+            $stmt->bind_param(
+                "ssi",
+                $nombre,
+                $descripcion,
+                $estadoInt
+            );
 
+            if ($stmt->execute()) {
+
+                header("Location: marcas.php");
+                exit();
+
+            } else {
+
+                $errores[] = "No fue posible guardar la marca.";
+
+            }
+
+            $stmt->close();
+
+        }
     }
-
 }
+    $sql = "SELECT * FROM marcas ORDER BY id_marca DESC";
 
-    $sql = "SELECT * FROM marcas ORDER BY 
-    id_marca DESC";
-
-    $resultado =$conexion->query($sql);
+    $resultado = $conexion->query($sql);
 
 
 ?>
@@ -143,18 +184,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 Desde aquí podrás administrar las marcas de AGRANDA.
             </p>
 
+            <?php if (!empty($errores)) { ?>
+
+                <div class="mensaje-error">
+
+                    <strong>🛑 No se puede guardar la marca.</strong>
+
+                    <ul>
+
+                        <?php foreach ($errores as $error) { ?>
+
+                            <li>
+                                <?php echo htmlspecialchars($error, ENT_QUOTES, "UTF-8"); ?>
+                            </li>
+
+                        <?php } ?>
+
+                    </ul>
+
+                </div>
+
+            <?php } ?>
+
             <form method="POST"class="formulario-marcas">
 
                 <label>Nombre de la marca</label>
+                    
                     <input
                         type="text"
                         name="nombre"
+                        id="nombre"
+                        maxlength="150"
                         required>
 
+                    <div
+                        id="contador-nombre"
+                        style="text-align:right;margin-top:5px;color:#666;font-size:13px;">
+                        0 / 150 caracteres
+                    </div>
+
                 <label>Descripción</label>
+
                     <textarea
                         name="descripcion"
-                        rows="4"></textarea>
+                        id="descripcion"
+                        rows="4"
+                        maxlength="300"></textarea>
+
+                    <div
+                        id="contador-descripcion"
+                        style="text-align:right;margin-top:5px;color:#666;font-size:13px;">
+                        0 / 300 caracteres
+                    </div>
 
                 <label>Estado</label>
 
@@ -240,6 +321,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 
 <script src="../dashboard/dashboard.js"></script>
+
+<script>
+
+const nombre = document.getElementById("nombre");
+const contadorNombre = document.getElementById("contador-nombre");
+
+const descripcion = document.getElementById("descripcion");
+const contadorDescripcion = document.getElementById("contador-descripcion");
+
+function actualizarContadorNombre() {
+
+    const cantidad = nombre.value.length;
+
+    contadorNombre.textContent =
+        cantidad + " / 150 caracteres";
+
+    if (cantidad >= 150) {
+
+        contadorNombre.style.color = "#c62828";
+        contadorNombre.style.fontWeight = "bold";
+
+    } else {
+
+        contadorNombre.style.color = "#666";
+        contadorNombre.style.fontWeight = "normal";
+
+    }
+
+}
+
+function actualizarContadorDescripcion() {
+
+    const cantidad = descripcion.value.length;
+
+    contadorDescripcion.textContent =
+        cantidad + " / 300 caracteres";
+
+    if (cantidad >= 300) {
+
+        contadorDescripcion.style.color = "#c62828";
+        contadorDescripcion.style.fontWeight = "bold";
+
+    } else {
+
+        contadorDescripcion.style.color = "#666";
+        contadorDescripcion.style.fontWeight = "normal";
+
+    }
+
+}
+
+nombre.addEventListener("input", actualizarContadorNombre);
+
+descripcion.addEventListener("input", actualizarContadorDescripcion);
+
+actualizarContadorNombre();
+actualizarContadorDescripcion();
+
+</script>
 
 </body>
 </html>
