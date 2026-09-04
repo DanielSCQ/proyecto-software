@@ -75,7 +75,108 @@ $descripcion = trim($_POST["descripcion"] ?? "");
 $estado = $_POST["estado"] ?? "";
 $destacado = $_POST["destacado"] ?? "";
 
+// Características del producto
+$atributoIds = $_POST["atributo_id"] ?? [];
+$atributoValores = $_POST["atributo_valor"] ?? [];
+
 $errores = [];
+
+/* =================================
+   VALIDACIÓN DE CARACTERÍSTICAS
+================================= */
+
+if (!is_array($atributoIds)) {
+    $atributoIds = [];
+}
+
+if (!is_array($atributoValores)) {
+    $atributoValores = [];
+}
+
+if (count($atributoIds) !== count($atributoValores)) {
+    $errores[] = "Los datos de las características no son válidos.";
+}
+
+if (empty($errores)) {
+
+    $atributosRecibidos = [];
+
+    foreach ($atributoIds as $indice => $atributoId) {
+
+        $valor = trim($atributoValores[$indice] ?? "");
+
+        // Si la fila está completamente vacía, se ignora.
+        if ($atributoId === "" && $valor === "") {
+            continue;
+        }
+
+        // El ID debe ser un entero positivo.
+        if (
+            filter_var(
+                $atributoId,
+                FILTER_VALIDATE_INT,
+                ["options" => ["min_range" => 1]]
+            ) === false
+        ) {
+            $errores[] = "Una de las características seleccionadas no es válida.";
+            continue;
+        }
+
+        // El valor es obligatorio.
+        if ($valor === "") {
+            $errores[] = "Todas las características seleccionadas deben tener un valor.";
+            continue;
+        }
+
+        // Longitud máxima del valor.
+        if (mb_strlen($valor) > 300) {
+            $errores[] = "El valor de una característica no puede superar los 300 caracteres.";
+            continue;
+        }
+
+        // Evitar repetir el mismo atributo.
+        if (in_array((int) $atributoId, $atributosRecibidos, true)) {
+            $errores[] = "No puedes agregar la misma característica más de una vez.";
+            continue;
+        }
+
+        $atributosRecibidos[] = (int) $atributoId;
+    }
+}
+
+if (empty($errores) && !empty($atributosRecibidos)) {
+
+    $stmtAtributo = $conexion->prepare(
+        "SELECT id_atributo
+         FROM atributos_producto
+         WHERE id_atributo = ?
+         AND estado = TRUE"
+    );
+
+    if (!$stmtAtributo) {
+
+        $errores[] = "No fue posible validar las características del producto.";
+
+    } else {
+
+        foreach ($atributosRecibidos as $idAtributo) {
+
+            $stmtAtributo->bind_param("i", $idAtributo);
+            $stmtAtributo->execute();
+
+            $resultadoAtributo = $stmtAtributo->get_result();
+
+            if ($resultadoAtributo->num_rows === 0) {
+
+                $errores[] = "Una de las características seleccionadas no existe o está inactiva.";
+                break;
+
+            }
+        }
+
+        $stmtAtributo->close();
+    }
+}
 
 // =================================
 // VALIDAR NOMBRE
@@ -665,6 +766,46 @@ try {
 
     // Obtener ID
     $id_producto = $conexion->insert_id;
+
+    /* =================================
+    GUARDAR CARACTERÍSTICAS
+    ================================= */
+
+    if (!empty($atributosRecibidos)) {
+
+        $stmtProductoAtributo = $conexion->prepare(
+            "INSERT INTO producto_atributo
+            (id_producto, id_atributo, valor)
+            VALUES (?, ?, ?)"
+        );
+
+        if (!$stmtProductoAtributo) {
+            throw new Exception("No fue posible preparar el registro de características.");
+        }
+
+        foreach ($atributosRecibidos as $indice => $idAtributo) {
+
+            $valor = trim($atributoValores[$indice] ?? "");
+
+            // Las filas vacías ya fueron ignoradas durante la validación.
+            if ($valor === "") {
+                continue;
+            }
+
+            $stmtProductoAtributo->bind_param(
+                "iis",
+                $id_producto,
+                $idAtributo,
+                $valor
+            );
+
+            if (!$stmtProductoAtributo->execute()) {
+                throw new Exception("No fue posible guardar las características del producto.");
+            }
+        }
+
+        $stmtProductoAtributo->close();
+    }
 
     // =================================
     // INSERTAR PROVEEDOR

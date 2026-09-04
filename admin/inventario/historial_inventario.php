@@ -144,6 +144,10 @@ $resultadoHistorial = $conexion->query($sqlHistorial);
 
                 <p>Consulta todos los movimientos registrados en el inventario.</p>
 
+                <a href="inventario.php" class="btn-cancelar">
+                    ⬅️ Volver al Inventario
+                </a>
+
             <table class="tabla-productos">
 
                 <thead>
@@ -214,10 +218,6 @@ $resultadoHistorial = $conexion->query($sqlHistorial);
                 </tbody>
 
                 </table>
-
-                <br><br>
-
-                <a href="inventario.php" class="btn-cancelar">⬅️ Volver al Inventario</a>
 
             </section>
 

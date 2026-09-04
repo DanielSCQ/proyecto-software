@@ -341,6 +341,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $sqlMovimiento = "INSERT INTO movimientos_inventario
             (
                 id_producto,
+                id_ingreso,
                 tipo,
                 cantidad,
                 motivo,
@@ -350,7 +351,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             )
             VALUES
             (
-                ?, 'Entrada', ?, ?, ?, ?, ?
+                ?, ?, 'Entrada', ?, ?, ?, ?, ?
             )";
 
             $motivo = "Ingreso de inventario";
@@ -358,8 +359,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmtMovimiento = $conexion->prepare($sqlMovimiento);
 
             $stmtMovimiento->bind_param(
-                "iissii",
+                "iiissii",
                 $id_producto,
+                $id_ingreso,
                 $cantidad,
                 $motivo,
                 $observacion,

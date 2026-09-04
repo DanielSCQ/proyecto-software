@@ -183,9 +183,11 @@ body{
 
 .barra-productos{
     display:flex;
-    justify-content:space-between;
+    justify-content:flex-start;
     align-items:center;
     margin-bottom:25px;
+    flex-wrap: wrap;
+    gap: 18px;
 }
 
 /* ===============================
@@ -276,9 +278,19 @@ form select{
 =================================*/
 
 .tabla-productos{
-    width:100%;
+    width:max-content;
+    min-width: 100%;
     border-collapse:collapse;
     margin-top:20px;
+}
+
+.contenedor-tabla {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-sizing: border-box;
+    border-radius: 8px;
 }
 
 .tabla-productos thead{
@@ -451,6 +463,13 @@ form{
     border-bottom:1px solid #ddd;
 }
 
+.tabla-productos{
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
 .precio-original {
     text-decoration: line-through;
     color: #777;
@@ -484,5 +503,108 @@ form{
 
 .pagina-productos{
     overflow-y:auto;
-    overflow-x:hidden;
+    overflow-x:auto;
+}
+
+/*=================================
+    CARACTERÍSTICAS DEL PRODUCTO
+=================================*/
+
+.seccion-producto{
+    margin-top:30px;
+    padding:20px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    background:#fafafa;
+}
+
+.titulo-seccion-producto{
+    color:#2e7d32;
+    margin-bottom:8px;
+}
+
+.ayuda-seccion-producto{
+    color:#666;
+    margin-bottom:20px;
+    font-size:14px;
+}
+
+.fila-caracteristica{
+    display:flex;
+    align-items:flex-start;
+    gap:15px;
+    margin-bottom:18px;
+    width:100%;
+}
+
+.fila-caracteristica .campo{
+    flex:1;
+    min-width:0;
+}
+
+.fila-caracteristica label{
+    display:block;
+    margin-top:0;
+    margin-bottom:6px;
+}
+
+.fila-caracteristica select,
+.fila-caracteristica input{
+    width:100%;
+}
+
+.contador-campo{
+    text-align:right;
+    margin-top:4px;
+    font-size:12px;
+    color:#777;
+    min-height:15px;
+}
+
+.btn-eliminar-caracteristica{
+    width:38px;
+    height:38px;
+    margin-top:28px;
+    border:none;
+    border-radius:8px;
+    background:#d32f2f;
+    color:white;
+    font-size:22px;
+    cursor:pointer;
+    flex-shrink:0;
+}
+
+.btn-eliminar-caracteristica:hover{
+    background:#b71c1c;
+}
+
+.btn-agregar-caracteristica{
+    margin-top:5px;
+    padding:10px 16px;
+    border:none;
+    border-radius:8px;
+    background:#2e7d32;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.btn-agregar-caracteristica:hover{
+    background:#256728;
+}
+
+.btn-eliminar-caracteristica{
+    width:38px;
+    height:38px;
+    border:none;
+    border-radius:8px;
+    background:#d32f2f;
+    color:white;
+    font-size:22px;
+    cursor:pointer;
+    flex-shrink:0;
+}
+
+.btn-eliminar-caracteristica:hover{
+    background:#b71c1c;
 }

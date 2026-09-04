@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 07-08-2026 a las 22:46:55
+-- Tiempo de generación: 04-09-2026 a las 17:22:26
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.1.25
 
@@ -20,6 +20,31 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `base de datos tienda-inventario`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `atributos_producto`
+--
+
+CREATE TABLE `atributos_producto` (
+  `id_atributo` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `estado` tinyint(1) DEFAULT 1,
+  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `atributos_producto`
+--
+
+INSERT INTO `atributos_producto` (`id_atributo`, `nombre`, `estado`, `fecha_creacion`) VALUES
+(1, 'Material', 1, '2026-09-04 03:06:12'),
+(2, 'Largo', 1, '2026-09-04 03:52:55'),
+(3, 'Ancho', 1, '2026-09-04 03:53:16'),
+(4, 'Diametro', 1, '2026-09-04 03:53:58'),
+(5, 'Tipo de pieza', 1, '2026-09-04 03:54:43'),
+(6, 'Aplicacion', 1, '2026-09-04 03:55:28');
 
 -- --------------------------------------------------------
 
@@ -73,8 +98,9 @@ CREATE TABLE `categorias` (
 --
 
 INSERT INTO `categorias` (`id_categoria`, `nombre`, `descripcion`, `imagen`, `estado`, `fecha_creacion`) VALUES
-(1, 'sistemas hidráulicos', 'repuestos y componentes del sistema hidraulico', 'uploads/categorias/1784731070_sigueñal.jpg', 1, '2026-07-22 14:37:50'),
-(3, 'sistemas electricos', ' componentes eléctricos para maquinaria agrícola\r\n       \r\n                            ', 'uploads/categorias/1784773887_destacado4.jpg', 1, '2026-07-23 02:31:27');
+(1, 'sistemas hidráulicos', 'repuestos y componentes del sistema hidraulico                ', 'uploads/categorias/1784731070_sigueñal.jpg', 1, '2026-07-22 14:37:50'),
+(3, 'sistemas electricos', ' componentes eléctricos para maquinaria agrícola\r\n       \r\n                            ', 'uploads/categorias/1784773887_destacado4.jpg', 1, '2026-07-23 02:31:27'),
+(4, 'empaques', 'los duros', 'uploads/categorias/99f6aa345d8000f0db465f5f5b4b18db.jpg', 1, '2026-08-18 14:19:56');
 
 -- --------------------------------------------------------
 
@@ -124,6 +150,7 @@ CREATE TABLE `contactos` (
   `correo` varchar(150) NOT NULL,
   `telefono` varchar(20) DEFAULT NULL,
   `asunto` varchar(150) NOT NULL,
+  `mensaje` text NOT NULL,
   `fecha_envio` timestamp NOT NULL DEFAULT current_timestamp(),
   `estado` enum('pendiente','leido','respondido','cerrado') DEFAULT 'pendiente',
   `respuesta` text DEFAULT NULL
@@ -186,7 +213,12 @@ CREATE TABLE `detalle_ingreso` (
 --
 
 INSERT INTO `detalle_ingreso` (`id_detalle_ingreso`, `id_ingreso`, `id_producto`, `cantidad`, `precio_compra`, `subtotal`) VALUES
-(1, 1, 1, 1234, 200000.00, 99999999.99);
+(1, 1, 1, 1234, 200000.00, 99999999.99),
+(2, 2, 2, 300, 37770.00, 11331000.00),
+(3, 3, 5, 2111, 6000.00, 12666000.00),
+(4, 4, 1, 3000, 30000.00, 90000000.00),
+(5, 5, 1, 3000, 30000.00, 90000000.00),
+(6, 6, 6, 50, 2000.00, 100000.00);
 
 -- --------------------------------------------------------
 
@@ -238,6 +270,17 @@ CREATE TABLE `estado_pedido` (
   `orden` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `estado_pedido`
+--
+
+INSERT INTO `estado_pedido` (`id_estado`, `nombre`, `descripcion`, `orden`) VALUES
+(1, 'Pendiente', 'Pedido recibido y pendiente de procesamiento', 1),
+(2, 'En proceso', 'El pedido está siendo preparado', 2),
+(3, 'Enviado', 'El pedido fue enviado al cliente', 3),
+(4, 'Entregado', 'El pedido fue entregado correctamente', 4),
+(5, 'Cancelado', 'El pedido fue cancelado', 5);
+
 -- --------------------------------------------------------
 
 --
@@ -287,9 +330,11 @@ CREATE TABLE `imagenes_producto` (
 --
 
 INSERT INTO `imagenes_producto` (`id_imagen`, `id_producto`, `ruta_imagen`, `principal`, `orden`, `fecha_subida`, `estado`) VALUES
-(1, 1, '../uploads/productos/1785535100_destacado 3.webp', 1, 1, '2026-07-31 21:58:20', 1),
-(2, 2, '../uploads/productos/1785543035_destacado2.webp', 1, 1, '2026-08-01 00:10:35', 1),
-(3, 4, '../uploads/productos/1785849579_destacado4.jpg', 1, 1, '2026-08-04 13:19:39', 1);
+(1, 1, 'uploads/productos/1785535100_destacado 3.webp', 1, 1, '2026-07-31 21:58:20', 1),
+(2, 2, 'uploads/productos/1785543035_destacado2.webp', 1, 1, '2026-08-01 00:10:35', 1),
+(3, 4, 'uploads/productos/1785849579_destacado4.jpg', 1, 1, '2026-08-04 13:19:39', 1),
+(4, 5, 'uploads/productos/1786666092_WhatsApp Image 2026-08-02 at 3.21.27 PM.jpeg', 1, 1, '2026-08-14 00:08:12', 1),
+(5, 6, 'uploads/productos/10e5f157a433e85da0c36f84ccdb338f.jpg', 1, 1, '2026-08-26 01:36:42', 1);
 
 -- --------------------------------------------------------
 
@@ -313,7 +358,12 @@ CREATE TABLE `ingresos_inventario` (
 --
 
 INSERT INTO `ingresos_inventario` (`id_ingreso`, `id_proveedor`, `fecha`, `documento`, `referencia`, `total_compra`, `id_usuario`, `estado`) VALUES
-(1, 1, '2026-08-04', '888266109', 'OC-028373', 99999999.99, 1, 'Recibido');
+(1, 1, '2026-08-04', '888266109', 'OC-028373', 99999999.99, 1, 'Recibido'),
+(2, 1, '2026-08-11', '52914101', 'OC-028373', 11331000.00, 1, 'Recibido'),
+(3, 11, '2026-08-28', '66vsu2y2', 'OC-028373', 12666000.00, 1, 'Recibido'),
+(4, 11, '2026-08-28', '88710003661', '00123331', 90000000.00, 1, 'Recibido'),
+(5, 3, '2026-08-28', '14co-42466', '2244ccc', 90000000.00, 1, 'Recibido'),
+(6, 1, '2026-08-28', '222222', '5555', 100000.00, 1, 'Recibido');
 
 -- --------------------------------------------------------
 
@@ -350,9 +400,11 @@ CREATE TABLE `inventario` (
 --
 
 INSERT INTO `inventario` (`id_inventario`, `id_producto`, `stock_actual`, `stock_minimo`, `fecha_actualizacion`) VALUES
-(1, 1, 1572, 50, '2026-08-04 14:28:35'),
-(2, 2, 121, 20, '2026-08-01 18:07:59'),
-(4, 4, 200, 20, '2026-08-01 18:25:04');
+(1, 1, 6000, 50, '2026-08-29 01:10:32'),
+(2, 2, 421, 20, '2026-08-29 04:35:17'),
+(4, 4, 200, 20, '2026-08-29 01:10:32'),
+(5, 5, 8555, 20, '2026-08-28 22:48:09'),
+(6, 6, 1000050, 122, '2026-08-29 04:35:17');
 
 -- --------------------------------------------------------
 
@@ -373,7 +425,8 @@ CREATE TABLE `marcas` (
 --
 
 INSERT INTO `marcas` (`id_marca`, `nombre`, `descripcion`, `estado`, `fecha_creacion`) VALUES
-(1, 'jhon deret ', 'repuestos duros ', 1, '2026-07-23 03:43:12');
+(1, 'JOHN DEERE ', 'repuestos duros ', 1, '2026-07-23 03:43:12'),
+(2, 'CATERPILLAR', 'Maquinaria y equipo de minería especializada', 1, '2026-08-28 02:09:11');
 
 -- --------------------------------------------------------
 
@@ -401,6 +454,7 @@ CREATE TABLE `modelos` (
 CREATE TABLE `movimientos_inventario` (
   `id_movimiento` int(11) NOT NULL,
   `id_producto` int(11) NOT NULL,
+  `id_ingreso` int(11) DEFAULT NULL,
   `tipo` enum('Entrada','Salida','Ajuste') NOT NULL,
   `cantidad` int(11) NOT NULL,
   `motivo` text NOT NULL,
@@ -415,9 +469,23 @@ CREATE TABLE `movimientos_inventario` (
 -- Volcado de datos para la tabla `movimientos_inventario`
 --
 
-INSERT INTO `movimientos_inventario` (`id_movimiento`, `id_producto`, `tipo`, `cantidad`, `motivo`, `observacion`, `id_pedido`, `id_proveedor`, `id_usuario`, `fecha`) VALUES
-(1, 4, 'Ajuste', -100, 'Actualización manual desde el panel', '', NULL, NULL, 1, '2026-08-01 18:25:04'),
-(2, 1, 'Entrada', 1234, 'Ingreso de inventario', 'chimba', NULL, 1, 1, '2026-08-04 14:28:35');
+INSERT INTO `movimientos_inventario` (`id_movimiento`, `id_producto`, `id_ingreso`, `tipo`, `cantidad`, `motivo`, `observacion`, `id_pedido`, `id_proveedor`, `id_usuario`, `fecha`) VALUES
+(1, 4, NULL, 'Ajuste', -100, 'Actualización manual desde el panel', '', NULL, NULL, 1, '2026-08-01 18:25:04'),
+(2, 1, NULL, 'Entrada', 1234, 'Ingreso de inventario', 'chimba', NULL, 1, 1, '2026-08-04 14:28:35'),
+(3, 2, NULL, 'Entrada', 300, 'Ingreso de inventario', 'llegaron nuevos', NULL, 1, 1, '2026-08-11 11:58:19'),
+(4, 6, NULL, 'Ajuste', -6000, 'Actualización manual desde el panel', '', NULL, NULL, 1, '2026-08-28 22:34:00'),
+(5, 6, NULL, 'Ajuste', 996000, 'Actualización manual desde el panel', '', NULL, NULL, 1, '2026-08-28 22:34:30'),
+(6, 5, NULL, 'Entrada', 2111, 'Ingreso de inventario', 'duros', NULL, 11, 1, '2026-08-28 22:48:09'),
+(7, 1, NULL, 'Entrada', 2147483647, 'Ingreso de inventario', 'tftfft', NULL, 11, 1, '2026-08-28 23:04:56'),
+(8, 1, NULL, 'Ajuste', -2147480647, 'Modificación de ingreso de inventario', 'Cambio de cantidad del ingreso #4. Cantidad anterior: 2147483647. Nueva cantidad: 3000', NULL, 11, 1, '2026-08-29 00:30:13'),
+(9, 4, NULL, 'Entrada', 4000, 'Ingreso de inventario', 'ninguna', NULL, 3, 1, '2026-08-29 01:07:48'),
+(10, 4, NULL, 'Ajuste', -1000, 'Modificación de ingreso de inventario', 'Cambio de cantidad del ingreso #5. Cantidad anterior: 4000. Nueva cantidad: 3000. Observación: error en el precio y cantidad', NULL, 3, 1, '2026-08-29 01:09:19'),
+(11, 4, NULL, 'Ajuste', -3000, 'Modificación de ingreso de inventario', 'Se retiraron 3000 unidades debido al cambio de producto del ingreso #5. Observación: prueba', NULL, NULL, 1, '2026-08-29 01:10:32'),
+(12, 1, NULL, 'Ajuste', 3000, 'Modificación de ingreso de inventario', 'Se agregaron 3000 unidades debido al cambio de producto del ingreso #5. Observación: prueba', NULL, 3, 1, '2026-08-29 01:10:32'),
+(13, 2, 6, 'Entrada', 34, 'Ingreso de inventario', 'si aplica', NULL, 1, 1, '2026-08-29 04:29:15'),
+(14, 2, 6, 'Ajuste', 16, 'Modificación de ingreso de inventario', 'Cambio de cantidad del ingreso #6. Cantidad anterior: 34. Nueva cantidad: 50. Observación: nuevos', NULL, 1, 1, '2026-08-29 04:30:57'),
+(15, 2, 6, 'Ajuste', -50, 'Modificación de ingreso de inventario', 'Se retiraron 50 unidades debido al cambio de producto del ingreso #6. Observación: error en el tipo de producto', NULL, NULL, 1, '2026-08-29 04:35:17'),
+(16, 6, 6, 'Ajuste', 50, 'Modificación de ingreso de inventario', 'Se agregaron 50 unidades debido al cambio de producto del ingreso #6. Observación: error en el tipo de producto', NULL, 1, 1, '2026-08-29 04:35:17');
 
 -- --------------------------------------------------------
 
@@ -500,7 +568,31 @@ CREATE TABLE `productos` (
 INSERT INTO `productos` (`id_producto`, `id_categoria`, `id_marca`, `nombre`, `descripcion`, `codigo_producto`, `precio`, `peso`, `estado`, `destacado`, `fecha_creacion`, `fecha_actualizacion`) VALUES
 (1, 1, 1, 'sigueñal', 'muy util', '223878', 120000.00, 13.00, 1, 1, '2026-07-31 21:58:20', '2026-07-31 21:58:20'),
 (2, 3, 1, 'cables', 'muy buenos', '112223', 55000.00, 11.85, 1, 1, '2026-08-01 00:10:35', '2026-08-04 14:32:45'),
-(4, 3, 1, 'sistemas electricos', 'dggdfgergear', 'pps7788', 121321.00, 354.00, 1, 1, '2026-08-01 17:49:53', '2026-08-04 14:32:35');
+(4, 3, 1, 'sistemas electricos', 'dggdfgergear', 'pps7788', 121321.00, 354.00, 1, 1, '2026-08-01 17:49:53', '2026-08-04 14:32:35'),
+(5, 4, 1, 'coco', 'bueno', '342f3r42', 12132.00, 354.00, 1, 1, '2026-08-14 00:08:12', '2026-09-02 15:30:06'),
+(6, 3, 1, 'tornillo', 'buenos y baratos', '8782gvb72', 500.00, 0.65, 1, 0, '2026-08-26 01:36:42', '2026-08-29 04:34:42');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `producto_atributo`
+--
+
+CREATE TABLE `producto_atributo` (
+  `id_producto_atributo` int(11) NOT NULL,
+  `id_producto` int(11) NOT NULL,
+  `id_atributo` int(11) NOT NULL,
+  `valor` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `producto_atributo`
+--
+
+INSERT INTO `producto_atributo` (`id_producto_atributo`, `id_producto`, `id_atributo`, `valor`) VALUES
+(1, 6, 4, '2.35 mm'),
+(2, 6, 2, '5 cm'),
+(3, 6, 1, 'Acero inoxidable');
 
 -- --------------------------------------------------------
 
@@ -520,6 +612,28 @@ CREATE TABLE `promociones` (
   `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `promociones`
+--
+
+INSERT INTO `promociones` (`id_promocion`, `nombre`, `descripcion`, `tipo`, `valor_descuento`, `fecha_inicio`, `fecha_fin`, `estado`, `fecha_creacion`) VALUES
+(1, 'super descuentos de temporada', 'las mejores ofertas del mercado', 'Porcentaje', 35.00, '2026-08-12', '2026-11-12', 0, '2026-08-12 20:43:04'),
+(2, 'descuentos navideños', 'descuentos en todo lo navideño', 'Fijo', 30000.00, '2026-08-11', '2026-12-22', 0, '2026-08-12 21:04:20'),
+(3, 'desdcuentos de los brujos', 'solo este mes de octubre', 'Fijo', 30000.00, '2026-08-12', '2026-12-12', 1, '2026-08-12 21:16:01');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `promocion_categoria`
+--
+
+CREATE TABLE `promocion_categoria` (
+  `id_promocion_categoria` int(11) NOT NULL,
+  `id_promocion` int(11) NOT NULL,
+  `id_categoria` int(11) NOT NULL,
+  `fecha_asignacion` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- --------------------------------------------------------
 
 --
@@ -532,6 +646,17 @@ CREATE TABLE `promocion_producto` (
   `id_producto` int(11) NOT NULL,
   `fecha_asignacion` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `promocion_producto`
+--
+
+INSERT INTO `promocion_producto` (`id_promocion_producto`, `id_promocion`, `id_producto`, `fecha_asignacion`) VALUES
+(6, 1, 1, '2026-08-12 21:54:47'),
+(38, 2, 2, '2026-08-28 13:26:56'),
+(39, 3, 2, '2026-08-28 13:27:31'),
+(40, 3, 1, '2026-08-28 13:27:31'),
+(41, 3, 4, '2026-08-28 13:27:31');
 
 -- --------------------------------------------------------
 
@@ -556,7 +681,10 @@ CREATE TABLE `proveedores` (
 --
 
 INSERT INTO `proveedores` (`id_proveedor`, `nombre`, `nit`, `telefono`, `correo`, `direccion`, `contacto_principal`, `estado`, `fecha_creacion`) VALUES
-(1, 'yo', '1112121221', '3209007970', 'danielscq08@gmail.com', 'carrera9 #13-61', '3108094559', 1, '2026-07-23 15:00:34');
+(1, 'yo', '1112121221', '3209007970', 'danielscq08@gmail.com', 'carrera9 #13-61', '3108094559', 1, '2026-07-23 15:00:34'),
+(3, 'AgroRepuestos tolima', '901234567-8', '3', 'dorq138@gmail.com', '', 'efefefwefewfewf', 1, '2026-08-28 02:59:19'),
+(11, 'reston', '72663413', '3001678131', 'danielscq08@gmail.com', 'carrera 9 N°13-61', 'don pablo', 1, '2026-08-28 04:09:31'),
+(12, 'elvert', '7714291238129', '82723734', 'danielscq08@gmail.com', 'carrera 9 N°13-61', 'don pablo', 0, '2026-08-28 13:14:12');
 
 -- --------------------------------------------------------
 
@@ -582,7 +710,9 @@ CREATE TABLE `proveedor_producto` (
 INSERT INTO `proveedor_producto` (`id_proveedor_producto`, `id_proveedor`, `id_producto`, `precio_compra`, `codigo_proveedor`, `tiempo_entrega`, `estado`, `fecha_creacion`) VALUES
 (1, 1, 1, 100000.00, NULL, NULL, 1, '2026-07-31 21:58:20'),
 (2, 1, 2, 40000.00, NULL, NULL, 1, '2026-08-01 00:10:35'),
-(4, 1, 4, 213231.00, NULL, NULL, 1, '2026-08-01 17:49:53');
+(4, 1, 4, 213231.00, NULL, NULL, 1, '2026-08-01 17:49:53'),
+(5, 1, 5, 2000.03, NULL, NULL, 1, '2026-08-14 00:08:12'),
+(6, 1, 6, 500.00, '121224', NULL, 1, '2026-08-26 01:36:42');
 
 -- --------------------------------------------------------
 
@@ -662,6 +792,13 @@ INSERT INTO `usuarios` (`id_usuario`, `nombre`, `apellido`, `correo`, `clave`, `
 --
 -- Índices para tablas volcadas
 --
+
+--
+-- Indices de la tabla `atributos_producto`
+--
+ALTER TABLE `atributos_producto`
+  ADD PRIMARY KEY (`id_atributo`),
+  ADD UNIQUE KEY `nombre` (`nombre`);
 
 --
 -- Indices de la tabla `auditoria`
@@ -815,7 +952,8 @@ ALTER TABLE `movimientos_inventario`
   ADD KEY `id_producto` (`id_producto`),
   ADD KEY `id_pedido` (`id_pedido`),
   ADD KEY `id_proveedor` (`id_proveedor`),
-  ADD KEY `id_usuario` (`id_usuario`);
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `fk_movimiento_ingreso` (`id_ingreso`);
 
 --
 -- Indices de la tabla `notificaciones`
@@ -851,10 +989,26 @@ ALTER TABLE `productos`
   ADD KEY `id_marca` (`id_marca`);
 
 --
+-- Indices de la tabla `producto_atributo`
+--
+ALTER TABLE `producto_atributo`
+  ADD PRIMARY KEY (`id_producto_atributo`),
+  ADD UNIQUE KEY `id_producto` (`id_producto`,`id_atributo`),
+  ADD KEY `id_atributo` (`id_atributo`);
+
+--
 -- Indices de la tabla `promociones`
 --
 ALTER TABLE `promociones`
   ADD PRIMARY KEY (`id_promocion`);
+
+--
+-- Indices de la tabla `promocion_categoria`
+--
+ALTER TABLE `promocion_categoria`
+  ADD PRIMARY KEY (`id_promocion_categoria`),
+  ADD UNIQUE KEY `id_promocion` (`id_promocion`,`id_categoria`),
+  ADD KEY `id_categoria` (`id_categoria`);
 
 --
 -- Indices de la tabla `promocion_producto`
@@ -916,6 +1070,12 @@ ALTER TABLE `usuarios`
 --
 
 --
+-- AUTO_INCREMENT de la tabla `atributos_producto`
+--
+ALTER TABLE `atributos_producto`
+  MODIFY `id_atributo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
 -- AUTO_INCREMENT de la tabla `auditoria`
 --
 ALTER TABLE `auditoria`
@@ -931,7 +1091,7 @@ ALTER TABLE `carrito`
 -- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `compatibilidades`
@@ -967,7 +1127,7 @@ ALTER TABLE `detalle_carrito`
 -- AUTO_INCREMENT de la tabla `detalle_ingreso`
 --
 ALTER TABLE `detalle_ingreso`
-  MODIFY `id_detalle_ingreso` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_detalle_ingreso` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_pedido`
@@ -985,7 +1145,7 @@ ALTER TABLE `direcciones`
 -- AUTO_INCREMENT de la tabla `estado_pedido`
 --
 ALTER TABLE `estado_pedido`
-  MODIFY `id_estado` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_estado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `favoritos`
@@ -1003,13 +1163,13 @@ ALTER TABLE `historial_estado_pedido`
 -- AUTO_INCREMENT de la tabla `imagenes_producto`
 --
 ALTER TABLE `imagenes_producto`
-  MODIFY `id_imagen` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_imagen` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `ingresos_inventario`
 --
 ALTER TABLE `ingresos_inventario`
-  MODIFY `id_ingreso` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_ingreso` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `intentos_pago`
@@ -1021,13 +1181,13 @@ ALTER TABLE `intentos_pago`
 -- AUTO_INCREMENT de la tabla `inventario`
 --
 ALTER TABLE `inventario`
-  MODIFY `id_inventario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_inventario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `marcas`
 --
 ALTER TABLE `marcas`
-  MODIFY `id_marca` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_marca` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `modelos`
@@ -1039,7 +1199,7 @@ ALTER TABLE `modelos`
 -- AUTO_INCREMENT de la tabla `movimientos_inventario`
 --
 ALTER TABLE `movimientos_inventario`
-  MODIFY `id_movimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_movimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `notificaciones`
@@ -1063,31 +1223,43 @@ ALTER TABLE `pedidos`
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `producto_atributo`
+--
+ALTER TABLE `producto_atributo`
+  MODIFY `id_producto_atributo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `promociones`
 --
 ALTER TABLE `promociones`
-  MODIFY `id_promocion` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_promocion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `promocion_categoria`
+--
+ALTER TABLE `promocion_categoria`
+  MODIFY `id_promocion_categoria` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `promocion_producto`
 --
 ALTER TABLE `promocion_producto`
-  MODIFY `id_promocion_producto` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_promocion_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT de la tabla `proveedores`
 --
 ALTER TABLE `proveedores`
-  MODIFY `id_proveedor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_proveedor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `proveedor_producto`
 --
 ALTER TABLE `proveedor_producto`
-  MODIFY `id_proveedor_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_proveedor_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `reembolsos`
@@ -1224,6 +1396,7 @@ ALTER TABLE `modelos`
 -- Filtros para la tabla `movimientos_inventario`
 --
 ALTER TABLE `movimientos_inventario`
+  ADD CONSTRAINT `fk_movimiento_ingreso` FOREIGN KEY (`id_ingreso`) REFERENCES `ingresos_inventario` (`id_ingreso`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `movimientos_inventario_ibfk_1` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`),
   ADD CONSTRAINT `movimientos_inventario_ibfk_2` FOREIGN KEY (`id_pedido`) REFERENCES `pedidos` (`id_pedido`),
   ADD CONSTRAINT `movimientos_inventario_ibfk_3` FOREIGN KEY (`id_proveedor`) REFERENCES `proveedores` (`id_proveedor`),
@@ -1255,6 +1428,20 @@ ALTER TABLE `pedidos`
 ALTER TABLE `productos`
   ADD CONSTRAINT `productos_ibfk_1` FOREIGN KEY (`id_categoria`) REFERENCES `categorias` (`id_categoria`),
   ADD CONSTRAINT `productos_ibfk_2` FOREIGN KEY (`id_marca`) REFERENCES `marcas` (`id_marca`);
+
+--
+-- Filtros para la tabla `producto_atributo`
+--
+ALTER TABLE `producto_atributo`
+  ADD CONSTRAINT `producto_atributo_ibfk_1` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`),
+  ADD CONSTRAINT `producto_atributo_ibfk_2` FOREIGN KEY (`id_atributo`) REFERENCES `atributos_producto` (`id_atributo`);
+
+--
+-- Filtros para la tabla `promocion_categoria`
+--
+ALTER TABLE `promocion_categoria`
+  ADD CONSTRAINT `promocion_categoria_ibfk_1` FOREIGN KEY (`id_promocion`) REFERENCES `promociones` (`id_promocion`),
+  ADD CONSTRAINT `promocion_categoria_ibfk_2` FOREIGN KEY (`id_categoria`) REFERENCES `categorias` (`id_categoria`);
 
 --
 -- Filtros para la tabla `promocion_producto`

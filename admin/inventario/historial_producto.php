@@ -141,10 +141,10 @@ $sqlHistorial = "SELECT
                 ON mi.id_proveedor = pr.id_proveedor
 
                 LEFT JOIN detalle_ingreso di
-                ON di.id_producto = mi.id_producto
+                ON di.id_ingreso = mi.id_ingreso
 
                 LEFT JOIN ingresos_inventario ii
-                ON ii.id_ingreso = di.id_ingreso
+                ON ii.id_ingreso = mi.id_ingreso
 
                 WHERE mi.id_producto = ?
 
@@ -290,13 +290,18 @@ $resultadoHistorial = $stmtHistorial->get_result();
 
             <section class="resumen">
 
-                <h2>📜 Historial del Producto</h2>
+                <h2>📜 Historial del Producto</h2> 
 
                 <p>
                     Consulta todos los movimientos e información
                     relacionada con este producto.
                 </p>
 
+                <a href="inventario.php" class="btn-cancelar">
+                    ⬅️ Volver al Inventario
+                </a>
+
+                <br></br>
                 <!-- INFORMACIÓN GENERAL DEL PRODUCTO -->
 
                 <div class="informacion-producto">
@@ -651,11 +656,6 @@ $resultadoHistorial = $stmtHistorial->get_result();
 
                 </div>
 
-                <br><br>
-
-                <a
-                    href="inventario.php"
-                    class="btn-cancelar">⬅️ Volver al Inventario</a>
 
             </section>
 

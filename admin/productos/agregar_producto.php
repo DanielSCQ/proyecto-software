@@ -31,6 +31,24 @@ require_once("../../config/conexion.php");
 
     $resultadoProveedores = $conexion->query($sqlProveedores);
 
+    // Obtener atributos activos para las características de productos
+    $sqlAtributos = "SELECT id_atributo, nombre
+                    FROM atributos_producto
+                    WHERE estado = TRUE
+                    ORDER BY nombre ASC";
+
+    $resultadoAtributos = $conexion->query($sqlAtributos);
+
+    $atributos = [];
+
+    if ($resultadoAtributos) {
+
+        while ($filaAtributo = $resultadoAtributos->fetch_assoc()) {
+            $atributos[] = $filaAtributo;
+        }
+
+    }
+
 ?>
 
 <!DOCTYPE html>
@@ -305,6 +323,84 @@ require_once("../../config/conexion.php");
                     0 / 300 caracteres
                 </div>
 
+                <!-- =================================
+                    CARACTERÍSTICAS DEL PRODUCTO
+                ================================= -->
+
+                <div class="seccion-producto">
+
+                    <h3 class="titulo-seccion-producto">
+                        Características del producto
+                    </h3>
+
+                    <p class="ayuda-seccion-producto">
+                        Agrega las características específicas del producto.
+                    </p>
+
+                    <div id="contenedor-caracteristicas">
+
+                        <div class="fila-caracteristica">
+
+                            <div class="campo">
+                                <label for="atributo_0">Característica</label>
+
+                                <select 
+                                    name="atributo_id[]" 
+                                    id="atributo_0"
+                                    class="select-atributo"
+                                >
+                                    <option value="">Seleccione una característica</option>
+
+                                    <?php foreach ($atributos as $atributo): ?>
+
+                                        <option value="<?= (int) $atributo["id_atributo"] ?>">
+                                            <?= htmlspecialchars($atributo["nombre"]) ?>
+                                        </option>
+
+                                    <?php endforeach; ?>
+
+                                </select>
+                            </div>
+
+                            <div class="campo">
+                                <label for="valor_atributo_0">Valor</label>
+
+                                <input
+                                    type="text"
+                                    name="atributo_valor[]"
+                                    id="valor_atributo_0"
+                                    maxlength="300"
+                                    placeholder="Ej: Acero inoxidable"
+                                >
+
+                                <div class="contador-campo">
+                                    <span class="contador-valor">0</span> / 300
+                                </div>
+                            </div>
+
+                            <button 
+                                type="button"
+                                class="btn-eliminar-caracteristica"
+                                onclick="eliminarCaracteristica(this)"
+                                aria-label="Eliminar característica"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <button 
+                        type="button"
+                        id="btn-agregar-caracteristica"
+                        class="btn-agregar-caracteristica"
+                    >
+                        + Agregar característica
+                    </button>
+
+                </div>
+
                 <label>Imagen del producto</label>
 
                 <input
@@ -469,6 +565,102 @@ descripcion.addEventListener("input", actualizarContadorDescripcion);
 actualizarContadorNombre();
 actualizarContadorCodigo();
 actualizarContadorDescripcion();
+
+let contadorCaracteristicas = 1;
+
+document.getElementById("btn-agregar-caracteristica").addEventListener("click", function () {
+
+    const contenedor = document.getElementById("contenedor-caracteristicas");
+
+    const fila = document.createElement("div");
+
+    fila.className = "fila-caracteristica";
+
+    fila.innerHTML = `
+        <div class="campo">
+            <label for="atributo_${contadorCaracteristicas}">
+                Característica
+            </label>
+
+            <select
+                name="atributo_id[]"
+                id="atributo_${contadorCaracteristicas}"
+                class="select-atributo"
+            >
+                <option value="">Seleccione una característica</option>
+
+                <?php foreach ($atributos as $atributo): ?>
+
+                    <option value="<?= (int) $atributo["id_atributo"] ?>">
+                        <?= htmlspecialchars($atributo["nombre"]) ?>
+                    </option>
+
+                <?php endforeach; ?>
+
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="valor_atributo_${contadorCaracteristicas}">
+                Valor
+            </label>
+
+            <input
+                type="text"
+                name="atributo_valor[]"
+                id="valor_atributo_${contadorCaracteristicas}"
+                maxlength="300"
+                placeholder="Ej: Acero inoxidable"
+            >
+
+            <div class="contador-campo">
+                <span class="contador-valor">0</span> / 300
+            </div>
+        </div>
+
+        <button
+            type="button"
+            class="btn-eliminar-caracteristica"
+            onclick="eliminarCaracteristica(this)"
+            aria-label="Eliminar característica"
+        >
+            ×
+        </button>
+    `;
+
+    contenedor.appendChild(fila);
+
+    const inputValor = fila.querySelector(".contador-valor");
+
+    const input = fila.querySelector('input[name="atributo_valor[]"]');
+
+    input.addEventListener("input", function () {
+
+        inputValor.textContent = this.value.length;
+
+        if (this.value.length >= 300) {
+            inputValor.style.color = "red";
+            inputValor.style.fontWeight = "bold";
+        } else {
+            inputValor.style.color = "";
+            inputValor.style.fontWeight = "";
+        }
+
+    });
+
+    contadorCaracteristicas++;
+
+});
+
+function eliminarCaracteristica(boton) {
+
+    const fila = boton.closest(".fila-caracteristica");
+
+    if (fila) {
+        fila.remove();
+    }
+
+}
 
 </script>
 </body>

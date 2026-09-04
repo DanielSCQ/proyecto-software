@@ -255,7 +255,6 @@ $resultado = $stmt->get_result();
                 seleccionar el que deseas editar.
             </p>
 
-
             <!-- BARRA SUPERIOR -->
 
             <div class="barra-productos">
@@ -276,6 +275,10 @@ $resultado = $stmt->get_result();
 
                     📜 Historial General
 
+                </a>
+
+                <a href="inventario.php" class="btn-cancelar">
+                    ⬅️ Volver al Inventario
                 </a>
 
 
@@ -586,13 +589,6 @@ $resultado = $stmt->get_result();
                 </tbody>
 
             </table>
-
-            <br>
-            <br>
-
-            <a
-                href="inventario.php"
-                class="btn-cancelar">⬅️ Volver al Inventario</a>
 
         </section>
 

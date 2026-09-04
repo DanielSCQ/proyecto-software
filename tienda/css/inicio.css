@@ -1,0 +1,779 @@
+/* =========================================================
+   AGRANDA - PÁGINA DE INICIO
+   ========================================================= */
+
+
+/* -------------------------
+   CONTENEDOR GENERAL
+   ------------------------- */
+
+.inicio-container {
+    width: min(1200px, 92%);
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.inicio-hero {
+    position: relative;
+    min-height: 560px;
+    overflow: hidden;
+    background-color: var(--blanco);
+}
+
+
+/*
+   Contenedor interno del hero.
+*/
+
+.inicio-hero .inicio-container {
+    min-height: 560px;
+
+    display: flex;
+    align-items: center;
+}
+
+
+/* -------------------------
+   CONTENIDO DEL HERO
+   ------------------------- */
+
+.hero-contenido {
+    position: relative;
+    z-index: 3;
+
+    width: 48%;
+    margin-left: auto;
+
+    padding: 70px 20px 70px 70px;
+}
+
+
+.hero-etiqueta {
+    display: inline-block;
+
+    margin-bottom: 18px;
+
+    color: var(--naranja-oscuro);
+
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+
+.hero-contenido h1 {
+    max-width: 560px;
+
+    margin-bottom: 22px;
+
+    color: var(--verde-principal);
+
+    font-size: clamp(38px, 4vw, 58px);
+    font-weight: 800;
+    line-height: 1.08;
+}
+
+
+.hero-contenido p {
+    max-width: 500px;
+
+    margin-bottom: 30px;
+
+    color: var(--gris-texto);
+
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+
+/* -------------------------
+   BOTÓN HERO
+   ------------------------- */
+
+.btn-hero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 170px;
+
+    padding: 14px 28px;
+
+    border-radius: 5px;
+
+    background-color: var(--naranja);
+    color: var(--blanco);
+
+    font-size: 14px;
+    font-weight: 700;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.btn-hero:hover {
+    background-color: var(--naranja-oscuro);
+    transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   ZONA VISUAL DEL TRACTOR
+   ========================================================= */
+
+.inicio-hero::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 57%;
+    height: 100%;
+
+    background-image:
+        linear-gradient(
+            115deg,
+            transparent 0%,
+            transparent 78%,
+            var(--blanco) 78.2%,
+            var(--blanco) 100%
+        );
+
+    background-color: var(--verde-principal);
+
+    z-index: 1;
+}
+
+
+/*
+   Zona preparada para la futura imagen del banner.
+
+   Por ahora utiliza una imagen externa de demostración.
+   Cuando hagamos Configuración, esta ruta será dinámica.
+*/
+
+.inicio-hero::after {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 57%;
+    height: 100%;
+
+    background-image:
+        linear-gradient(
+            115deg,
+            rgba(31, 95, 40, 0.12),
+            rgba(31, 95, 40, 0.12)
+        ),
+        url("../assets/tractor-banner.jpg");
+
+    background-size: cover;
+    background-position: center;
+
+    clip-path: polygon(
+        0 0,
+        86% 0,
+        100% 100%,
+        0 100%
+    );
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   SECCIONES GENERALES
+   ========================================================= */
+
+.inicio-seccion {
+    padding: 80px 0;
+}
+
+
+.productos-seccion {
+    background-color: var(--blanco);
+}
+
+
+.seccion-encabezado {
+    max-width: 700px;
+
+    margin: 0 auto 45px;
+
+    text-align: center;
+}
+
+
+.seccion-etiqueta {
+    display: block;
+
+    margin-bottom: 10px;
+
+    color: var(--naranja-oscuro);
+
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+
+.seccion-encabezado h2 {
+    margin-bottom: 12px;
+
+    color: var(--verde-principal);
+
+    font-size: 34px;
+    line-height: 1.2;
+}
+
+
+.seccion-encabezado p {
+    color: var(--gris-texto);
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   CATEGORÍAS
+   ========================================================= */
+
+.categorias-grid {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 24px;
+}
+
+
+.categoria-card {
+    overflow: hidden;
+
+    background-color: var(--blanco);
+
+    border: 1px solid var(--gris-borde);
+    border-radius: 8px;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.categoria-card:hover {
+    transform: translateY(-5px);
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+
+.categoria-imagen {
+    width: 100%;
+    height: 190px;
+
+    overflow: hidden;
+
+    background-color: #eef1ee;
+}
+
+
+.categoria-imagen img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    display: block;
+
+    transition: transform 0.3s ease;
+}
+
+
+.categoria-card:hover .categoria-imagen img {
+    transform: scale(1.05);
+}
+
+
+.categoria-sin-imagen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--verde-principal);
+
+    font-weight: 800;
+}
+
+
+.categoria-contenido {
+    padding: 20px;
+}
+
+
+.categoria-contenido h3 {
+    margin-bottom: 8px;
+
+    color: var(--negro);
+
+    font-size: 18px;
+}
+
+
+.categoria-contenido p {
+    margin-bottom: 14px;
+
+    color: var(--gris-texto);
+
+    font-size: 13px;
+    line-height: 1.5;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+
+.categoria-enlace {
+    color: var(--naranja-oscuro);
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   PRODUCTOS DESTACADOS
+   ========================================================= */
+
+.productos-grid {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 24px;
+}
+
+
+.producto-card {
+    overflow: hidden;
+
+    background-color: var(--blanco);
+
+    border: 1px solid var(--gris-borde);
+    border-radius: 8px;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.producto-card:hover {
+    transform: translateY(-5px);
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+
+.producto-imagen {
+    display: block;
+
+    width: 100%;
+    height: 220px;
+
+    overflow: hidden;
+
+    background-color: #f0f2f0;
+}
+
+
+.producto-imagen img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: contain;
+
+    transition: transform 0.3s ease;
+}
+
+
+.producto-card:hover .producto-imagen img {
+    transform: scale(1.05);
+}
+
+
+.producto-sin-imagen {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--gris-texto);
+
+    font-size: 13px;
+}
+
+
+.producto-contenido {
+    padding: 20px;
+}
+
+
+.producto-codigo {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--gris-texto);
+
+    font-size: 11px;
+}
+
+
+.producto-contenido h3 {
+    min-height: 44px;
+
+    margin-bottom: 12px;
+
+    font-size: 17px;
+    line-height: 1.3;
+}
+
+
+.producto-contenido h3 a {
+    color: var(--negro);
+
+    transition: color 0.2s ease;
+}
+
+
+.producto-contenido h3 a:hover {
+    color: var(--verde-principal);
+}
+
+
+.producto-precio {
+    margin-bottom: 18px;
+
+    color: var(--verde-principal);
+
+    font-size: 21px;
+    font-weight: 800;
+}
+
+
+.producto-boton {
+    display: block;
+
+    width: 100%;
+
+    padding: 11px;
+
+    border: 1px solid var(--verde-principal);
+    border-radius: 4px;
+
+    color: var(--verde-principal);
+
+    text-align: center;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.producto-boton:hover {
+    background-color: var(--verde-principal);
+    color: var(--blanco);
+}
+
+
+/* =========================================================
+   BOTÓN VER TODOS
+   ========================================================= */
+
+.seccion-boton {
+    margin-top: 40px;
+
+    text-align: center;
+}
+
+
+.btn-secundario {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 13px 25px;
+
+    border: 1px solid var(--verde-principal);
+    border-radius: 5px;
+
+    color: var(--verde-principal);
+
+    font-size: 14px;
+    font-weight: 700;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.btn-secundario:hover {
+    background-color: var(--verde-principal);
+    color: var(--blanco);
+}
+
+
+/* =========================================================
+   ¿POR QUÉ AGRANDA?
+   ========================================================= */
+
+.inicio-confianza {
+    padding: 80px 0;
+
+    background-color: var(--gris-fondo);
+}
+
+
+.confianza-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 30px;
+}
+
+
+.confianza-item {
+    padding: 35px 25px;
+
+    background-color: var(--blanco);
+
+    border: 1px solid var(--gris-borde);
+    border-radius: 8px;
+
+    text-align: center;
+}
+
+
+.confianza-icono {
+    width: 48px;
+    height: 48px;
+
+    margin: 0 auto 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background-color: var(--naranja);
+    color: var(--blanco);
+
+    font-size: 22px;
+    font-weight: 800;
+}
+
+
+.confianza-item h3 {
+    margin-bottom: 10px;
+
+    color: var(--verde-principal);
+
+    font-size: 18px;
+}
+
+
+.confianza-item p {
+    color: var(--gris-texto);
+
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   MENSAJES VACÍOS
+   ========================================================= */
+
+.inicio-vacio {
+    padding: 40px;
+
+    border: 1px dashed var(--gris-borde);
+    border-radius: 8px;
+
+    background-color: var(--blanco);
+
+    text-align: center;
+}
+
+
+.inicio-vacio p {
+    color: var(--gris-texto);
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+    .categorias-grid,
+    .productos-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+
+    .inicio-hero {
+        min-height: 520px;
+    }
+
+
+    .inicio-hero .inicio-container {
+        min-height: 520px;
+    }
+
+
+    .hero-contenido {
+        width: 50%;
+        padding-left: 40px;
+    }
+
+
+    .inicio-hero::before,
+    .inicio-hero::after {
+        width: 55%;
+    }
+
+}
+
+
+@media (max-width: 750px) {
+
+    .inicio-hero {
+        min-height: auto;
+    }
+
+
+    .inicio-hero .inicio-container {
+        min-height: auto;
+
+        padding: 0;
+    }
+
+
+    /*
+       En pantallas pequeñas la composición pasa
+       a una distribución vertical.
+    */
+
+    .inicio-hero::before,
+    .inicio-hero::after {
+        position: relative;
+
+        top: auto;
+        left: auto;
+
+        width: 100%;
+        height: 300px;
+
+        clip-path: none;
+    }
+
+
+    .inicio-hero::before {
+        display: none;
+    }
+
+
+    .inicio-hero::after {
+        display: block;
+
+        background-position: center;
+    }
+
+
+    .hero-contenido {
+        width: 100%;
+
+        margin: 0;
+
+        padding: 55px 0 60px;
+
+        text-align: center;
+    }
+
+
+    .hero-contenido h1,
+    .hero-contenido p {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+
+    .inicio-seccion,
+    .inicio-confianza {
+        padding: 60px 0;
+    }
+
+
+    .confianza-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 550px) {
+
+    .categorias-grid,
+    .productos-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .seccion-encabezado h2 {
+        font-size: 28px;
+    }
+
+
+    .hero-contenido h1 {
+        font-size: 36px;
+    }
+
+
+    .hero-contenido p {
+        font-size: 15px;
+    }
+
+
+    .inicio-hero::after {
+        height: 240px;
+    }
+
+}

@@ -232,105 +232,105 @@ $resultado = $stmt->get_result();
 
                 <tbody>
 
-                <?php while($inventario = $resultado->fetch_assoc()){ ?>
+                    <?php while($inventario = $resultado->fetch_assoc()){ ?>
 
-                    <?php
+                        <?php
 
-                    $stock_actual = $inventario["stock_actual"];
-                    $stock_minimo = $inventario["stock_minimo"];
+                        $stock_actual = (int)$inventario["stock_actual"];
+                        $stock_minimo = (int)$inventario["stock_minimo"];
 
-                    if($stock_actual <= 0){
+                        if($stock_actual <= 0){
 
-                        $estado = "Agotado";
-                        $clase = "stock-agotado";
+                            $estado = "Agotado";
+                            $clase = "stock-agotado";
 
-                    }elseif($stock_actual <= $stock_minimo){
+                        }elseif($stock_actual <= $stock_minimo){
 
-                        $estado = "Stock bajo";
-                        $clase = "stock-bajo";
+                            $estado = "Stock bajo";
+                            $clase = "stock-bajo";
 
-                    }else{
+                        }else{
 
-                        $estado = "Disponible";
-                        $clase = "stock-disponible";
+                            $estado = "Disponible";
+                            $clase = "stock-disponible";
 
-                    }
+                        }
 
-                    ?>
+                        ?>
 
-                    <tr>
+                        <tr>
 
-                        <td>
+                            <td>
 
-                            <?php if(!empty($inventario["ruta_imagen"])){ ?>
+                                <?php if(!empty($inventario["ruta_imagen"])){ ?>
 
-                                <img
-                                    src="../../<?php echo $inventario["ruta_imagen"]; ?>"
-                                    alt="Producto"
-                                    width="70">
+                                    <img
+                                        src="../../<?php echo htmlspecialchars($inventario["ruta_imagen"], ENT_QUOTES, 'UTF-8'); ?>"
+                                        alt="Producto"
+                                        width="70">
 
-                            <?php }else{ ?>
+                                <?php }else{ ?>
 
-                                Sin imagen
+                                    Sin imagen
 
-                            <?php } ?>
+                                <?php } ?>
 
-                        </td>
+                            </td>
 
-                        <td>
-                            <?php echo $inventario["nombre"]; ?>
-                        </td>
+                            <td>
+                                <?php echo htmlspecialchars($inventario["nombre"], ENT_QUOTES, 'UTF-8'); ?>
+                            </td>
 
-                        <td>
-                            <?php echo $inventario["codigo_producto"]; ?>
-                        </td>
+                            <td>
+                                <?php echo htmlspecialchars($inventario["codigo_producto"], ENT_QUOTES, 'UTF-8'); ?>
+                            </td>
 
-                        <td>
-                            <?php echo $inventario["categoria"]; ?>
-                        </td>
+                            <td>
+                                <?php echo htmlspecialchars($inventario["categoria"], ENT_QUOTES, 'UTF-8'); ?>
+                            </td>
 
-                        <td>
-                            <?php echo $inventario["marca"] ?? "Sin marca"; ?>
-                        </td>
+                            <td>
+                                <?php echo htmlspecialchars($inventario["marca"] ?? "Sin marca", ENT_QUOTES, 'UTF-8'); ?>
+                            </td>
 
-                        <td>
-                            <?php echo $inventario["stock_actual"]; ?>
-                        </td>
+                            <td>
+                                <?php echo $stock_actual; ?>
+                            </td>
 
-                        <td>
-                            <?php echo $inventario["stock_minimo"]; ?>
-                        </td>
+                            <td>
+                                <?php echo $stock_minimo; ?>
+                            </td>
 
-                        <td>
+                            <td>
 
-                            <span class="<?php echo $clase; ?>">
-                                <?php echo $estado; ?>
-                            </span>
+                                <span class="<?php echo htmlspecialchars($clase, ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo htmlspecialchars($estado, ENT_QUOTES, 'UTF-8'); ?>
+                                </span>
 
-                        </td>
+                            </td>
 
-                        <td>
-                            <?php echo $inventario["fecha_actualizacion"]; ?>
-                        </td>
+                            <td>
+                                <?php echo htmlspecialchars($inventario["fecha_actualizacion"], ENT_QUOTES, 'UTF-8'); ?>
+                            </td>
 
-                        <td class="acciones">
+                            <td class="acciones">
 
-                            <a href="editar_inventario.php?id=<?php echo $inventario["id_inventario"]; ?>"
-                            class="btn-editar">✏️</a>
+                                <a href="editar_inventario.php?id=<?php echo (int)$inventario["id_inventario"]; ?>"
+                                class="btn-editar">✏️</a>
 
-                            <a href="historial_producto.php?id=<?php echo $inventario["id_producto"]; ?>"
-                            class="btn-eliminar"
-                            title="Ver historial del producto">
-                                📜
-                            </a>
+                                <a href="historial_producto.php?id=<?php echo (int)$inventario["id_producto"]; ?>"
+                                class="btn-eliminar"
+                                title="Ver historial del producto">
+                                    📜
+                                </a>
 
-                        </td>
+                            </td>
 
-                    </tr>
+                        </tr>
 
-                <?php } ?>
+                    <?php } ?>
 
-                </tbody>
+                    </tbody>
 
             </table>
 

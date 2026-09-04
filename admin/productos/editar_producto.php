@@ -96,6 +96,76 @@ $errores = [];
 
 
 // =================================
+// CARGAR ATRIBUTOS DISPONIBLES
+// =================================
+
+$sqlAtributos = "
+    SELECT id_atributo, nombre
+    FROM atributos_producto
+    WHERE estado = TRUE
+    ORDER BY nombre ASC
+";
+
+$resultadoAtributos = $conexion->query($sqlAtributos);
+
+$atributos = [];
+
+if ($resultadoAtributos) {
+
+    while ($filaAtributo = $resultadoAtributos->fetch_assoc()) {
+
+        $atributos[] = $filaAtributo;
+
+    }
+
+}
+
+
+// =================================
+// OBTENER ATRIBUTOS DEL PRODUCTO
+// =================================
+
+$sqlProductoAtributos = "
+    SELECT
+        id_atributo,
+        valor
+    FROM producto_atributo
+    WHERE id_producto = ?
+    ORDER BY id_atributo ASC
+";
+
+$stmtProductoAtributos =
+    $conexion->prepare($sqlProductoAtributos);
+
+$atributosProducto = [];
+
+if ($stmtProductoAtributos) {
+
+    $stmtProductoAtributos->bind_param(
+        "i",
+        $id_producto
+    );
+
+    $stmtProductoAtributos->execute();
+
+    $resultadoProductoAtributos =
+        $stmtProductoAtributos->get_result();
+
+    while (
+        $filaAtributoProducto =
+        $resultadoProductoAtributos->fetch_assoc()
+    ) {
+
+        $atributosProducto[] = $filaAtributoProducto;
+
+    }
+
+    $stmtProductoAtributos->close();
+
+}
+
+
+// =================================
 // ACTUALIZAR PRODUCTO
 // =================================
 
@@ -122,6 +192,216 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $estado = $_POST["estado"] ?? "";
 
     $destacado = $_POST["destacado"] ?? "";
+
+
+    // =================================
+    // RECIBIR CARACTERÍSTICAS
+    // =================================
+
+    $atributoIds = $_POST["atributo_id"] ?? [];
+
+    $atributoValores = $_POST["atributo_valor"] ?? [];
+
+    $atributosFormulario = [];
+
+
+    // =================================
+    // VALIDAR CARACTERÍSTICAS
+    // =================================
+
+    if (!is_array($atributoIds)) {
+
+        $atributoIds = [];
+
+    }
+
+    if (!is_array($atributoValores)) {
+
+        $atributoValores = [];
+
+    }
+
+    if (count($atributoIds) !== count($atributoValores)) {
+
+        $errores[] =
+            "Los datos de las características no son válidos.";
+
+    }
+
+    if (empty($errores)) {
+
+        $atributosRecibidos = [];
+
+        foreach ($atributoIds as $indice => $atributoId) {
+
+            $valor =
+                trim($atributoValores[$indice] ?? "");
+
+            // =================================
+            // IGNORAR FILA COMPLETAMENTE VACÍA
+            // =================================
+
+            if (
+                $atributoId === "" &&
+                $valor === ""
+            ) {
+
+                continue;
+
+            }
+
+
+            // =================================
+            // VALIDAR ID DEL ATRIBUTO
+            // =================================
+
+            if (
+                filter_var(
+                    $atributoId,
+                    FILTER_VALIDATE_INT,
+                    [
+                        "options" => [
+                            "min_range" => 1
+                        ]
+                    ]
+                ) === false
+            ) {
+
+                $errores[] =
+                    "Una de las características seleccionadas no es válida.";
+
+                continue;
+
+            }
+
+
+            $idAtributo =
+                (int) $atributoId;
+
+
+            // =================================
+            // VALIDAR VALOR
+            // =================================
+
+            if ($valor === "") {
+
+                $errores[] =
+                    "Todas las características seleccionadas deben tener un valor.";
+
+                continue;
+
+            }
+
+
+            // =================================
+            // VALIDAR LONGITUD
+            // =================================
+
+            if (mb_strlen($valor) > 300) {
+
+                $errores[] =
+                    "El valor de una característica no puede superar los 300 caracteres.";
+
+                continue;
+
+            }
+
+
+            // =================================
+            // EVITAR ATRIBUTOS REPETIDOS
+            // =================================
+
+            if (
+                in_array(
+                    $idAtributo,
+                    $atributosRecibidos,
+                    true
+                )
+            ) {
+
+                $errores[] =
+                    "No puedes agregar la misma característica más de una vez.";
+
+                continue;
+
+            }
+
+
+            // =================================
+            // GUARDAR ATRIBUTO VALIDADO
+            // =================================
+
+            $atributosRecibidos[] =
+                $idAtributo;
+
+            $atributosFormulario[] = [
+                "id_atributo" => $idAtributo,
+                "valor" => $valor
+            ];
+
+        }
+
+    }
+
+
+    // =================================
+    // VALIDAR ATRIBUTOS EN BD
+    // =================================
+
+    if (
+        empty($errores) &&
+        !empty($atributosFormulario)
+    ) {
+
+        $stmtAtributo =
+            $conexion->prepare(
+                "SELECT id_atributo
+                 FROM atributos_producto
+                 WHERE id_atributo = ?
+                 AND estado = TRUE
+                 LIMIT 1"
+            );
+
+        if (!$stmtAtributo) {
+
+            $errores[] =
+                "No fue posible validar las características del producto.";
+
+        } else {
+
+            foreach ($atributosFormulario as $atributo) {
+
+                $idAtributo =
+                    $atributo["id_atributo"];
+
+                $stmtAtributo->bind_param(
+                    "i",
+                    $idAtributo
+                );
+
+                $stmtAtributo->execute();
+
+                $resultadoAtributo =
+                    $stmtAtributo->get_result();
+
+                if (
+                    $resultadoAtributo->num_rows === 0
+                ) {
+
+                    $errores[] =
+                        "Una de las características seleccionadas no existe o está inactiva.";
+
+                    break;
+
+                }
+
+            }
+
+            $stmtAtributo->close();
+
+        }
+
+    }
 
 
     // =================================
@@ -528,6 +808,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $rutaDestino = null;
         $rutaImagen = null;
         $imagenMovida = false;
+        $imagenActual = null;
 
         try {
 
@@ -585,6 +866,105 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
 
             $stmt->close();
+
+
+            // =================================
+            // ACTUALIZAR CARACTERÍSTICAS
+            // =================================
+
+            $sqlEliminarAtributos = "
+                DELETE FROM producto_atributo
+                WHERE id_producto = ?
+            ";
+
+            $stmtEliminarAtributos =
+                $conexion->prepare(
+                    $sqlEliminarAtributos
+                );
+
+            if (!$stmtEliminarAtributos) {
+
+                throw new Exception(
+                    "No fue posible preparar la actualización de características."
+                );
+
+            }
+
+            $stmtEliminarAtributos->bind_param(
+                "i",
+                $id_producto
+            );
+
+            if (!$stmtEliminarAtributos->execute()) {
+
+                throw new Exception(
+                    "No fue posible actualizar las características del producto."
+                );
+
+            }
+
+            $stmtEliminarAtributos->close();
+
+
+            // =================================
+            // INSERTAR CARACTERÍSTICAS ACTUALES
+            // =================================
+
+            if (!empty($atributosFormulario)) {
+
+                $sqlInsertarAtributo = "
+                    INSERT INTO producto_atributo
+                    (
+                        id_producto,
+                        id_atributo,
+                        valor
+                    )
+                    VALUES
+                    (?, ?, ?)
+                ";
+
+                $stmtInsertarAtributo =
+                    $conexion->prepare(
+                        $sqlInsertarAtributo
+                    );
+
+                if (!$stmtInsertarAtributo) {
+
+                    throw new Exception(
+                        "No fue posible preparar las características del producto."
+                    );
+
+                }
+
+                foreach ($atributosFormulario as $atributo) {
+
+                    $idAtributo =
+                        $atributo["id_atributo"];
+
+                    $valor =
+                        $atributo["valor"];
+
+                    $stmtInsertarAtributo->bind_param(
+                        "iis",
+                        $id_producto,
+                        $idAtributo,
+                        $valor
+                    );
+
+                    if (!$stmtInsertarAtributo->execute()) {
+
+                        throw new Exception(
+                            "No fue posible guardar las características del producto."
+                        );
+
+                    }
+
+                }
+
+                $stmtInsertarAtributo->close();
+
+            }
+
 
             // =================================
             // ACTUALIZAR IMAGEN SI SE SUBIÓ
@@ -1073,7 +1453,7 @@ $stmtImagen->close();
 
             <?php } ?>
 
-            <form method="POST"enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data">
 
                 <label>Nombre del producto</label>
 
@@ -1211,6 +1591,7 @@ $stmtImagen->close();
                     <?php } ?>
 
                 </select>
+
                 <!-- =================================
                      PRECIO Y PESO
                 ================================= -->
@@ -1263,6 +1644,7 @@ $stmtImagen->close();
                     </div>
 
                 </div>
+
                 <!-- =================================
                      DESCRIPCIÓN
                 ================================= -->
@@ -1289,6 +1671,277 @@ $stmtImagen->close();
                     id="contador-descripcion"
                     style="text-align:right;margin-top:5px;color:#666;font-size:13px;">
                     0 / 300 caracteres
+                </div>
+
+                <!-- =================================
+                     CARACTERÍSTICAS DEL PRODUCTO
+                ================================= -->
+
+                <div class="seccion-producto">
+
+                    <h3 class="titulo-seccion-producto">
+                        Características del producto
+                    </h3>
+
+                    <p class="ayuda-seccion-producto">
+                        Agrega las características específicas del producto.
+                    </p>
+
+                    <div id="contenedor-caracteristicas">
+
+                        <?php
+
+                        /*
+                         * Si hubo un POST con errores, mostrar
+                         * exactamente las características enviadas.
+                         *
+                         * Si es la primera carga, mostrar las
+                         * características guardadas en BD.
+                         */
+
+                        if (
+                            $_SERVER["REQUEST_METHOD"] === "POST"
+                        ) {
+
+                            $filasCaracteristicas =
+                                $atributosFormulario;
+
+                        } else {
+
+                            $filasCaracteristicas =
+                                $atributosProducto;
+
+                        }
+
+
+                        if (!empty($filasCaracteristicas)) {
+
+                            foreach (
+                                $filasCaracteristicas
+                                as $indice => $caracteristica
+                            ) {
+
+                                $idAtributoSeleccionado =
+                                    (int)
+                                    $caracteristica["id_atributo"];
+
+                                $valorCaracteristica =
+                                    $caracteristica["valor"];
+
+                        ?>
+
+                                <div class="fila-caracteristica">
+
+                                    <div class="campo">
+
+                                        <label
+                                            for="atributo_<?php echo $indice; ?>"
+                                        >
+                                            Característica
+                                        </label>
+
+                                        <select
+                                            name="atributo_id[]"
+                                            id="atributo_<?php echo $indice; ?>"
+                                            class="select-atributo"
+                                        >
+
+                                            <option value="">
+                                                Seleccione una característica
+                                            </option>
+
+                                            <?php
+                                            foreach (
+                                                $atributos
+                                                as $atributo
+                                            ) {
+                                            ?>
+
+                                                <option
+                                                    value="<?php
+                                                        echo (int)
+                                                        $atributo["id_atributo"];
+                                                    ?>"
+                                                    <?php
+                                                    if (
+                                                        $idAtributoSeleccionado ===
+                                                        (int)
+                                                        $atributo["id_atributo"]
+                                                    ) {
+                                                        echo "selected";
+                                                    }
+                                                    ?>
+                                                >
+
+                                                    <?php
+                                                    echo htmlspecialchars(
+                                                        $atributo["nombre"],
+                                                        ENT_QUOTES,
+                                                        "UTF-8"
+                                                    );
+                                                    ?>
+
+                                                </option>
+
+                                            <?php } ?>
+
+                                        </select>
+
+                                    </div>
+
+                                    <div class="campo">
+
+                                        <label
+                                            for="valor_atributo_<?php echo $indice; ?>"
+                                        >
+                                            Valor
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            name="atributo_valor[]"
+                                            id="valor_atributo_<?php echo $indice; ?>"
+                                            maxlength="300"
+                                            placeholder="Ej: Acero inoxidable"
+                                            value="<?php
+                                                echo htmlspecialchars(
+                                                    $valorCaracteristica,
+                                                    ENT_QUOTES,
+                                                    "UTF-8"
+                                                );
+                                            ?>"
+                                        >
+
+                                        <div class="contador-campo">
+
+                                            <span class="contador-valor">
+                                                <?php
+                                                echo mb_strlen(
+                                                    $valorCaracteristica
+                                                );
+                                                ?>
+                                            </span>
+                                            / 300
+
+                                        </div>
+
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        class="btn-eliminar-caracteristica"
+                                        onclick="eliminarCaracteristica(this)"
+                                        aria-label="Eliminar característica"
+                                    >
+                                        ×
+                                    </button>
+
+                                </div>
+
+                        <?php
+
+                            }
+
+                        } else {
+
+                        ?>
+
+                            <div class="fila-caracteristica">
+
+                                <div class="campo">
+
+                                    <label for="atributo_0">
+                                        Característica
+                                    </label>
+
+                                    <select
+                                        name="atributo_id[]"
+                                        id="atributo_0"
+                                        class="select-atributo"
+                                    >
+
+                                        <option value="">
+                                            Seleccione una característica
+                                        </option>
+
+                                        <?php
+                                        foreach (
+                                            $atributos
+                                            as $atributo
+                                        ) {
+                                        ?>
+
+                                            <option
+                                                value="<?php
+                                                    echo (int)
+                                                    $atributo["id_atributo"];
+                                                ?>"
+                                            >
+
+                                                <?php
+                                                echo htmlspecialchars(
+                                                    $atributo["nombre"],
+                                                    ENT_QUOTES,
+                                                    "UTF-8"
+                                                );
+                                                ?>
+
+                                            </option>
+
+                                        <?php } ?>
+
+                                    </select>
+
+                                </div>
+
+                                <div class="campo">
+
+                                    <label for="valor_atributo_0">
+                                        Valor
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="atributo_valor[]"
+                                        id="valor_atributo_0"
+                                        maxlength="300"
+                                        placeholder="Ej: Acero inoxidable"
+                                    >
+
+                                    <div class="contador-campo">
+
+                                        <span class="contador-valor">
+                                            0
+                                        </span>
+                                        / 300
+
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="btn-eliminar-caracteristica"
+                                    onclick="eliminarCaracteristica(this)"
+                                    aria-label="Eliminar característica"
+                                >
+                                    ×
+                                </button>
+
+                            </div>
+
+                        <?php } ?>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        id="btn-agregar-caracteristica"
+                        class="btn-agregar-caracteristica"
+                    >
+                        + Agregar característica
+                    </button>
+
                 </div>
 
                 <!-- =================================
@@ -1426,7 +2079,6 @@ $stmtImagen->close();
 
 
 <script>
-
 // =================================
 // ELEMENTOS
 // =================================
@@ -1570,6 +2222,226 @@ actualizarContador(
     300
 );
 
+
+// =================================
+// CARACTERÍSTICAS
+// =================================
+
+let contadorCaracteristicas =
+    document.querySelectorAll(
+        ".fila-caracteristica"
+    ).length;
+
+
+// =================================
+// ACTUALIZAR CONTADORES DE VALORES
+// =================================
+
+function actualizarContadoresCaracteristicas() {
+
+    const inputs =
+        document.querySelectorAll(
+            'input[name="atributo_valor[]"]'
+        );
+
+    inputs.forEach(function (input) {
+
+        const contador =
+            input
+                .closest(".campo")
+                .querySelector(".contador-valor");
+
+        if (!contador) {
+            return;
+        }
+
+        contador.textContent =
+            input.value.length;
+
+        if (input.value.length >= 300) {
+
+            contador.style.color = "red";
+            contador.style.fontWeight = "bold";
+
+        } else {
+
+            contador.style.color = "";
+            contador.style.fontWeight = "";
+
+        }
+
+    });
+
+}
+
+
+// =================================
+// AGREGAR CARACTERÍSTICA
+// =================================
+
+document
+    .getElementById("btn-agregar-caracteristica")
+    .addEventListener(
+        "click",
+        function () {
+
+            const contenedor =
+                document.getElementById(
+                    "contenedor-caracteristicas"
+                );
+
+            const fila =
+                document.createElement("div");
+
+            fila.className =
+                "fila-caracteristica";
+
+            fila.innerHTML = `
+                <div class="campo">
+
+                    <label for="atributo_${contadorCaracteristicas}">
+                        Característica
+                    </label>
+
+                    <select
+                        name="atributo_id[]"
+                        id="atributo_${contadorCaracteristicas}"
+                        class="select-atributo"
+                    >
+
+                        <option value="">
+                            Seleccione una característica
+                        </option>
+
+                        <?php foreach ($atributos as $atributo): ?>
+
+                            <option value="<?= (int) $atributo["id_atributo"] ?>">
+                                <?= htmlspecialchars(
+                                    $atributo["nombre"],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>
+                            </option>
+
+                        <?php endforeach; ?>
+
+                    </select>
+
+                </div>
+
+                <div class="campo">
+
+                    <label for="valor_atributo_${contadorCaracteristicas}">
+                        Valor
+                    </label>
+
+                    <input
+                        type="text"
+                        name="atributo_valor[]"
+                        id="valor_atributo_${contadorCaracteristicas}"
+                        maxlength="300"
+                        placeholder="Ej: Acero inoxidable"
+                    >
+
+                    <div class="contador-campo">
+
+                        <span class="contador-valor">
+                            0
+                        </span>
+                        / 300
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-eliminar-caracteristica"
+                    onclick="eliminarCaracteristica(this)"
+                    aria-label="Eliminar característica"
+                >
+                    ×
+                </button>
+            `;
+
+            contenedor.appendChild(fila);
+
+
+            const input =
+                fila.querySelector(
+                    'input[name="atributo_valor[]"]'
+                );
+
+            const contador =
+                fila.querySelector(
+                    ".contador-valor"
+                );
+
+
+            input.addEventListener(
+                "input",
+                function () {
+
+                    contador.textContent =
+                        this.value.length;
+
+                    if (
+                        this.value.length >= 300
+                    ) {
+
+                        contador.style.color =
+                            "red";
+
+                        contador.style.fontWeight =
+                            "bold";
+
+                    } else {
+
+                        contador.style.color =
+                            "";
+
+                        contador.style.fontWeight =
+                            "";
+
+                    }
+
+                }
+            );
+
+
+            contadorCaracteristicas++;
+
+        }
+    );
+
+
+// =================================
+// ELIMINAR CARACTERÍSTICA
+// =================================
+
+function eliminarCaracteristica(boton) {
+
+    const fila =
+        boton.closest(
+            ".fila-caracteristica"
+        );
+
+    if (fila) {
+
+        fila.remove();
+
+    }
+
+}
+
+
+// =================================
+// ACTUALIZAR CONTADORES AL CARGAR
+// =================================
+
+actualizarContadoresCaracteristicas();
+
+
 // =================================
 // VALIDAR ANTES DE ENVIAR
 // =================================
@@ -1629,7 +2501,157 @@ formulario.addEventListener(
             descripcion.focus();
 
             return;
+
         }
+
+
+        // =============================
+        // CARACTERÍSTICAS
+        // =============================
+
+        const filas =
+            document.querySelectorAll(
+                ".fila-caracteristica"
+            );
+
+        const atributosSeleccionados =
+            [];
+
+        for (
+            const fila of filas
+        ) {
+
+            const select =
+                fila.querySelector(
+                    'select[name="atributo_id[]"]'
+                );
+
+            const input =
+                fila.querySelector(
+                    'input[name="atributo_valor[]"]'
+                );
+
+
+            if (!select || !input) {
+                continue;
+            }
+
+
+            const atributo =
+                select.value.trim();
+
+            const valor =
+                input.value.trim();
+
+
+            // =================================
+            // FILA COMPLETAMENTE VACÍA
+            // =================================
+
+            if (
+                atributo === "" &&
+                valor === ""
+            ) {
+
+                continue;
+
+            }
+
+
+            // =================================
+            // ATRIBUTO SIN VALOR
+            // =================================
+
+            if (
+                atributo !== "" &&
+                valor === ""
+            ) {
+
+                event.preventDefault();
+
+                alert(
+                    "🛑 Todas las características seleccionadas deben tener un valor."
+                );
+
+                input.focus();
+
+                return;
+
+            }
+
+
+            // =================================
+            // VALOR SIN ATRIBUTO
+            // =================================
+
+            if (
+                atributo === "" &&
+                valor !== ""
+            ) {
+
+                event.preventDefault();
+
+                alert(
+                    "🛑 Debes seleccionar una característica para cada valor ingresado."
+                );
+
+                select.focus();
+
+                return;
+
+            }
+
+
+            // =================================
+            // MÁXIMO DE CARACTERES
+            // =================================
+
+            if (
+                valor.length > 300
+            ) {
+
+                event.preventDefault();
+
+                alert(
+                    "🛑 El valor de una característica no puede superar los 300 caracteres."
+                );
+
+                input.focus();
+
+                return;
+
+            }
+
+
+            // =================================
+            // EVITAR DUPLICADOS
+            // =================================
+
+            if (
+                atributosSeleccionados.includes(
+                    atributo
+                )
+            ) {
+
+                event.preventDefault();
+
+                alert(
+                    "🛑 No puedes agregar la misma característica más de una vez."
+                );
+
+                select.focus();
+
+                return;
+
+            }
+
+
+            atributosSeleccionados.push(
+                atributo
+            );
+
+        }
+
     }
 );
 

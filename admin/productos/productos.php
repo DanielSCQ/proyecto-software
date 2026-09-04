@@ -20,12 +20,33 @@ $sql = "SELECT
     p.nombre,
     p.codigo_producto,
     p.precio,
+    pp.precio_compra,
+    p.peso,
+    p.descripcion,
     p.estado,
     p.destacado,
+
     c.nombre AS categoria,
+
     m.nombre AS marca,
+
+    prov.nombre AS proveedor,
+
+    pp.codigo_proveedor,
+
     i.stock_actual,
+    i.stock_minimo,
+
     img.ruta_imagen,
+
+    GROUP_CONCAT(
+        CONCAT(
+            ap.nombre,
+            ': ',
+            pa.valor
+        )
+        SEPARATOR ' | '
+    ) AS caracteristicas,
 
     pr.id_promocion,
     pr.nombre AS nombre_promocion,
@@ -42,12 +63,24 @@ INNER JOIN categorias c
 LEFT JOIN marcas m
     ON p.id_marca = m.id_marca
 
+LEFT JOIN proveedor_producto pp
+    ON p.id_producto = pp.id_producto
+
+LEFT JOIN proveedores prov
+    ON pp.id_proveedor = prov.id_proveedor
+
 LEFT JOIN inventario i
     ON p.id_producto = i.id_producto
 
 LEFT JOIN imagenes_producto img
     ON p.id_producto = img.id_producto
     AND img.principal = 1
+
+LEFT JOIN producto_atributo pa
+    ON p.id_producto = pa.id_producto
+
+LEFT JOIN atributos_producto ap
+    ON pa.id_atributo = ap.id_atributo
 
 LEFT JOIN promociones pr
     ON pr.id_promocion = (
@@ -71,6 +104,30 @@ LEFT JOIN promociones pr
 
         LIMIT 1
     )
+
+GROUP BY
+    p.id_producto,
+    p.nombre,
+    p.codigo_producto,
+    p.precio,
+    pp.precio_compra,
+    p.peso,
+    p.descripcion,
+    p.estado,
+    p.destacado,
+    c.nombre,
+    m.nombre,
+    prov.nombre,
+    pp.codigo_proveedor,
+    i.stock_actual,
+    i.stock_minimo,
+    img.ruta_imagen,
+    pr.id_promocion,
+    pr.nombre,
+    pr.tipo,
+    pr.valor_descuento,
+    pr.fecha_inicio,
+    pr.fecha_fin
 
 ORDER BY p.id_producto DESC";
 
@@ -147,6 +204,7 @@ $resultado = $conexion->query($sql);
 
         </aside>
 
+
         <!-- =================================
              CONTENIDO PRINCIPAL
         ================================== -->
@@ -161,7 +219,9 @@ $resultado = $conexion->query($sql);
 
                 <div class="titulo-panel">
 
-                    <h2>¡Bienvenido,<?php echo htmlspecialchars($_SESSION["nombre"]); ?>!</h2>
+                    <h2>
+                        ¡Bienvenido,<?php echo htmlspecialchars($_SESSION["nombre"]); ?>!
+                    </h2>
 
                     <p>Panel de Administración AGRANDA</p>
 
@@ -178,7 +238,9 @@ $resultado = $conexion->query($sql);
 
                     </div>
 
-                    <div class="usuario">👤<?php echo htmlspecialchars($_SESSION["nombre"]); ?></div>
+                    <div class="usuario">
+                        👤<?php echo htmlspecialchars($_SESSION["nombre"]); ?>
+                    </div>
 
 
                     <a href="../cerrar_sesion.php"
@@ -196,6 +258,7 @@ $resultado = $conexion->query($sql);
             <section class="tarjetas">
 
             </section>
+
 
             <!-- =================================
                  GESTOR DE PRODUCTOS
@@ -220,6 +283,9 @@ $resultado = $conexion->query($sql);
                     <a href="agregar_producto.php"
                         class="btn-nuevo">➕ Nuevo Producto</a>
 
+                    <a href="atributos.php"
+                        class="btn-nuevo">⚙️ Atributos</a>
+
 
                     <input
                         type="search"
@@ -234,6 +300,7 @@ $resultado = $conexion->query($sql);
                      TABLA
                 ================================== -->
 
+                <div class="contenedor-tabla">
                 <table class="tabla-productos">
 
                     <thead>
@@ -250,9 +317,23 @@ $resultado = $conexion->query($sql);
 
                             <th>Marca</th>
 
-                            <th>Precio</th>
+                            <th>Proveedor</th>
 
-                            <th>Stock</th>
+                            <th>Código proveedor</th>
+
+                            <th>Características</th>
+
+                            <th>Precio venta</th>
+
+                            <th>Precio compra</th>
+
+                            <th>Stock actual</th>
+
+                            <th>Stock mínimo</th>
+
+                            <th>Peso</th>
+
+                            <th>Descripción</th>
 
                             <th>Promoción</th>
 
@@ -431,15 +512,86 @@ $resultado = $conexion->query($sql);
 
 
                             <!-- =================================
-                                 PRECIO
+                                 PROVEEDOR
+                            ================================== -->
+
+                            <td>
+
+                                <?php
+
+                                echo !empty($producto["proveedor"])
+                                    ? htmlspecialchars(
+                                        $producto["proveedor"]
+                                    )
+                                    : "Sin proveedor";
+
+                                ?>
+
+                            </td>
+
+
+                            <!-- =================================
+                                 CÓDIGO DEL PROVEEDOR
+                            ================================== -->
+
+                            <td>
+
+                                <?php
+
+                                echo !empty($producto["codigo_proveedor"])
+                                    ? htmlspecialchars(
+                                        $producto["codigo_proveedor"]
+                                    )
+                                    : "Sin código";
+
+                                ?>
+
+                            </td>
+
+
+                            <!-- =================================
+                                 CARACTERÍSTICAS
+                            ================================== -->
+
+                            <td>
+
+                                <?php if (!empty($producto["caracteristicas"])): ?>
+
+                                    <?php
+
+                                    $caracteristicas = explode(
+                                        " | ",
+                                        $producto["caracteristicas"]
+                                    );
+
+                                    ?>
+
+                                    <?php foreach ($caracteristicas as $caracteristica): ?>
+
+                                        <div>
+                                            <?php echo htmlspecialchars($caracteristica); ?>
+                                        </div>
+
+                                    <?php endforeach; ?>
+
+                                <?php else: ?>
+
+                                    <span class="sin-caracteristicas">
+                                        Sin características
+                                    </span>
+
+                                <?php endif; ?>
+
+                            </td>
+
+
+                            <!-- =================================
+                                 PRECIO DE VENTA
                             ================================== -->
 
                             <td>
 
                                 <?php if (!empty($producto["id_promocion"])): ?>
-
-
-                                    <!-- PRECIO ORIGINAL -->
 
                                     <span class="precio-original">
 
@@ -453,11 +605,7 @@ $resultado = $conexion->query($sql);
 
                                     </span>
 
-
                                     <br>
-
-
-                                    <!-- PRECIO PROMOCIONAL -->
 
                                     <strong class="precio-promocion">
 
@@ -471,11 +619,7 @@ $resultado = $conexion->query($sql);
 
                                     </strong>
 
-
                                     <br>
-
-
-                                    <!-- DESCUENTO -->
 
                                     <span class="descuento-promocion">
 
@@ -489,9 +633,7 @@ $resultado = $conexion->query($sql);
                                         ) {
 
                                             echo number_format(
-                                                $producto[
-                                                    "valor_descuento"
-                                                ],
+                                                $producto["valor_descuento"],
                                                 0,
                                                 ",",
                                                 "."
@@ -501,9 +643,7 @@ $resultado = $conexion->query($sql);
 
                                             echo "$" .
                                                 number_format(
-                                                    $producto[
-                                                        "valor_descuento"
-                                                    ],
+                                                    $producto["valor_descuento"],
                                                     0,
                                                     ",",
                                                     "."
@@ -515,14 +655,9 @@ $resultado = $conexion->query($sql);
 
                                     </span>
 
-
                                 <?php else: ?>
 
-
-                                    <!-- PRECIO NORMAL -->
-
                                     $
-
                                     <?php echo number_format(
                                         $precioOriginal,
                                         0,
@@ -530,21 +665,119 @@ $resultado = $conexion->query($sql);
                                         "."
                                     ); ?>
 
-
                                 <?php endif; ?>
 
                             </td>
 
 
                             <!-- =================================
-                                 STOCK
+                                 PRECIO DE COMPRA
                             ================================== -->
 
                             <td>
 
-                                <?php echo $producto["stock_actual"] ?? 0;?>
+                                <?php
+
+                                if (
+                                    $producto["precio_compra"] !== null &&
+                                    $producto["precio_compra"] !== ""
+                                ) {
+
+                                    echo "$" .
+                                        number_format(
+                                            (float) $producto["precio_compra"],
+                                            0,
+                                            ",",
+                                            "."
+                                        );
+
+                                } else {
+
+                                    echo "Sin registrar";
+
+                                }
+
+                                ?>
 
                             </td>
+
+
+                            <!-- =================================
+                                 STOCK ACTUAL
+                            ================================== -->
+
+                            <td>
+
+                                <?php
+
+                                echo $producto["stock_actual"] ?? 0;
+
+                                ?>
+
+                            </td>
+
+
+                            <!-- =================================
+                                 STOCK MÍNIMO
+                            ================================== -->
+
+                            <td>
+
+                                <?php
+
+                                echo $producto["stock_minimo"] ?? 0;
+
+                                ?>
+
+                            </td>
+
+
+                            <!-- =================================
+                                 PESO
+                            ================================== -->
+
+                            <td>
+
+                                <?php
+
+                                if (
+                                    $producto["peso"] !== null &&
+                                    $producto["peso"] !== ""
+                                ) {
+
+                                    echo htmlspecialchars(
+                                        $producto["peso"]
+                                    ) . " kg";
+
+                                } else {
+
+                                    echo "Sin registrar";
+
+                                }
+
+                                ?>
+
+                            </td>
+
+
+                            <!-- =================================
+                                 DESCRIPCIÓN
+                            ================================== -->
+
+                            <td>
+
+                                <?php
+
+                                echo !empty($producto["descripcion"])
+                                    ? htmlspecialchars(
+                                        $producto["descripcion"]
+                                    )
+                                    : "Sin descripción";
+
+                                ?>
+
+                            </td>
+
 
                             <!-- =================================
                                  PROMOCIÓN
@@ -554,11 +787,19 @@ $resultado = $conexion->query($sql);
 
                                 <?php if (!empty($producto["id_promocion"])): ?>
 
-                                    <span class="promocion-activa">🔥<?php echo htmlspecialchars($producto["nombre_promocion"]); ?></span>
+                                    <span class="promocion-activa">
+
+                                        🔥<?php echo htmlspecialchars(
+                                            $producto["nombre_promocion"]
+                                        ); ?>
+
+                                    </span>
 
                                 <?php else: ?>
 
-                                    <span class="sin-promocion">Sin promoción</span>
+                                    <span class="sin-promocion">
+                                        Sin promoción
+                                    </span>
 
                                 <?php endif; ?>
 
@@ -583,6 +824,7 @@ $resultado = $conexion->query($sql);
 
                             </td>
 
+
                             <!-- =================================
                                  ESTADO
                             ================================== -->
@@ -591,15 +833,20 @@ $resultado = $conexion->query($sql);
 
                                 <?php if ($producto["estado"]): ?>
 
-                                    <span class="estado-activo">Activo</span>
+                                    <span class="estado-activo">
+                                        Activo
+                                    </span>
 
                                 <?php else: ?>
 
-                                    <span class="estado-inactivo">Inactivo</span>
+                                    <span class="estado-inactivo">
+                                        Inactivo
+                                    </span>
 
                                 <?php endif; ?>
 
                             </td>
+
 
                             <!-- =================================
                                  ACCIONES
@@ -607,15 +854,19 @@ $resultado = $conexion->query($sql);
 
                             <td class="acciones">
 
-                                <a href="editar_producto.php?id=<?php echo $producto["id_producto"]; ?>"
+                                <a
+                                    href="editar_producto.php?id=<?php echo $producto["id_producto"]; ?>"
                                     class="btn-editar"
-                                    title="Editar producto">✏️</a>
+                                    title="Editar producto"
+                                >✏️</a>
 
 
-                                <a href="eliminar_producto.php?id=<?php echo $producto["id_producto"]; ?>"
+                                <a
+                                    href="eliminar_producto.php?id=<?php echo $producto["id_producto"]; ?>"
                                     class="btn-eliminar"
                                     title="Eliminar producto"
-                                    onclick="return confirm('¿Está seguro de eliminar este producto?');">🗑️</a>
+                                    onclick="return confirm('¿Está seguro de eliminar este producto?');"
+                                >🗑️</a>
 
                             </td>
 
@@ -627,13 +878,12 @@ $resultado = $conexion->query($sql);
                     </tbody>
 
                 </table>
-
+                </div>         
             </section>
 
         </main>
 
     </div>
-
     <script src="../dashboard/dashboard.js"></script>
 </body>
 </html>
