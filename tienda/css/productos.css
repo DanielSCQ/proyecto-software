@@ -976,6 +976,11 @@
     cursor: pointer;
 }
 
+.modal-btn-favorito.favorito-activo {
+    color: #1f5f28;
+    font-weight: 700;
+}
+
 
 .modal-btn-favorito:disabled {
     opacity: 0.45;

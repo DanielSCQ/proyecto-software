@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-09-2026 a las 17:22:26
+-- Tiempo de generación: 07-09-2026 a las 04:58:51
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.1.25
 
@@ -775,7 +775,11 @@ CREATE TABLE `usuarios` (
   `nombre` varchar(100) NOT NULL,
   `apellido` varchar(100) NOT NULL,
   `correo` varchar(150) NOT NULL,
-  `clave` varchar(255) NOT NULL,
+  `google_id` varchar(255) DEFAULT NULL,
+  `email_verificado` tinyint(1) NOT NULL DEFAULT 0,
+  `token_verificacion_hash` varchar(64) DEFAULT NULL,
+  `token_expira` datetime DEFAULT NULL,
+  `clave` varchar(255) DEFAULT NULL,
   `telefono` varchar(20) DEFAULT NULL,
   `rol` enum('cliente','administrador') DEFAULT 'cliente',
   `estado` tinyint(1) DEFAULT 1,
@@ -786,8 +790,10 @@ CREATE TABLE `usuarios` (
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id_usuario`, `nombre`, `apellido`, `correo`, `clave`, `telefono`, `rol`, `estado`, `fecha_registro`) VALUES
-(1, 'daniel santiago', 'cortes quesada', 'danielscq08@gmail.com', '123456', '3209007970', 'administrador', 1, '2026-07-17 15:11:25');
+INSERT INTO `usuarios` (`id_usuario`, `nombre`, `apellido`, `correo`, `google_id`, `email_verificado`, `token_verificacion_hash`, `token_expira`, `clave`, `telefono`, `rol`, `estado`, `fecha_registro`) VALUES
+(1, 'daniel santiago', 'cortes quesada', 'danielscq08@gmail.com', NULL, 0, NULL, NULL, '123456', '3209007970', 'administrador', 1, '2026-07-17 15:11:25'),
+(2, 'Daniel santiago', 'cortes quesada', 'dorq138@gmail.com', NULL, 0, '19ee0e3bcc29358a62de0d83b7b24b7b4f8dba2862b13973257032825c1a9829', '2026-09-06 19:50:13', '$2y$10$e6zu33MKfZJoWqFYpOa4Cu6X.NnidK7aTW8T6Es61Dvraljkiotda', '3209007970', 'cliente', 1, '2026-09-06 23:50:13'),
+(3, 'FRANCISCO', 'JAVIER', 'franciscojavieravilareyes2009@gmail.com', NULL, 0, '371fb51291a4eb7bfe9a6991d4d35f6ab49f067df314637f7f7f859b4ff35e1e', '2026-09-06 20:24:09', '$2y$10$Pdxxou05sBxjkLg.rLmkHeMDtUP.2KnNzrpZ/oLfTa21TZWoO9Fbu', '3151819241', 'cliente', 1, '2026-09-07 00:24:09');
 
 --
 -- Índices para tablas volcadas
@@ -1063,7 +1069,8 @@ ALTER TABLE `uso_cupones`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id_usuario`),
-  ADD UNIQUE KEY `correo` (`correo`);
+  ADD UNIQUE KEY `correo` (`correo`),
+  ADD UNIQUE KEY `google_id` (`google_id`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -1283,7 +1290,7 @@ ALTER TABLE `uso_cupones`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Restricciones para tablas volcadas

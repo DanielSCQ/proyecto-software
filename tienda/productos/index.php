@@ -5,6 +5,16 @@
 // =================================
 require_once("../includes/header.php");
 
+if (
+    empty($_SESSION["csrf_favoritos"]) ||
+    !is_string($_SESSION["csrf_favoritos"])
+) {
+    $_SESSION["csrf_favoritos"] =
+        bin2hex(random_bytes(32));
+}
+
+$csrfFavoritos =
+    $_SESSION["csrf_favoritos"];
 ?>
 
 <link rel="stylesheet" href="<?= $base_url ?>css/productos.css">
@@ -879,7 +889,14 @@ function mostrarProductoCard($producto, $base_url)
                         type="button"
                         class="modal-btn-favorito"
                         id="modalBtnFavorito"
-                        disabled
+                        data-cliente-logueado="<?= $clienteLogueado ? "1" : "0" ?>"
+                        data-csrf="<?= htmlspecialchars(
+                            $csrfFavoritos,
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                        aria-label="Agregar a favoritos"
+                        aria-pressed="false"
                     >
                         ♡
                     </button>

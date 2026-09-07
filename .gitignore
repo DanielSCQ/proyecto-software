@@ -1,19 +1,35 @@
-# Configuración local / credenciales
+# ==========================================
+# CONFIGURACIÓN LOCAL / CREDENCIALES
+# ==========================================
 .env
 .env.*
+config/correo.local.php
 
-# Archivos temporales de Windows
+# ==========================================
+# DEPENDENCIAS DE COMPOSER
+# ==========================================
+/vendor/
+
+# ==========================================
+# ARCHIVOS TEMPORALES DE WINDOWS
+# ==========================================
 Thumbs.db
 desktop.ini
 
-# Archivos temporales de editores
+# ==========================================
+# ARCHIVOS TEMPORALES DE EDITORES
+# ==========================================
 .vscode/
 *.swp
 *.swo
 
-# Logs
+# ==========================================
+# LOGS
+# ==========================================
 *.log
 
-# Archivos temporales
+# ==========================================
+# ARCHIVOS TEMPORALES
+# ==========================================
 *.tmp
 *.temp
