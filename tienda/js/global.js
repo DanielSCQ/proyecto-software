@@ -74,6 +74,11 @@ document.addEventListener("DOMContentLoaded", () => {
             "modalBtnFavorito"
         );
 
+    const btnCarrito =
+        document.getElementById(
+            "modalBtnCarrito"
+        );    
+
     let productoActualId = null;    
 
     /* =========================================
@@ -157,6 +162,14 @@ document.addEventListener("DOMContentLoaded", () => {
         mensaje.textContent = "";
 
         productoActualId = null;
+
+        if (btnCarrito) {
+
+            btnCarrito.disabled = true;
+
+            btnCarrito.textContent =
+                "Agregar al carrito";
+        }
 
         if (btnFavorito) {
 
@@ -421,6 +434,13 @@ document.addEventListener("DOMContentLoaded", () => {
             bloqueCaracteristicas.hidden = true;
         }
 
+        if (
+            btnCarrito &&
+            Number(producto.stock) > 0
+        ) {
+
+            btnCarrito.disabled = false;
+        }
 
         mensaje.textContent = "";
 
@@ -664,6 +684,142 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    /* =========================================
+    AGREGAR AL CARRITO
+    ========================================= */
+
+    async function agregarAlCarrito() {
+
+        if (
+            !btnCarrito ||
+            !Number.isInteger(productoActualId) ||
+            productoActualId < 1
+        ) {
+            return;
+        }
+
+
+        const csrf =
+            btnCarrito.dataset.csrf || "";
+
+
+        const datosFormulario =
+            new FormData();
+
+
+        datosFormulario.append(
+            "producto",
+            String(productoActualId)
+        );
+
+
+        datosFormulario.append(
+            "csrf",
+            csrf
+        );
+
+
+        btnCarrito.disabled = true;
+
+        btnCarrito.textContent =
+            "Agregando...";
+
+
+        mensaje.textContent = "";
+
+
+        try {
+
+            const respuesta =
+                await fetch(
+                    "../carrito/agregar.php",
+                    {
+                        method: "POST",
+                        body: datosFormulario,
+                        credentials: "same-origin",
+                        headers: {
+                            "Accept":
+                                "application/json",
+                            "X-Requested-With":
+                                "XMLHttpRequest"
+                        }
+                    }
+                );
+
+
+            const datos =
+                await respuesta.json();
+
+
+            if (
+                !respuesta.ok ||
+                !datos.success
+            ) {
+
+                mensaje.textContent =
+                    datos.message ||
+                    "No fue posible agregar el producto al carrito.";
+
+                return;
+            }
+
+
+            mensaje.textContent =
+                datos.message ||
+                "Producto agregado al carrito.";
+
+            const contadorCarrito =
+                document.getElementById(
+                    "contadorCarrito"
+                );
+
+            const textoContadorCarrito =
+                document.getElementById(
+                    "textoContadorCarrito"
+                );
+
+
+            if (
+                Number.isInteger(datos.cantidad_carrito)
+            ) {
+
+                if (contadorCarrito) {
+
+                    contadorCarrito.textContent =
+                        String(datos.cantidad_carrito);
+                }
+
+
+                if (textoContadorCarrito) {
+
+                    textoContadorCarrito.textContent =
+                        `${datos.cantidad_carrito} producto${
+                            datos.cantidad_carrito === 1
+                                ? ""
+                                : "s"
+                        }`;
+                }
+            }    
+
+
+        } catch (error) {
+
+            mensaje.textContent =
+                "No fue posible conectar con el servidor.";
+
+        } finally {
+
+            btnCarrito.disabled = false;
+
+            btnCarrito.textContent =
+                "Agregar al carrito";
+        }
+    }
+
+    btnCarrito?.addEventListener(
+        "click",
+        agregarAlCarrito
+    );
 
     /* =========================================
     CLIC EN EL CORAZÓN
@@ -856,13 +1012,26 @@ document.addEventListener("DOMContentLoaded", () => {
                         return;
                     }
 
+                // =================================
+                // LOGIN CORRECTO
+                // =================================
 
-                    // =================================
-                    // LOGIN CORRECTO
-                    // =================================
+                const destinoLogin =
+                    document.body.dataset.destinoLogin
+                    || "";
+
+
+                if (destinoLogin !== "") {
+
+                    window.location.href =
+                        destinoLogin;
+
+                } else {
+
                     window.location.href =
                         datos.redirect;
-
+                }
+                    
 
                 } catch (error) {
 
@@ -1335,3 +1504,264 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
+
+/* =========================================
+   CONTINUAR COMPRA DESDE EL CARRITO
+========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const btnContinuarCompra =
+            document.getElementById(
+                "btnContinuarCompra"
+            );
+
+
+        if (!btnContinuarCompra) {
+            return;
+        }
+
+
+        btnContinuarCompra.addEventListener(
+            "click",
+            () => {
+
+                const clienteLogueado =
+                    btnContinuarCompra.dataset
+                        .clienteLogueado === "1";
+
+
+                const urlCheckout =
+                    btnContinuarCompra.dataset
+                        .checkout || "";
+
+
+                // =================================
+                // CLIENTE YA LOGUEADO
+                // =================================
+
+                if (clienteLogueado) {
+
+                    if (urlCheckout !== "") {
+
+                        window.location.href =
+                            urlCheckout;
+                    }
+
+                    return;
+                }
+
+
+                // =================================
+                // INVITADO
+                // =================================
+                //
+                // Guardamos temporalmente el destino
+                // para que, después del login AJAX,
+                // vaya al checkout.
+                //
+
+                document.body.dataset.destinoLogin =
+                    urlCheckout;
+
+
+                const abrirModalCuenta =
+                    document.getElementById(
+                        "abrirModalCuenta"
+                    );
+
+
+                if (!abrirModalCuenta) {
+                    return;
+                }
+
+
+                abrirModalCuenta.click();
+
+
+                // =================================
+                // ASEGURAR PANEL LOGIN
+                // =================================
+
+                const panelLogin =
+                    document.getElementById(
+                        "panelLogin"
+                    );
+
+                const panelRegistro =
+                    document.getElementById(
+                        "panelRegistro"
+                    );
+
+
+                panelRegistro?.classList.remove(
+                    "cuenta-panel-activo"
+                );
+
+                panelLogin?.classList.add(
+                    "cuenta-panel-activo"
+                );
+
+
+                // =================================
+                // MENSAJE AL CLIENTE
+                // =================================
+
+                const mensajeLogin =
+                    document.getElementById(
+                        "mensajeLoginModal"
+                    );
+
+
+                if (mensajeLogin) {
+
+                    mensajeLogin.textContent =
+                        "¡Ya casi terminamos! Inicia sesión o crea una cuenta para continuar con tu compra y poder asociar tu pedido.";
+
+                    mensajeLogin.hidden = false;
+                }
+
+            }
+        );
+
+    }
+);
+
+/* =========================================
+   CONTADORES DEL CHECKOUT
+========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const campos =
+            document.querySelectorAll(
+                "[data-contador-checkout]"
+            );
+
+
+        campos.forEach((campo) => {
+
+            const contenedor =
+                campo.closest(
+                    ".checkout-campo"
+                );
+
+
+            if (!contenedor) {
+                return;
+            }
+
+
+            const contador =
+                contenedor.querySelector(
+                    ".checkout-contador"
+                );
+
+
+            const numero =
+                contador?.querySelector(
+                    "span"
+                );
+
+
+            const maximo =
+                Number(
+                    campo.getAttribute(
+                        "maxlength"
+                    )
+                );
+
+
+            if (
+                !contador ||
+                !numero ||
+                !Number.isInteger(maximo) ||
+                maximo < 1
+            ) {
+                return;
+            }
+
+
+            function actualizar() {
+
+                const cantidad =
+                    campo.value.length;
+
+
+                numero.textContent =
+                    String(cantidad);
+
+
+                contador.classList.toggle(
+                    "checkout-contador-limite",
+                    cantidad >= maximo
+                );
+            }
+
+
+            actualizar();
+
+
+            campo.addEventListener(
+                "input",
+                actualizar
+            );
+
+        });
+
+    }
+);
+
+/* =========================================
+   EVITAR DOBLE ENVÍO DEL CHECKOUT
+========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const formCheckout =
+            document.getElementById(
+                "formCheckout"
+            );
+
+        const btnConfirmar =
+            document.querySelector(
+                '.checkout-confirmar[form="formCheckout"]'
+            );
+
+        if (
+            !formCheckout ||
+            !btnConfirmar
+        ) {
+            return;
+        }
+
+        let procesandoPedido = false;
+
+        formCheckout.addEventListener(
+            "submit",
+            (evento) => {
+
+                if (procesandoPedido) {
+
+                    evento.preventDefault();
+
+                    return;
+                }
+
+                procesandoPedido = true;
+
+                btnConfirmar.disabled = true;
+
+                btnConfirmar.textContent =
+                    "Procesando pedido...";
+            }
+        );
+
+    }
+);

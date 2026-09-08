@@ -1169,16 +1169,21 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
     position: absolute;
 
-    top: -5%;
-    left: -48px;
+    inset: 0 auto 0 0;
 
-    width: 95px;
-    height: 110%;
+    width: 78px;
+    height: 100%;
 
     background: #fff;
 
-    transform:
-        skewX(-8deg);
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        35% 100%,
+        0 100%
+    );
+
+    pointer-events: none;
 }
 
 .cuenta-banner::after {

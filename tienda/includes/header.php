@@ -62,28 +62,32 @@ $nombreCliente = $clienteLogueado ? htmlspecialchars($_SESSION["nombre"], ENT_QU
 // =================================
 // CONTADOR DEL CARRITO
 // =================================
-// Suma las cantidades del carrito "Activo" del cliente logueado.
-// Si no hay sesión de cliente, se muestra 0 (el carrito de invitado
-// se resolverá cuando construyamos el módulo de carrito).
+//
+// El carrito actual se guarda temporalmente
+// en la sesión.
+//
+// Esto permite que un visitante agregue
+// productos incluso antes de iniciar sesión.
+//
+
 $totalCarrito = 0;
 
-if ($clienteLogueado) {
+if (
+    isset($_SESSION["carrito"]) &&
+    is_array($_SESSION["carrito"])
+) {
 
-    $sqlCarrito = "
-        SELECT COALESCE(SUM(dc.cantidad), 0) AS total
-        FROM carrito c
-        INNER JOIN detalle_carrito dc ON dc.id_carrito = c.id_carrito
-        WHERE c.id_usuario = ? AND c.estado = 'Activo'
-    ";
+    foreach ($_SESSION["carrito"] as $item) {
 
-    $stmtCarrito = $conexion->prepare($sqlCarrito);
-    $stmtCarrito->bind_param("i", $_SESSION["id_usuario"]);
-    $stmtCarrito->execute();
-    $resultadoCarrito = $stmtCarrito->get_result()->fetch_assoc();
-    $totalCarrito = (int) $resultadoCarrito["total"];
-    $stmtCarrito->close();
+        $cantidad =
+            (int) ($item["cantidad"] ?? 0);
 
+        if ($cantidad > 0) {
+            $totalCarrito += $cantidad;
+        }
+    }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -219,13 +223,21 @@ if ($clienteLogueado) {
                         <path d="M3 4h2l2.2 11.5a2 2 0 0 0 2 1.5h8.5a2 2 0 0 0 1.9-1.4L21 8H7"></path>
                     </svg>
 
-                    <span class="cart-count"><?= $totalCarrito ?></span>
+                    <span
+                        class="cart-count"
+                        id="contadorCarrito"
+                    >
+                        <?= $totalCarrito ?>
+                    </span>
 
                 </span>
 
                 <span class="action-text">
                     <strong>Mi carrito</strong>
-                    <small><?= $totalCarrito ?> producto<?= $totalCarrito === 1 ? "" : "s" ?></small>
+                    <small id="textoContadorCarrito">
+                        <?= $totalCarrito ?>
+                        producto<?= $totalCarrito === 1 ? "" : "s" ?>
+                    </small>
                 </span>
 
             </a>

@@ -15,6 +15,22 @@ if (
 
 $csrfFavoritos =
     $_SESSION["csrf_favoritos"];
+
+    // =================================
+    // CSRF CARRITO
+    // =================================
+
+    if (
+        empty($_SESSION["csrf_carrito"]) ||
+        !is_string($_SESSION["csrf_carrito"])
+    ) {
+        $_SESSION["csrf_carrito"] =
+            bin2hex(random_bytes(32));
+    }
+
+    $csrfCarrito =
+        $_SESSION["csrf_carrito"];
+
 ?>
 
 <link rel="stylesheet" href="<?= $base_url ?>css/productos.css">
@@ -879,11 +895,15 @@ function mostrarProductoCard($producto, $base_url)
                         type="button"
                         class="modal-btn-carrito"
                         id="modalBtnCarrito"
+                        data-csrf="<?= htmlspecialchars(
+                            $csrfCarrito,
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
                         disabled
                     >
                         Agregar al carrito
                     </button>
-
 
                     <button
                         type="button"
