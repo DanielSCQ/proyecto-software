@@ -4,6 +4,8 @@
 .env
 .env.*
 config/correo.local.php
+# Credenciales privadas del servidor
+/config/credenciales_servidor.php
 
 # ==========================================
 # DEPENDENCIAS DE COMPOSER

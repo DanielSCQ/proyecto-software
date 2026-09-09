@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 07-09-2026 a las 04:58:51
+-- Tiempo de generación: 08-09-2026 a las 15:12:04
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.1.25
 
@@ -236,6 +236,14 @@ CREATE TABLE `detalle_pedido` (
   `subtotal` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `detalle_pedido`
+--
+
+INSERT INTO `detalle_pedido` (`id_detalle_pedido`, `id_pedido`, `id_producto`, `cantidad`, `precio_unitario`, `descuento`, `subtotal`) VALUES
+(1, 1, 5, 3, 12132.00, 0.00, 36396.00),
+(2, 1, 4, 1, 121321.00, 0.00, 121321.00);
+
 -- --------------------------------------------------------
 
 --
@@ -256,6 +264,13 @@ CREATE TABLE `direcciones` (
   `principal` tinyint(1) DEFAULT 0,
   `estado` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `direcciones`
+--
+
+INSERT INTO `direcciones` (`id_direccion`, `id_usuario`, `nombre`, `telefono`, `receptor`, `direccion`, `barrio`, `municipio`, `departamento`, `referencia`, `principal`, `estado`) VALUES
+(1, 2, 'casa de los quesada', '3209007970', 'Daniel santiago cortes quesada', 'carrera 9 N°13-61', 'ospina perez sector 1', 'PURIFICACIÓN', 'Tolima', 'casa verde al lado de los otavo', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -294,6 +309,15 @@ CREATE TABLE `favoritos` (
   `fecha_agregado` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `favoritos`
+--
+
+INSERT INTO `favoritos` (`id_favorito`, `id_usuario`, `id_producto`, `fecha_agregado`) VALUES
+(8, 2, 4, '2026-09-07 03:56:38'),
+(12, 2, 5, '2026-09-08 02:35:03'),
+(13, 2, 1, '2026-09-08 02:35:46');
+
 -- --------------------------------------------------------
 
 --
@@ -308,6 +332,13 @@ CREATE TABLE `historial_estado_pedido` (
   `descripcion` text DEFAULT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `historial_estado_pedido`
+--
+
+INSERT INTO `historial_estado_pedido` (`id_historial`, `id_pedido`, `id_estado`, `ubicacion`, `descripcion`, `fecha`) VALUES
+(1, 1, 1, NULL, 'Pedido creado y pendiente de procesamiento.', '2026-09-08 12:16:34');
 
 -- --------------------------------------------------------
 
@@ -402,8 +433,8 @@ CREATE TABLE `inventario` (
 INSERT INTO `inventario` (`id_inventario`, `id_producto`, `stock_actual`, `stock_minimo`, `fecha_actualizacion`) VALUES
 (1, 1, 6000, 50, '2026-08-29 01:10:32'),
 (2, 2, 421, 20, '2026-08-29 04:35:17'),
-(4, 4, 200, 20, '2026-08-29 01:10:32'),
-(5, 5, 8555, 20, '2026-08-28 22:48:09'),
+(4, 4, 199, 20, '2026-09-08 12:16:33'),
+(5, 5, 8552, 20, '2026-09-08 12:16:33'),
 (6, 6, 1000050, 122, '2026-08-29 04:35:17');
 
 -- --------------------------------------------------------
@@ -485,7 +516,9 @@ INSERT INTO `movimientos_inventario` (`id_movimiento`, `id_producto`, `id_ingres
 (13, 2, 6, 'Entrada', 34, 'Ingreso de inventario', 'si aplica', NULL, 1, 1, '2026-08-29 04:29:15'),
 (14, 2, 6, 'Ajuste', 16, 'Modificación de ingreso de inventario', 'Cambio de cantidad del ingreso #6. Cantidad anterior: 34. Nueva cantidad: 50. Observación: nuevos', NULL, 1, 1, '2026-08-29 04:30:57'),
 (15, 2, 6, 'Ajuste', -50, 'Modificación de ingreso de inventario', 'Se retiraron 50 unidades debido al cambio de producto del ingreso #6. Observación: error en el tipo de producto', NULL, NULL, 1, '2026-08-29 04:35:17'),
-(16, 6, 6, 'Ajuste', 50, 'Modificación de ingreso de inventario', 'Se agregaron 50 unidades debido al cambio de producto del ingreso #6. Observación: error en el tipo de producto', NULL, 1, 1, '2026-08-29 04:35:17');
+(16, 6, 6, 'Ajuste', 50, 'Modificación de ingreso de inventario', 'Se agregaron 50 unidades debido al cambio de producto del ingreso #6. Observación: error en el tipo de producto', NULL, 1, 1, '2026-08-29 04:35:17'),
+(17, 5, NULL, 'Salida', -3, 'Venta de producto', 'Salida de inventario por pedido #1', 1, NULL, 2, '2026-09-08 12:16:33'),
+(18, 4, NULL, 'Salida', -1, 'Venta de producto', 'Salida de inventario por pedido #1', 1, NULL, 2, '2026-09-08 12:16:34');
 
 -- --------------------------------------------------------
 
@@ -536,9 +569,17 @@ CREATE TABLE `pedidos` (
   `id_estado` int(11) NOT NULL,
   `total` decimal(10,2) NOT NULL,
   `metodo_pago` varchar(50) NOT NULL,
+  `token_checkout` varchar(64) DEFAULT NULL,
   `fecha_pedido` timestamp NOT NULL DEFAULT current_timestamp(),
   `fecha_actualizacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `pedidos`
+--
+
+INSERT INTO `pedidos` (`id_pedido`, `id_usuario`, `id_direccion`, `id_estado`, `total`, `metodo_pago`, `token_checkout`, `fecha_pedido`, `fecha_actualizacion`) VALUES
+(1, 2, 1, 1, 157717.00, 'Contra entrega', '3757d3052218c00ee6c5d7fbb2965c75ad3eebad512027ddc9cd32bccd26df30', '2026-09-08 12:16:33', '2026-09-08 12:16:33');
 
 -- --------------------------------------------------------
 
@@ -981,6 +1022,7 @@ ALTER TABLE `pagos`
 --
 ALTER TABLE `pedidos`
   ADD PRIMARY KEY (`id_pedido`),
+  ADD UNIQUE KEY `uk_pedidos_token_checkout` (`token_checkout`),
   ADD KEY `id_usuario` (`id_usuario`),
   ADD KEY `id_direccion` (`id_direccion`),
   ADD KEY `id_estado` (`id_estado`);
@@ -1140,13 +1182,13 @@ ALTER TABLE `detalle_ingreso`
 -- AUTO_INCREMENT de la tabla `detalle_pedido`
 --
 ALTER TABLE `detalle_pedido`
-  MODIFY `id_detalle_pedido` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_detalle_pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `direcciones`
 --
 ALTER TABLE `direcciones`
-  MODIFY `id_direccion` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_direccion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `estado_pedido`
@@ -1158,13 +1200,13 @@ ALTER TABLE `estado_pedido`
 -- AUTO_INCREMENT de la tabla `favoritos`
 --
 ALTER TABLE `favoritos`
-  MODIFY `id_favorito` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_favorito` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `historial_estado_pedido`
 --
 ALTER TABLE `historial_estado_pedido`
-  MODIFY `id_historial` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_historial` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `imagenes_producto`
@@ -1206,7 +1248,7 @@ ALTER TABLE `modelos`
 -- AUTO_INCREMENT de la tabla `movimientos_inventario`
 --
 ALTER TABLE `movimientos_inventario`
-  MODIFY `id_movimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id_movimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `notificaciones`
@@ -1224,7 +1266,7 @@ ALTER TABLE `pagos`
 -- AUTO_INCREMENT de la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
-  MODIFY `id_pedido` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
