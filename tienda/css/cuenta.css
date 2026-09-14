@@ -867,7 +867,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
         minmax(0, 1fr)
         390px;
 
-    min-height: 470px;
+    height: min(720px, calc(100vh - 180px));
+    min-height: 520px;
 
     overflow: hidden;
 
@@ -880,7 +881,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
         0 15px 40px
         rgba(20, 40, 20, .07);
 }
-
 
 /* =========================================
    MENÚ IZQUIERDO
@@ -986,8 +986,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
 .cuenta-contenido {
     min-width: 0;
+    min-height: 0;
 
     padding: 34px 36px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    overscroll-behavior: contain;
 
     background: #fff;
 }
@@ -1273,6 +1279,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
     .cuenta-dashboard {
         display: block;
+
+        height: auto;
+        min-height: 0;
     }
 
     .cuenta-menu {
@@ -1307,7 +1316,25 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     }
 
     .cuenta-contenido {
+        max-height: 70vh;
+
         padding: 26px 20px;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        -webkit-overflow-scrolling: touch;
+
+        overscroll-behavior: contain;
+    }
+
+    .cuenta-contenido {
+        scrollbar-width: none;
+    }
+
+
+    .cuenta-contenido::-webkit-scrollbar {
+        display: none;
     }
 
     .cuenta-dato {
@@ -1586,4 +1613,1993 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 .cuenta-favorito-quitar:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+/* =========================================
+   PEDIDOS - MI CUENTA
+========================================= */
+
+.cuenta-pedidos-lista {
+    display: grid;
+    gap: 16px;
+    margin-top: 22px;
+}
+
+
+/* =========================================
+   TARJETA DE PEDIDO
+========================================= */
+
+.cuenta-pedido-card {
+    padding: 18px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8e1;
+    border-radius: 14px;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.cuenta-pedido-card:hover {
+    transform: translateY(-2px);
+
+    border-color: #b8ceb9;
+
+    box-shadow:
+        0 8px 24px
+        rgba(28, 70, 33, 0.08);
+}
+
+
+/* =========================================
+   PARTE SUPERIOR
+========================================= */
+
+.cuenta-pedido-superior {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    padding-bottom: 14px;
+
+    border-bottom: 1px solid #edf0ec;
+}
+
+
+.cuenta-pedido-numero {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #7a837b;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+
+.cuenta-pedido-superior h3 {
+    margin: 0;
+
+    color: #243027;
+
+    font-size: 20px;
+}
+
+
+/* =========================================
+   ESTADO DEL PEDIDO
+========================================= */
+
+.cuenta-pedido-estado {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    min-height: 30px;
+
+    padding: 5px 11px;
+
+    border-radius: 20px;
+
+    background: #fff4df;
+    color: #9a5a12;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.cuenta-pedido-estado::before {
+    content: "";
+
+    width: 8px;
+    height: 8px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: currentColor;
+}
+
+
+/* =========================================
+   DATOS DEL PEDIDO
+========================================= */
+
+.cuenta-pedido-datos {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
+
+    padding: 16px 0;
+}
+
+
+.cuenta-pedido-datos > div {
+    min-width: 0;
+}
+
+
+.cuenta-pedido-datos span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #828982;
+
+    font-size: 12px;
+}
+
+
+.cuenta-pedido-datos strong {
+    display: block;
+
+    color: #29322a;
+
+    font-size: 14px;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.cuenta-pedido-acciones {
+    display: flex;
+    justify-content: flex-end;
+
+    padding-top: 3px;
+}
+
+
+.cuenta-pedido-acciones .cuenta-boton-secundario {
+    cursor: pointer;
+
+    background: #f7f9f6;
+    color: #1f5f28;
+
+    border-color: #cfd9ce;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.cuenta-pedido-acciones .cuenta-boton-secundario:hover {
+    background: #edf5ec;
+
+    border-color: #aec7b0;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .cuenta-pedido-card {
+        padding: 15px;
+    }
+
+
+    .cuenta-pedido-superior {
+        align-items: flex-start;
+    }
+
+
+    .cuenta-pedido-datos {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+
+    .cuenta-pedido-acciones {
+        justify-content: stretch;
+    }
+
+
+    .cuenta-pedido-acciones
+    .cuenta-boton-secundario {
+        width: 100%;
+    }
+
+}
+
+/* =========================================
+   SCROLL DISCRETO - MI CUENTA
+========================================= */
+
+/* Firefox */
+.cuenta-contenido {
+    scrollbar-width: thin;
+    scrollbar-color:
+        rgba(31, 95, 40, 0.30)
+        transparent;
+}
+
+
+/* Chrome, Edge y Safari */
+.cuenta-contenido::-webkit-scrollbar {
+    width: 5px;
+}
+
+
+.cuenta-contenido::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.cuenta-contenido::-webkit-scrollbar-thumb {
+    background:
+        rgba(31, 95, 40, 0.25);
+
+    border-radius: 20px;
+}
+
+
+.cuenta-contenido::-webkit-scrollbar-thumb:hover {
+    background:
+        rgba(31, 95, 40, 0.50);
+}
+
+/* =========================================
+   EDITAR DATOS - MI CUENTA
+========================================= */
+
+.cuenta-formulario-edicion {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    margin-top: 28px;
+}
+
+.cuenta-formulario-edicion[hidden] {
+    display: none !important;
+}
+
+
+/* =========================================
+   CAMPOS
+========================================= */
+
+.cuenta-formulario-edicion .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cuenta-formulario-edicion .campo label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #222;
+}
+
+.cuenta-formulario-edicion .campo input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+
+    border: 1px solid #cfd6cf;
+    border-radius: 9px;
+
+    background: #fff;
+    color: #222;
+
+    font-size: 15px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.cuenta-formulario-edicion .campo input:hover {
+    border-color: #2e7d32;
+}
+
+.cuenta-formulario-edicion .campo input:focus {
+    border-color: #1f5f28;
+
+    box-shadow:
+        0 0 0 3px rgba(31, 95, 40, 0.12);
+}
+
+
+/* =========================================
+   CONTADORES
+========================================= */
+
+.cuenta-formulario-edicion .contador {
+    align-self: flex-end;
+
+    font-size: 12px;
+    color: #777;
+
+    margin-top: -3px;
+}
+
+.cuenta-formulario-edicion .contador-limite {
+    color: #c62828;
+    font-weight: 700;
+}
+
+
+/* =========================================
+   CORREO BLOQUEADO
+========================================= */
+
+.cuenta-campo-bloqueado {
+    width: 100%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 13px 14px;
+
+    border: 1px solid #d7d7d7;
+    border-radius: 9px;
+
+    background: #f5f6f5;
+
+    color: #555;
+
+    font-size: 15px;
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.cuenta-campo-bloqueado:hover {
+    border-color: #f28c28;
+    background: #fff8f0;
+}
+
+.cuenta-campo-bloqueado:active {
+    transform: scale(0.995);
+}
+
+.cuenta-campo-bloqueado small {
+    flex-shrink: 0;
+
+    padding: 4px 8px;
+
+    border-radius: 20px;
+
+    background: #e8e8e8;
+
+    color: #666;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+/* =========================================
+   FECHA / INFORMACIÓN NO EDITABLE
+========================================= */
+
+.cuenta-campo-informativo {
+    padding: 13px 14px;
+
+    border: 1px solid #e0e0e0;
+    border-radius: 9px;
+
+    background: #f7f8f7;
+
+    color: #555;
+
+    font-size: 15px;
+}
+
+
+/* =========================================
+   AVISO DE CORREO
+========================================= */
+
+.cuenta-aviso-correo {
+    padding: 16px 18px;
+
+    border-left: 4px solid #f28c28;
+    border-radius: 8px;
+
+    background: #fff8ef;
+
+    color: #444;
+
+    line-height: 1.5;
+}
+
+.cuenta-aviso-correo[hidden] {
+    display: none !important;
+}
+
+.cuenta-aviso-correo strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #17491e;
+}
+
+.cuenta-aviso-correo p {
+    margin: 4px 0;
+
+    font-size: 14px;
+}
+
+
+/* =========================================
+   ACCIONES DEL FORMULARIO
+========================================= */
+
+.cuenta-formulario-acciones {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin-top: 5px;
+}
+
+
+/* =========================================
+   BOTÓN PRINCIPAL
+========================================= */
+
+.cuenta-boton-primario {
+    min-height: 44px;
+
+    padding: 11px 20px;
+
+    border: 1px solid #1f5f28;
+    border-radius: 8px;
+
+    background: #1f5f28;
+
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.cuenta-boton-primario:hover {
+    background: #f28c28;
+    border-color: #f28c28;
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.12);
+
+    transform: translateY(-1px);
+}
+
+.cuenta-boton-primario:active {
+    transform: translateY(0);
+}
+
+.cuenta-boton-primario:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+
+/* =========================================
+   BOTÓN SECUNDARIO
+========================================= */
+
+.cuenta-boton-secundario {
+    min-height: 42px;
+
+    padding: 10px 18px;
+
+    border: 1px solid #bfc6bf;
+    border-radius: 8px;
+
+    background: #fff;
+
+    color: #333;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.cuenta-boton-secundario:hover:not(:disabled) {
+    background: #f28c28;
+    border-color: #f28c28;
+
+    color: #fff;
+
+    transform: translateY(-1px);
+}
+
+.cuenta-boton-secundario:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.cuenta-boton-secundario:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+
+/* =========================================
+   BOTÓN EDITAR DATOS
+========================================= */
+
+#btnEditarDatos {
+    min-width: 120px;
+}
+
+
+/* =========================================
+   RESPONSIVE - TABLET
+========================================= */
+
+@media (max-width: 900px) {
+
+    .cuenta-formulario-edicion {
+        gap: 18px;
+    }
+
+    .cuenta-campo-bloqueado {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+}
+
+
+/* =========================================
+   RESPONSIVE - CELULAR
+========================================= */
+
+@media (max-width: 600px) {
+
+    .cuenta-formulario-edicion {
+        margin-top: 20px;
+        gap: 17px;
+    }
+
+    .cuenta-formulario-edicion .campo input,
+    .cuenta-campo-bloqueado,
+    .cuenta-campo-informativo {
+        min-height: 46px;
+
+        padding: 11px 12px;
+
+        font-size: 14px;
+    }
+
+    .cuenta-formulario-acciones {
+        flex-direction: column;
+
+        width: 100%;
+    }
+
+    .cuenta-formulario-acciones button {
+        width: 100%;
+    }
+
+    #btnEditarDatos {
+        width: 100%;
+    }
+
+    .cuenta-aviso-correo {
+        padding: 14px;
+    }
+
+    .cuenta-aviso-correo p {
+        font-size: 13px;
+    }
+
+}
+
+
+/* =========================================
+   RESPONSIVE - CELULAR PEQUEÑO
+========================================= */
+
+@media (max-width: 380px) {
+
+    .cuenta-formulario-edicion .campo label {
+        font-size: 14px;
+    }
+
+    .cuenta-campo-bloqueado small {
+        font-size: 10px;
+    }
+
+}
+
+/* =========================================
+   ELEMENTOS OCULTOS - MI CUENTA
+========================================= */
+
+.cuenta-page [hidden] {
+    display: none !important;
+}
+
+/* =========================================
+   DETALLE DEL PEDIDO
+========================================= */
+
+.pedido-detalle-page {
+    min-height: 70vh;
+    padding: 42px 20px 70px;
+    background: #f4f6f2;
+}
+
+.pedido-detalle-container {
+    width: min(1100px, 100%);
+    margin: 0 auto;
+}
+
+
+/* =========================================
+   VOLVER
+========================================= */
+
+.pedido-detalle-volver {
+    display: inline-flex;
+    align-items: center;
+
+    margin-bottom: 22px;
+    padding: 9px 14px;
+
+    border: 1px solid #d5ddd4;
+    border-radius: 8px;
+
+    background: #ffffff;
+    color: #1f5f28;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        background .2s ease,
+        color .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+}
+
+.pedido-detalle-volver:hover {
+    background: #f28c28;
+    border-color: #f28c28;
+    color: #ffffff;
+
+    transform: translateX(-2px);
+}
+
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.pedido-detalle-encabezado {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 25px;
+
+    margin-bottom: 25px;
+}
+
+.pedido-detalle-etiqueta {
+    display: inline-block;
+
+    margin-bottom: 7px;
+
+    color: #c96e19;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 1.3px;
+}
+
+.pedido-detalle-encabezado h1 {
+    margin: 0 0 7px;
+
+    color: #1d261e;
+
+    font-size: 34px;
+}
+
+.pedido-detalle-encabezado p {
+    margin: 0;
+
+    color: #747d75;
+}
+
+
+/* =========================================
+   ESTADOS
+========================================= */
+
+.pedido-detalle-estado {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 7px 13px;
+
+    border-radius: 20px;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+.pedido-detalle-estado::before {
+    content: "";
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: currentColor;
+}
+
+.pedido-estado-1 {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.pedido-estado-2 {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.pedido-estado-3 {
+    background: #ede7f6;
+    color: #5e35b1;
+}
+
+.pedido-estado-4 {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.pedido-estado-5 {
+    background: #ffebee;
+    color: #c62828;
+}
+
+
+/* =========================================
+   PROGRESO
+========================================= */
+
+.pedido-progreso {
+    position: relative;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    margin-bottom: 28px;
+    padding: 25px 20px;
+
+    border: 1px solid #e0e6df;
+    border-radius: 14px;
+
+    background: #ffffff;
+}
+
+.pedido-progreso::before {
+    content: "";
+
+    position: absolute;
+
+    top: 43px;
+    left: 12%;
+    right: 12%;
+
+    height: 3px;
+
+    background: #e0e5df;
+}
+
+.pedido-progreso-paso {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 9px;
+
+    color: #8a928b;
+
+    font-size: 12px;
+    text-align: center;
+}
+
+.pedido-progreso-punto {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 3px solid #e0e5df;
+    border-radius: 50%;
+
+    background: #ffffff;
+
+    font-weight: 800;
+}
+
+.pedido-progreso-completado {
+    color: #1f5f28;
+}
+
+.pedido-progreso-completado .pedido-progreso-punto {
+    border-color: #1f5f28;
+
+    background: #1f5f28;
+    color: #ffffff;
+}
+
+.pedido-progreso-actual .pedido-progreso-punto {
+    box-shadow:
+        0 0 0 5px
+        rgba(31, 95, 40, .12);
+}
+
+
+/* =========================================
+   CANCELADO
+========================================= */
+
+.pedido-cancelado-aviso {
+    margin-bottom: 28px;
+    padding: 18px 20px;
+
+    border-left: 4px solid #c62828;
+    border-radius: 10px;
+
+    background: #ffebee;
+    color: #792020;
+}
+
+.pedido-cancelado-aviso strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.pedido-cancelado-aviso p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   TARJETAS PRINCIPALES
+========================================= */
+
+.pedido-detalle-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
+
+    margin-bottom: 24px;
+}
+
+.pedido-detalle-card,
+.pedido-detalle-seccion {
+    padding: 24px;
+
+    border: 1px solid #e0e6df;
+    border-radius: 14px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 8px 26px
+        rgba(30, 60, 30, .04);
+}
+
+.pedido-detalle-card-etiqueta,
+.pedido-seccion-encabezado > span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #c96e19;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+}
+
+.pedido-detalle-card h2,
+.pedido-seccion-encabezado h2 {
+    margin: 0 0 15px;
+
+    color: #253027;
+}
+
+.pedido-detalle-card p {
+    margin: 6px 0;
+
+    color: #626b63;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   RESUMEN
+========================================= */
+
+.pedido-resumen-linea {
+    display: flex;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 12px 0;
+
+    border-bottom: 1px solid #edf0ec;
+}
+
+.pedido-resumen-linea span {
+    color: #7b847c;
+}
+
+.pedido-resumen-linea strong {
+    color: #2b352c;
+    text-align: right;
+}
+
+.pedido-resumen-total {
+    margin-top: 4px;
+    border-bottom: 0;
+}
+
+.pedido-resumen-total strong {
+    color: #1f5f28;
+    font-size: 20px;
+}
+
+
+/* =========================================
+   SECCIONES
+========================================= */
+
+.pedido-detalle-seccion {
+    margin-bottom: 24px;
+}
+
+.pedido-seccion-encabezado p {
+    margin: -7px 0 18px;
+
+    color: #747d75;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   PRODUCTOS
+========================================= */
+
+.pedido-productos-lista {
+    display: grid;
+    gap: 12px;
+}
+
+.pedido-producto-card {
+    display: grid;
+
+    grid-template-columns:
+        85px
+        minmax(0, 1fr)
+        auto;
+
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 14px;
+
+    border: 1px solid #e5e9e4;
+    border-radius: 12px;
+
+    background: #fafbfa;
+}
+
+.pedido-producto-imagen {
+    width: 85px;
+    height: 85px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: #f0f3ef;
+
+    color: #818981;
+
+    font-size: 12px;
+    text-align: center;
+}
+
+.pedido-producto-imagen img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+}
+
+.pedido-producto-info {
+    min-width: 0;
+}
+
+.pedido-producto-codigo {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #7d867e;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: .06em;
+}
+
+.pedido-producto-info h3 {
+    margin: 0 0 8px;
+
+    color: #273128;
+
+    font-size: 16px;
+}
+
+.pedido-producto-datos {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 8px 18px;
+
+    color: #717a72;
+
+    font-size: 13px;
+}
+
+.pedido-producto-subtotal {
+    text-align: right;
+}
+
+.pedido-producto-subtotal span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #858d86;
+
+    font-size: 11px;
+}
+
+.pedido-producto-subtotal strong {
+    color: #1f5f28;
+    font-size: 16px;
+}
+
+
+/* =========================================
+   HISTORIAL
+========================================= */
+
+.pedido-historial {
+    position: relative;
+
+    display: grid;
+    gap: 0;
+}
+
+.pedido-historial-item {
+    display: grid;
+
+    grid-template-columns:
+        18px
+        minmax(0, 1fr);
+
+    gap: 15px;
+
+    padding: 0 0 22px;
+}
+
+.pedido-historial-item:last-child {
+    padding-bottom: 0;
+}
+
+.pedido-historial-punto {
+    width: 12px;
+    height: 12px;
+
+    margin-top: 5px;
+
+    border-radius: 50%;
+
+    background: #9ba39c;
+}
+
+.pedido-estado-fondo-1 {
+    background: #d4a017;
+}
+
+.pedido-estado-fondo-2 {
+    background: #1976d2;
+}
+
+.pedido-estado-fondo-3 {
+    background: #673ab7;
+}
+
+.pedido-estado-fondo-4 {
+    background: #2e7d32;
+}
+
+.pedido-estado-fondo-5 {
+    background: #c62828;
+}
+
+.pedido-historial-superior {
+    display: flex;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 5px;
+}
+
+.pedido-historial-superior strong {
+    color: #29332a;
+}
+
+.pedido-historial-superior time {
+    flex-shrink: 0;
+
+    color: #8a918b;
+
+    font-size: 12px;
+}
+
+.pedido-historial-contenido p {
+    margin: 0 0 6px;
+
+    color: #626b63;
+
+    line-height: 1.5;
+}
+
+.pedido-historial-ubicacion {
+    color: #727a73;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   VACÍO
+========================================= */
+
+.pedido-detalle-vacio {
+    padding: 22px;
+
+    border: 1px dashed #d6ddd5;
+    border-radius: 10px;
+
+    background: #fafbfa;
+
+    color: #727b73;
+
+    text-align: center;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .pedido-detalle-page {
+        padding: 28px 14px 50px;
+    }
+
+    .pedido-detalle-encabezado {
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .pedido-detalle-encabezado h1 {
+        font-size: 28px;
+    }
+
+    .pedido-detalle-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pedido-progreso {
+        padding: 20px 8px;
+    }
+
+    .pedido-progreso::before {
+        top: 38px;
+    }
+
+    .pedido-progreso-punto {
+        width: 34px;
+        height: 34px;
+    }
+
+    .pedido-progreso-paso {
+        font-size: 10px;
+    }
+
+    .pedido-producto-card {
+        grid-template-columns:
+            70px
+            minmax(0, 1fr);
+    }
+
+    .pedido-producto-imagen {
+        width: 70px;
+        height: 70px;
+    }
+
+    .pedido-producto-subtotal {
+        grid-column: 2;
+
+        text-align: left;
+    }
+
+    .pedido-historial-superior {
+        flex-direction: column;
+        gap: 3px;
+    }
+
+}
+
+
+/* =========================================
+   RESPONSIVE - CELULAR PEQUEÑO
+========================================= */
+
+@media (max-width: 420px) {
+
+    .pedido-detalle-card,
+    .pedido-detalle-seccion {
+        padding: 18px;
+    }
+
+    .pedido-progreso {
+        overflow-x: auto;
+
+        grid-template-columns:
+            repeat(4, minmax(90px, 1fr));
+    }
+
+    .pedido-progreso::before {
+        display: none;
+    }
+
+}
+
+/* =========================================
+   COLORES DE ESTADO - LISTA DE PEDIDOS
+========================================= */
+
+.cuenta-pedido-estado-1 {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.cuenta-pedido-estado-2 {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.cuenta-pedido-estado-3 {
+    background: #ede7f6;
+    color: #5e35b1;
+}
+
+.cuenta-pedido-estado-4 {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.cuenta-pedido-estado-5 {
+    background: #ffebee;
+    color: #c62828;
+}
+
+/* =========================================================
+   MI CUENTA - DIRECCIONES
+========================================================= */
+
+
+/* =========================
+   LISTA DE DIRECCIONES
+========================= */
+
+.cuenta-direcciones-lista{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:18px;
+    margin-top:22px;
+}
+
+
+/* =========================
+   TARJETA
+========================= */
+
+.cuenta-direccion-card{
+    background:#ffffff;
+    border:1px solid #e3e8e2;
+    border-radius:16px;
+    padding:20px;
+    box-shadow:0 5px 18px rgba(0,0,0,.05);
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        border-color .2s ease;
+}
+
+.cuenta-direccion-card:hover{
+    transform:translateY(-2px);
+    border-color:#c9d8c7;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+
+
+/* =========================
+   PARTE SUPERIOR
+========================= */
+
+.cuenta-direccion-superior{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:15px;
+    padding-bottom:14px;
+    margin-bottom:14px;
+    border-bottom:1px solid #edf0ec;
+}
+
+.cuenta-direccion-superior > div{
+    min-width:0;
+}
+
+.cuenta-direccion-superior > div > span{
+    display:block;
+    margin-bottom:5px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1px;
+    color:#6d776d;
+}
+
+.cuenta-direccion-superior h3{
+    margin:0;
+    font-size:18px;
+    line-height:1.3;
+    color:#1d2a1e;
+    overflow-wrap:anywhere;
+}
+
+
+/* =========================
+   INSIGNIA PRINCIPAL
+========================= */
+
+.cuenta-direccion-principal{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    padding:6px 10px;
+    border-radius:999px;
+    background:#e8f4e9;
+    color:#1f5f28;
+    font-size:12px;
+    font-weight:700;
+}
+
+
+/* =========================
+   DATOS
+========================= */
+
+.cuenta-direccion-datos{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+
+.cuenta-direccion-datos p{
+    margin:0;
+    font-size:14px;
+    line-height:1.5;
+    color:#515a51;
+    overflow-wrap:anywhere;
+}
+
+.cuenta-direccion-datos strong{
+    color:#263027;
+}
+
+
+/* =========================
+   BOTONES DE TARJETA
+========================= */
+
+.cuenta-direccion-card .cuenta-direccion-acciones{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:18px;
+}
+
+.cuenta-direccion-card .cuenta-boton-secundario,
+.cuenta-direccion-eliminar{
+    min-height:38px;
+    padding:8px 13px;
+    border-radius:9px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:
+        background .2s ease,
+        color .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+}
+
+.cuenta-direccion-card .cuenta-boton-secundario{
+    border:1px solid #ccd5cb;
+    background:#ffffff;
+    color:#334034;
+}
+
+.cuenta-direccion-card .cuenta-boton-secundario:hover{
+    border-color:#1f5f28;
+    color:#1f5f28;
+    background:#f5faf5;
+}
+
+.cuenta-direccion-eliminar{
+    border:1px solid #e4b8b8;
+    background:#fff7f7;
+    color:#a83030;
+}
+
+.cuenta-direccion-eliminar:hover{
+    background:#a83030;
+    border-color:#a83030;
+    color:#ffffff;
+}
+
+
+/* =========================
+   BOTÓN AGREGAR DIRECCIÓN
+========================= */
+
+.cuenta-direcciones-lista + .cuenta-vista-acciones,
+.cuenta-direcciones-lista .cuenta-vista-acciones{
+    grid-column:1 / -1;
+    margin-top:4px;
+}
+
+.cuenta-vista-acciones .cuenta-boton-primario{
+    border:none;
+    border-radius:10px;
+    padding:11px 18px;
+    background:#1f5f28;
+    color:#ffffff;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    transition:
+        background .2s ease,
+        transform .2s ease;
+}
+
+.cuenta-vista-acciones .cuenta-boton-primario:hover{
+    background:#17491e;
+    transform:translateY(-1px);
+}
+
+
+/* =========================================================
+   BLOQUE DEL FORMULARIO
+========================================================= */
+
+.cuenta-direcciones{
+    margin-top:24px;
+}
+
+.cuenta-seccion-encabezado{
+    margin-bottom:18px;
+}
+
+.cuenta-seccion-encabezado h2{
+    margin:0 0 5px;
+    font-size:21px;
+    color:#1c291d;
+}
+
+.cuenta-seccion-encabezado p{
+    margin:0;
+    color:#697069;
+    font-size:14px;
+    line-height:1.5;
+}
+
+
+/* =========================
+   FORMULARIO
+========================= */
+
+.cuenta-direccion-formulario{
+    margin-top:20px;
+    padding:24px;
+    border:1px solid #dde5dc;
+    border-radius:18px;
+    background:#f9fbf8;
+}
+
+.cuenta-direccion-formulario[hidden]{
+    display:none !important;
+}
+
+.cuenta-direccion-formulario-titulo{
+    margin-bottom:20px;
+}
+
+.cuenta-direccion-formulario-titulo h3{
+    margin:0 0 5px;
+    font-size:20px;
+    color:#1f2d20;
+}
+
+.cuenta-direccion-formulario-titulo p{
+    margin:0;
+    color:#697069;
+    font-size:14px;
+}
+
+
+/* =========================
+   GRID DEL FORMULARIO
+========================= */
+
+.cuenta-form-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:18px;
+}
+
+.cuenta-form-grupo{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    min-width:0;
+}
+
+.cuenta-form-grupo-completo{
+    grid-column:1 / -1;
+}
+
+.cuenta-form-grupo label{
+    font-size:13px;
+    font-weight:700;
+    color:#394139;
+}
+
+.cuenta-form-grupo label span{
+    font-weight:400;
+    color:#858d85;
+}
+
+.cuenta-form-grupo input,
+.cuenta-form-grupo textarea{
+    width:100%;
+    border:1px solid #ccd5cb;
+    border-radius:10px;
+    background:#ffffff;
+    padding:11px 12px;
+    color:#252b25;
+    font-size:14px;
+    outline:none;
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.cuenta-form-grupo textarea{
+    min-height:100px;
+    resize:vertical;
+}
+
+.cuenta-form-grupo input:focus,
+.cuenta-form-grupo textarea:focus{
+    border-color:#2e7d32;
+    box-shadow:0 0 0 3px rgba(46,125,50,.10);
+}
+
+
+/* =========================
+   CHECKBOX PRINCIPAL
+========================= */
+
+.cuenta-direccion-principal-opcion{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    width:max-content;
+    max-width:100%;
+    margin-top:18px;
+    cursor:pointer;
+    color:#3e493f;
+    font-size:14px;
+    font-weight:600;
+}
+
+.cuenta-direccion-principal-opcion input{
+    width:17px;
+    height:17px;
+    accent-color:#1f5f28;
+}
+
+
+/* =========================
+   ACCIONES FORMULARIO
+========================= */
+
+.cuenta-direccion-formulario .cuenta-direccion-acciones{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:22px;
+}
+
+.btn-cuenta-principal{
+    min-height:42px;
+    padding:10px 18px;
+    border:0;
+    border-radius:10px;
+    background:#1f5f28;
+    color:#ffffff;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    transition:
+        background .2s ease,
+        transform .2s ease;
+}
+
+.btn-cuenta-principal:hover{
+    background:#17491e;
+    transform:translateY(-1px);
+}
+
+
+/* =========================
+   MENSAJES
+========================= */
+
+.cuenta-mensaje{
+    margin:15px 0;
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:14px;
+    line-height:1.5;
+}
+
+.cuenta-mensaje-exito{
+    border:1px solid #a8d5ad;
+    background:#edf8ee;
+    color:#1f5f28;
+}
+
+.cuenta-mensaje-error{
+    border:1px solid #edb9b9;
+    background:#fff2f2;
+    color:#9d2929;
+}
+
+.cuenta-mensaje ul{
+    margin:0;
+    padding-left:18px;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px){
+
+    .cuenta-direcciones-lista{
+        grid-template-columns:1fr;
+    }
+
+    .cuenta-form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .cuenta-form-grupo-completo{
+        grid-column:auto;
+    }
+
+}
+
+
+/* =========================================================
+   CELULAR
+   DISEÑO PROPIO PARA MÓVIL
+========================================================= */
+
+@media (max-width: 600px){
+
+    /* =====================
+       LISTADO
+    ====================== */
+
+    .cuenta-direcciones-lista{
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+        margin-top:16px;
+    }
+
+
+    /* =====================
+       TARJETA MÓVIL
+    ====================== */
+
+    .cuenta-direccion-card{
+        padding:16px;
+        border-radius:14px;
+        box-shadow:0 3px 12px rgba(0,0,0,.05);
+    }
+
+    .cuenta-direccion-card:hover{
+        transform:none;
+    }
+
+    .cuenta-direccion-superior{
+        gap:10px;
+        padding-bottom:12px;
+        margin-bottom:12px;
+    }
+
+    .cuenta-direccion-superior h3{
+        font-size:16px;
+    }
+
+    .cuenta-direccion-principal{
+        padding:5px 8px;
+        font-size:11px;
+    }
+
+    .cuenta-direccion-datos{
+        gap:5px;
+    }
+
+    .cuenta-direccion-datos p{
+        font-size:13px;
+        line-height:1.45;
+    }
+
+
+    /* =====================
+       BOTONES MÓVIL
+    ====================== */
+
+    .cuenta-direccion-card .cuenta-direccion-acciones{
+        display:grid;
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+        gap:8px;
+        margin-top:15px;
+    }
+
+    .cuenta-direccion-card .cuenta-boton-secundario,
+    .cuenta-direccion-eliminar{
+        width:100%;
+        min-height:40px;
+        padding:8px;
+        font-size:12px;
+    }
+
+    .cuenta-direccion-card .cuenta-direccion-eliminar:last-child{
+        grid-column:1 / -1;
+    }
+
+
+    /* =====================
+       FORMULARIO MÓVIL
+    ====================== */
+
+    .cuenta-direcciones{
+        margin-top:18px;
+    }
+
+    .cuenta-direccion-formulario{
+        margin-top:15px;
+        padding:16px;
+        border-radius:14px;
+    }
+
+    .cuenta-direccion-formulario-titulo{
+        margin-bottom:16px;
+    }
+
+    .cuenta-direccion-formulario-titulo h3{
+        font-size:18px;
+    }
+
+    .cuenta-direccion-formulario-titulo p{
+        font-size:13px;
+    }
+
+    .cuenta-form-grid{
+        display:flex;
+        flex-direction:column;
+        gap:14px;
+    }
+
+    .cuenta-form-grupo{
+        gap:6px;
+    }
+
+    .cuenta-form-grupo label{
+        font-size:13px;
+    }
+
+    .cuenta-form-grupo input,
+    .cuenta-form-grupo textarea{
+        min-height:44px;
+        padding:10px 11px;
+        font-size:16px;
+    }
+
+    /*
+       16px evita que algunos navegadores móviles
+       hagan zoom automático al tocar el input.
+    */
+
+    .cuenta-form-grupo textarea{
+        min-height:90px;
+    }
+
+    .cuenta-direccion-principal-opcion{
+        width:100%;
+        margin-top:16px;
+        font-size:13px;
+        line-height:1.4;
+    }
+
+
+    /* =====================
+       ACCIONES FORMULARIO
+    ====================== */
+
+    .cuenta-direccion-formulario .cuenta-direccion-acciones{
+        display:flex;
+        flex-direction:column;
+        align-items:stretch;
+        gap:9px;
+        margin-top:18px;
+    }
+
+    .btn-cuenta-principal,
+    .cuenta-direccion-formulario .cuenta-boton-secundario{
+        width:100%;
+        min-height:44px;
+    }
+
+
+    /* =====================
+       AGREGAR DIRECCIÓN
+    ====================== */
+
+    .cuenta-vista-acciones{
+        width:100%;
+    }
+
+    .cuenta-vista-acciones .cuenta-boton-primario{
+        width:100%;
+        min-height:44px;
+    }
+
 }

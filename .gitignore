@@ -35,3 +35,10 @@ desktop.ini
 # ==========================================
 *.tmp
 *.temp
+# ==========================================
+# google credenciales
+# ==========================================
+/config/google_oauth.php
+
+# Bases de datos exportadas
+*.sql

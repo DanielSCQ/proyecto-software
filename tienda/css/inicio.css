@@ -48,7 +48,7 @@
     width: 48%;
     margin-left: auto;
 
-    padding: 70px 20px 70px 70px;
+    padding: 70px 25px 70px 95px;
 }
 
 
@@ -177,7 +177,7 @@
             rgba(31, 95, 40, 0.12),
             rgba(31, 95, 40, 0.12)
         ),
-        url("../assets/tractor-banner.jpg");
+        var(--imagen-hero);
 
     background-size: cover;
     background-position: center;

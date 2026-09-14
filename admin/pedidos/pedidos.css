@@ -408,7 +408,13 @@ form select{
     display:flex;
     gap:10px;
     align-items:center;
+    width:100%;
+    max-width:none;
     margin-bottom:25px;
+    padding:0;
+    background:transparent;
+    border-radius:0;
+    box-shadow:none;
 }
 
 .buscador-pedidos input{
@@ -448,7 +454,8 @@ form select{
     TABLA DE PEDIDOS
 =================================*/
 
-.tabla-pedidos-contenedor{
+.tabla-pedidos-contenedor,
+.tabla-contenedor{
     width:100%;
     overflow-x:auto;
     border:1px solid #e5e7eb;
@@ -538,7 +545,7 @@ form select{
     ESTADOS
 =================================*/
 
-.estado-pedido{
+.estado{
     display:inline-block;
     padding:6px 11px;
     border-radius:20px;
@@ -547,31 +554,30 @@ form select{
     white-space:nowrap;
 }
 
-.estado-pendiente{
+.estado-1{
     background:#fff3cd;
     color:#856404;
 }
 
-.estado-proceso{
+.estado-2{
     background:#e3f2fd;
     color:#1565c0;
 }
 
-.estado-enviado{
+.estado-3{
     background:#ede7f6;
     color:#5e35b1;
 }
 
-.estado-entregado{
+.estado-4{
     background:#e8f5e9;
     color:#2e7d32;
 }
 
-.estado-cancelado{
+.estado-5{
     background:#ffebee;
     color:#c62828;
 }
-
 
 /*=================================
     BOTÓN VER PEDIDO
@@ -586,13 +592,14 @@ form select{
     border-radius:7px;
     font-size:13px;
     font-weight:bold;
+    white-space:nowrap;
     transition:.25s;
 }
 
 .btn-ver-pedido:hover{
-    background:#256728;
+    background:#f28c28;
+    transform:translateY(-1px);
 }
-
 
 /*=================================
     MENSAJE SIN PEDIDOS
@@ -733,17 +740,27 @@ form select{
 }
 
 .btn-volver{
-    display:inline-block;
-    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    padding:9px 14px;
+    background:#f4f6f5;
+    border:1px solid #d8ded9;
+    border-radius:8px;
     color:#1f5f28;
-    font-weight:600;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:700;
     margin-bottom:4px;
+    transition:.25s;
 }
 
 .btn-volver:hover{
-    text-decoration:underline;
+    background:#f28c28;
+    border-color:#f28c28;
+    color:white;
+    text-decoration:none;
+    transform:translateX(-2px);
 }
-
 
 /* =========================================
    TARJETAS DE INFORMACIÓN
@@ -922,6 +939,140 @@ form select{
 
     .tabla-contenedor{
         overflow-x:auto;
+    }
+
+}
+
+/* =========================================
+   GESTIÓN DEL ESTADO DEL PEDIDO
+========================================= */
+
+.gestion-estado{
+    margin-bottom:28px;
+}
+
+.estado-actual-texto{
+    margin-bottom:18px !important;
+    color:#555 !important;
+}
+
+.estado-actual-texto strong{
+    color:#1f5f28;
+}
+
+.form-estado-pedido{
+    max-width:100%;
+    padding:0;
+    background:transparent;
+    border-radius:0;
+    box-shadow:none;
+}
+
+.campo-estado{
+    margin-bottom:18px;
+}
+
+.campo-estado label{
+    display:block;
+    margin:0 0 7px;
+    color:#333;
+    font-size:14px;
+    font-weight:bold;
+}
+
+.campo-estado label span{
+    color:#777;
+    font-size:12px;
+    font-weight:normal;
+}
+
+.campo-estado input,
+.campo-estado select,
+.campo-estado textarea{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid #ccd4cf;
+    border-radius:8px;
+    font-size:14px;
+    color:#333;
+    background:#fff;
+    outline:none;
+    transition:.2s;
+}
+
+.campo-estado input:focus,
+.campo-estado select:focus,
+.campo-estado textarea:focus{
+    border-color:#2e7d32;
+    box-shadow:0 0 0 3px rgba(46,125,50,.10);
+}
+
+.campo-estado textarea{
+    resize:vertical;
+    min-height:100px;
+}
+
+.limite-campo{
+    display:block;
+    margin-top:6px;
+    color:#777;
+    font-size:12px;
+}
+
+.btn-actualizar-estado{
+    display:inline-block;
+    padding:11px 18px;
+    background:#2e7d32;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.btn-actualizar-estado:hover{
+    background:#f28c28;
+    transform:translateY(-1px);
+}
+
+/* =========================================
+   MENSAJES DE ACTUALIZACIÓN
+========================================= */
+
+.mensaje-pedido{
+    margin-bottom:20px;
+    padding:12px 15px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:600;
+}
+
+.mensaje-exito{
+    background:#e8f5e9;
+    color:#2e7d32;
+    border:1px solid #c8e6c9;
+}
+
+.mensaje-error{
+    background:#ffebee;
+    color:#c62828;
+    border:1px solid #ffcdd2;
+}
+
+/* =========================================
+   RESPONSIVE - GESTIÓN DE ESTADO
+========================================= */
+
+@media(max-width:700px){
+
+    .gestion-estado{
+        padding:16px;
+    }
+
+    .btn-actualizar-estado{
+        width:100%;
     }
 
 }

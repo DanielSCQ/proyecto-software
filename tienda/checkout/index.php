@@ -990,9 +990,9 @@ require_once("../includes/header.php");
                             </div>
 
 
-                            <!-- =================================
-                                 MÉTODO DE PAGO
-                            ================================== -->
+                        <!-- =================================
+                             MÉTODO DE PAGO
+                        ================================== -->
 
                             <div class="checkout-pago">
 
@@ -1001,29 +1001,64 @@ require_once("../includes/header.php");
                                 </h3>
 
                                 <p>
-                                    Por ahora utilizaremos un método
-                                    provisional mientras integramos
-                                    el pago de prueba.
+                                    Selecciona cómo deseas realizar el pago.
                                 </p>
 
+                                <div class="checkout-pago-opciones">
 
-                                <label class="checkout-pago-opcion">
+                                    <label class="checkout-pago-opcion">
 
-                                    <input
-                                        type="radio"
-                                        name="metodo_pago"
-                                        value="Contra entrega"
-                                        checked
-                                    >
+                                        <input
+                                            type="radio"
+                                            name="metodo_pago"
+                                            value="Contra entrega"
+                                            checked
+                                        >
 
-                                    <span>
-                                        Pago contra entrega
-                                    </span>
+                                        <div class="checkout-pago-info">
 
-                                </label>
+                                            <strong>
+                                                Pago contra entrega
+                                            </strong>
+
+                                            <span>
+                                                Paga al momento de recibir tu pedido.
+                                            </span>
+
+                                        </div>
+
+                                    </label>
+
+
+                                    <label class="checkout-pago-opcion">
+
+                                        <input
+                                            type="radio"
+                                            name="metodo_pago"
+                                            value="Pago simulado"
+                                        >
+
+                                        <div class="checkout-pago-info">
+
+                                            <strong>
+                                                Pago en línea
+                                            </strong>
+
+                                            <span>
+                                                Simulación de pago para fines demostrativos.
+                                            </span>
+
+                                            <small>
+                                                No utilices información bancaria real.
+                                            </small>
+
+                                        </div>
+
+                                    </label>
+
+                                </div>
 
                             </div>
-
 
                         </form>
 

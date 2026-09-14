@@ -808,6 +808,24 @@ body{
     line-height:1.5;
 }
 
+/*=================================
+    MENSAJE DE ÉXITO
+=================================*/
+
+.mensaje-exito{
+    background:#e8f5e9;
+    color:#1f5f28;
+
+    border-left:4px solid #2e7d32;
+
+    padding:14px 16px;
+
+    margin-bottom:20px;
+
+    border-radius:7px;
+
+    font-weight:bold;
+}
 
 /*=================================
     BOTONES FORMULARIO
@@ -816,24 +834,87 @@ body{
 .botones-formulario{
     display:flex;
     justify-content:flex-end;
-    gap:10px;
+    align-items:center;
+    gap:12px;
 }
 
+
+/*=================================
+    BOTÓN CANCELAR
+=================================*/
+
+.btn-cancelar{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:12px 20px;
+
+    background:#f4f4f4;
+    color:#555;
+
+    border:1px solid #ccc;
+    border-radius:8px;
+
+    text-decoration:none;
+
+    font-size:15px;
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:
+        background .25s ease,
+        color .25s ease,
+        border-color .25s ease,
+        transform .15s ease;
+}
+
+.btn-cancelar:hover{
+    background:#e8e8e8;
+    color:#333;
+    border-color:#aaa;
+}
+
+.btn-cancelar:active{
+    transform:scale(.97);
+}
+
+
+/*=================================
+    BOTÓN GUARDAR
+=================================*/
+
 .btn-guardar{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
     border:none;
+
     background:#2e7d32;
     color:white;
+
     padding:12px 20px;
+
     border-radius:8px;
+
     font-weight:bold;
     cursor:pointer;
     font-size:15px;
+
+    transition:
+        background .25s ease,
+        transform .15s ease;
 }
 
 .btn-guardar:hover{
     background:#256728;
 }
 
+.btn-guardar:active{
+    transform:scale(.97);
+}
 
 /*=================================
     RESPONSIVE FORMULARIO

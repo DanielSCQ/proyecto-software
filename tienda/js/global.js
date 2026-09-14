@@ -226,8 +226,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
+            const detalleUrl =
+                modal.dataset.detalleUrl || "";
+
+            if (detalleUrl === "") {
+
+                throw new Error(
+                    "No está configurada la ruta del producto."
+                );
+            }
+
             const respuesta = await fetch(
-                `detalle.php?id=${encodeURIComponent(idProducto)}`,
+                `${detalleUrl}?id=${encodeURIComponent(idProducto)}`,
+
                 {
                     method: "GET",
                     headers: {
@@ -509,8 +520,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
+            const favoritoUrl =
+                modal.dataset.favoritoUrl || "";
+
+            if (favoritoUrl === "") {
+                return;
+            }
+
             const respuesta = await fetch(
-                `favorito.php?producto=${encodeURIComponent(idProducto)}`,
+                `${favoritoUrl}?producto=${encodeURIComponent(idProducto)}`,
+
                 {
                     method: "GET",
                     credentials: "same-origin",
@@ -617,8 +636,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
+            const favoritoUrl =
+                modal.dataset.favoritoUrl || "";
+
+            if (favoritoUrl === "") {
+
+                mensaje.textContent =
+                    "No fue posible localizar favoritos.";
+
+                return;
+            }
+
             const respuesta = await fetch(
-                "favorito.php",
+                favoritoUrl,
+
                 {
                     method: "POST",
                     body: datosFormulario,
@@ -730,9 +761,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
+            const carritoUrl =
+                modal.dataset.carritoUrl || "";
+
+            if (carritoUrl === "") {
+
+                mensaje.textContent =
+                    "No fue posible localizar el carrito.";
+
+                return;
+            }
+
             const respuesta =
                 await fetch(
-                    "../carrito/agregar.php",
+                    carritoUrl,
+
                     {
                         method: "POST",
                         body: datosFormulario,
@@ -840,9 +883,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const enlace =
                 evento.target.closest(
-                    ".producto-enlace-detalle"
+                    ".producto-enlace-detalle, [data-ver-producto]"
                 );
-
 
             if (!enlace) {
                 return;
@@ -1717,7 +1759,7 @@ document.addEventListener(
 );
 
 /* =========================================
-   EVITAR DOBLE ENVÍO DEL CHECKOUT
+   CONTROL DEL ENVÍO DEL CHECKOUT
 ========================================= */
 
 document.addEventListener(
@@ -1734,6 +1776,7 @@ document.addEventListener(
                 '.checkout-confirmar[form="formCheckout"]'
             );
 
+
         if (
             !formCheckout ||
             !btnConfirmar
@@ -1741,11 +1784,66 @@ document.addEventListener(
             return;
         }
 
+
         let procesandoPedido = false;
+
+
+        const metodosPago =
+            formCheckout.querySelectorAll(
+                'input[name="metodo_pago"]'
+            );
+
+
+        function actualizarBotonPago() {
+
+            const metodoSeleccionado =
+                formCheckout.querySelector(
+                    'input[name="metodo_pago"]:checked'
+                );
+
+
+            if (!metodoSeleccionado) {
+                return;
+            }
+
+
+            if (
+                metodoSeleccionado.value ===
+                "Pago simulado"
+            ) {
+
+                btnConfirmar.textContent =
+                    "Continuar al pago";
+
+            } else {
+
+                btnConfirmar.textContent =
+                    "Confirmar pedido";
+            }
+        }
+
+
+        metodosPago.forEach(
+            (radio) => {
+
+                radio.addEventListener(
+                    "change",
+                    actualizarBotonPago
+                );
+
+            }
+        );
+
+
+        actualizarBotonPago();
 
         formCheckout.addEventListener(
             "submit",
             (evento) => {
+
+                // =================================
+                // EVITAR DOBLE ENVÍO
+                // =================================
 
                 if (procesandoPedido) {
 
@@ -1754,12 +1852,70 @@ document.addEventListener(
                     return;
                 }
 
+
+                // =================================
+                // MÉTODO SELECCIONADO
+                // =================================
+
+                const metodoSeleccionado =
+                    formCheckout.querySelector(
+                        'input[name="metodo_pago"]:checked'
+                    );
+
+
+                if (!metodoSeleccionado) {
+
+                    evento.preventDefault();
+
+                    return;
+                }
+
+
+                const metodoPago =
+                    metodoSeleccionado.value;
+
+
+                // =================================
+                // DEFINIR DESTINO
+                // =================================
+
+                if (
+                    metodoPago ===
+                    "Pago simulado"
+                ) {
+
+                    formCheckout.action =
+                        "simulador.php";
+
+                    btnConfirmar.textContent =
+                        "Continuando al pago...";
+
+                } else if (
+                    metodoPago ===
+                    "Contra entrega"
+                ) {
+
+                    formCheckout.action =
+                        "confirmar.php";
+
+                    btnConfirmar.textContent =
+                        "Procesando pedido...";
+
+                } else {
+
+                    // Método manipulado o inesperado.
+                    // No enviamos el formulario.
+
+                    evento.preventDefault();
+
+                    return;
+                }
+
+
                 procesandoPedido = true;
 
                 btnConfirmar.disabled = true;
 
-                btnConfirmar.textContent =
-                    "Procesando pedido...";
             }
         );
 

@@ -400,11 +400,9 @@ $resultado = $stmt->get_result();
 
                                     <div class="acciones-cliente">
 
-                                        <a href="ver_cliente.php?id=<?php echo $cliente["id_usuario"]; ?>"
+                                        <a href="ver_clientes.php?id=<?php echo $cliente["id_usuario"]; ?>"
                                             class="btn-ver">👁 Ver</a>
 
-                                        <a href="editar_cliente.php?id=<?php echo $cliente["id_usuario"]; ?>"
-                                            class="btn-editar">✏️ Editar</a>
 
                                     </div>
 

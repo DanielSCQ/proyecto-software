@@ -331,6 +331,82 @@
     accent-color: #1f5f28;
 }
 
+.checkout-pago-opciones {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+.checkout-pago-opcion {
+    position: relative;
+
+    align-items: flex-start;
+
+    min-width: 0;
+
+    transition:
+        border-color .2s ease,
+        background .2s ease,
+        box-shadow .2s ease,
+        transform .2s ease;
+}
+
+.checkout-pago-opcion:hover {
+    border-color: #91af93;
+
+    background: #f7faf7;
+}
+
+.checkout-pago-opcion:has(input:checked) {
+    border-color: #1f5f28;
+
+    background: #f2f8f3;
+
+    box-shadow:
+        0 0 0 2px rgba(31,95,40,.08);
+}
+
+.checkout-pago-opcion input {
+    flex-shrink: 0;
+
+    width: 17px;
+    height: 17px;
+
+    margin-top: 3px;
+}
+
+.checkout-pago-info {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+.checkout-pago-info strong {
+    color: #29332a;
+
+    font-size: 14px;
+}
+
+.checkout-pago-info span {
+    color: #6f786f;
+
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.checkout-pago-info small {
+    margin-top: 3px;
+
+    color: #a65d19;
+
+    font-size: 10px;
+    font-weight: 700;
+}
 
 /* =========================================
    SIN DIRECCIÓN
@@ -622,6 +698,24 @@
         grid-template-columns: 1fr;
     }
 
+    .checkout-pago-opciones {
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+    }
+
+    .checkout-pago-opcion {
+        padding: 13px;
+    }
+
+    .checkout-pago-info strong {
+        font-size: 13px;
+    }
+
+    .checkout-pago-info span {
+        font-size: 11px;
+    }
+
 }
 
 /* =========================================
@@ -829,6 +923,216 @@
 
     .checkout-guardar-direccion {
         width: 100%;
+    }
+
+}
+
+/* =========================================
+   SIMULADOR DE PAGO
+========================================= */
+
+.simulador-aviso {
+    margin-bottom: 24px;
+    padding: 16px 18px;
+
+    border: 1px solid #e7bd87;
+    border-radius: 10px;
+
+    background: #fff8ef;
+}
+
+.simulador-aviso strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #9c5414;
+}
+
+.simulador-aviso p {
+    margin: 0;
+
+    color: #70583e;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+.simulador-rechazado {
+    margin-bottom: 20px;
+    padding: 15px 17px;
+
+    border: 1px solid #e4a4a0;
+    border-radius: 9px;
+
+    background: #fff3f2;
+    color: #8f2f2a;
+}
+
+.simulador-rechazado strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.simulador-rechazado p {
+    margin: 0;
+}
+
+
+.simulador-layout {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        330px;
+
+    gap: 24px;
+
+    align-items: start;
+}
+
+
+.simulador-formulario,
+.simulador-pruebas {
+    padding: 26px;
+
+    border: 1px solid #e1e6df;
+    border-radius: 14px;
+
+    background: #fff;
+}
+
+
+.simulador-formulario h2,
+.simulador-pruebas h2 {
+    margin: 0 0 22px;
+
+    color: #273028;
+
+    font-size: 21px;
+}
+
+
+.simulador-formulario form {
+    display: grid;
+    gap: 17px;
+}
+
+
+.simulador-campos-cortos {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 14px;
+}
+
+
+.simulador-pruebas {
+    background:
+        linear-gradient(
+            145deg,
+            #173f1c,
+            #1f5f28
+        );
+
+    color: #fff;
+}
+
+
+.simulador-pruebas h2 {
+    color: #fff;
+}
+
+
+.simulador-prueba {
+    margin-bottom: 13px;
+    padding: 14px;
+
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 9px;
+
+    background: rgba(255,255,255,.06);
+}
+
+
+.simulador-prueba strong {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 13px;
+}
+
+
+.simulador-prueba code {
+    display: block;
+
+    overflow-wrap: anywhere;
+
+    color: #fff;
+
+    font-family:
+        Consolas,
+        monospace;
+
+    font-size: 14px;
+}
+
+
+.simulador-pruebas > p {
+    color: rgba(255,255,255,.68);
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+.simulador-volver {
+    margin-top: 18px;
+}
+
+
+/* =========================================
+   SIMULADOR RESPONSIVE
+========================================= */
+
+@media (max-width: 800px) {
+
+    .simulador-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .simulador-pruebas {
+        order: -1;
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .simulador-formulario,
+    .simulador-pruebas {
+        padding: 19px;
+    }
+
+    .simulador-campos-cortos {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 10px;
+    }
+
+}
+
+
+@media (max-width: 390px) {
+
+    .simulador-campos-cortos {
+        grid-template-columns: 1fr;
     }
 
 }

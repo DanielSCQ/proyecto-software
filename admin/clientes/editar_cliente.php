@@ -43,7 +43,7 @@ $sql = "SELECT
 $stmt = $conexion->prepare($sql);
 
 if (!$stmt) {
-    die("Error en la consulta: " . $conexion->error);
+    die("No fue posible consultar la información del cliente.");
 }
 
 $stmt->bind_param("i", $id_cliente);
@@ -58,11 +58,17 @@ $resultado = $stmt->get_result();
 // =================================
 
 if ($resultado->num_rows === 0) {
+
+    $stmt->close();
+
     header("Location: clientes.php");
+
     exit();
 }
 
 $cliente = $resultado->fetch_assoc();
+
+$stmt->close();
 
 ?>
 
@@ -132,6 +138,7 @@ $cliente = $resultado->fetch_assoc();
 
     </aside>
 
+
     <!-- =================================
          CONTENIDO PRINCIPAL
     ================================== -->
@@ -146,11 +153,21 @@ $cliente = $resultado->fetch_assoc();
 
             <div class="titulo-panel">
 
-                <h2>¡Bienvenido,<?php echo htmlspecialchars($_SESSION["nombre"]); ?>!</h2>
+                <h2>
+                    ¡Bienvenido,
+                    <?php
+                    echo htmlspecialchars(
+                        $_SESSION["nombre"] ?? "",
+                        ENT_QUOTES,
+                        "UTF-8"
+                    );
+                    ?>!
+                </h2>
 
                 <p>Panel de Administración AGRANDA</p>
 
             </div>
+
 
             <div class="panel-usuario">
 
@@ -163,14 +180,31 @@ $cliente = $resultado->fetch_assoc();
                 </div>
 
 
-                <div class="usuario">👤<?php echo htmlspecialchars($_SESSION["nombre"]); ?></div>
+                <div class="usuario">
 
-                <a href="../cerrar_sesion.php"
-                    class="btn-salir">Cerrar sesión</a>
+                    👤
+                    <?php
+                    echo htmlspecialchars(
+                        $_SESSION["nombre"] ?? "",
+                        ENT_QUOTES,
+                        "UTF-8"
+                    );
+                    ?>
+
+                </div>
+
+
+                <a
+                    href="../cerrar_sesion.php"
+                    class="btn-salir"
+                >
+                    Cerrar sesión
+                </a>
 
             </div>
 
         </header>
+
 
         <!-- =================================
              EDICIÓN DEL CLIENTE
@@ -188,18 +222,26 @@ $cliente = $resultado->fetch_assoc();
 
                     <h2>✏️ Editar cliente</h2>
 
-                    <p>Modifica la información del cliente seleccionado.</p>
+                    <p>
+                        Modifica la información del cliente seleccionado.
+                    </p>
 
                 </div>
 
+
                 <div class="acciones-detalle">
 
-                    <a href="ver_cliente.php?id=<?php echo $cliente["id_usuario"]; ?>"
-                        class="btn-volver">← Volver</a>
+                    <a
+                        href="ver_clientes.php?id=<?php echo (int)$cliente["id_usuario"]; ?>"
+                        class="btn-volver"
+                    >
+                        ← Volver
+                    </a>
 
                 </div>
 
             </div>
+
 
             <!-- =================================
                  FORMULARIO
@@ -221,8 +263,9 @@ $cliente = $resultado->fetch_assoc();
                     <input
                         type="hidden"
                         name="id_usuario"
-                        value="<?php echo $cliente["id_usuario"]; ?>"
+                        value="<?php echo (int)$cliente["id_usuario"]; ?>"
                     >
+
 
                     <!-- =================================
                          NOMBRE Y APELLIDO
@@ -230,37 +273,57 @@ $cliente = $resultado->fetch_assoc();
 
                     <div class="fila-formulario">
 
+
                         <div class="campo-formulario">
 
-                            <label for="nombre">Nombre</label>
+                            <label for="nombre">
+                                Nombre
+                            </label>
 
                             <input
                                 type="text"
                                 id="nombre"
                                 name="nombre"
                                 maxlength="100"
-                                value="<?php echo htmlspecialchars($cliente["nombre"]); ?>"
+                                value="<?php
+                                    echo htmlspecialchars(
+                                        $cliente["nombre"],
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    );
+                                ?>"
                                 required
                             >
 
                         </div>
 
+
                         <div class="campo-formulario">
 
-                            <label for="apellido">Apellido</label>
+                            <label for="apellido">
+                                Apellido
+                            </label>
 
                             <input
                                 type="text"
                                 id="apellido"
                                 name="apellido"
                                 maxlength="100"
-                                value="<?php echo htmlspecialchars($cliente["apellido"]); ?>"
+                                value="<?php
+                                    echo htmlspecialchars(
+                                        $cliente["apellido"],
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    );
+                                ?>"
                                 required
                             >
 
                         </div>
 
+
                     </div>
+
 
                     <!-- =================================
                          CORREO
@@ -277,7 +340,13 @@ $cliente = $resultado->fetch_assoc();
                             id="correo"
                             name="correo"
                             maxlength="150"
-                            value="<?php echo htmlspecialchars($cliente["correo"]); ?>"
+                            value="<?php
+                                echo htmlspecialchars(
+                                    $cliente["correo"],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                );
+                            ?>"
                             required
                         >
 
@@ -299,7 +368,13 @@ $cliente = $resultado->fetch_assoc();
                             id="telefono"
                             name="telefono"
                             maxlength="20"
-                            value="<?php echo htmlspecialchars($cliente["telefono"] ?? ""); ?>"
+                            value="<?php
+                                echo htmlspecialchars(
+                                    $cliente["telefono"] ?? "",
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                );
+                            ?>"
                         >
 
                     </div>
@@ -323,14 +398,23 @@ $cliente = $resultado->fetch_assoc();
 
                             <option
                                 value="1"
-                                <?php echo $cliente["estado"] ? "selected" : ""; ?>
+                                <?php
+                                echo (int)$cliente["estado"] === 1
+                                    ? "selected"
+                                    : "";
+                                ?>
                             >
                                 Activo
                             </option>
 
+
                             <option
                                 value="0"
-                                <?php echo !$cliente["estado"] ? "selected" : ""; ?>
+                                <?php
+                                echo (int)$cliente["estado"] === 0
+                                    ? "selected"
+                                    : "";
+                                ?>
                             >
                                 Inactivo
                             </option>
@@ -366,12 +450,20 @@ $cliente = $resultado->fetch_assoc();
 
                     <div class="botones-formulario">
 
-                        <a href="ver_cliente.php?id=<?php echo $cliente["id_usuario"]; ?>"
-                            class="btn-cancelar">Cancelar</a>
+                        <a
+                            href="ver_clientes.php?id=<?php echo (int)$cliente["id_usuario"]; ?>"
+                            class="btn-cancelar"
+                        >
+                            Cancelar
+                        </a>
 
 
-                        <button type="submit"
-                            class="btn-guardar">💾 Guardar cambios</button>
+                        <button
+                            type="submit"
+                            class="btn-guardar"
+                        >
+                            💾 Guardar cambios
+                        </button>
 
                     </div>
 
@@ -385,6 +477,9 @@ $cliente = $resultado->fetch_assoc();
 
 </div>
 
+
 <script src="../dashboard/dashboard.js"></script>
+
 </body>
+
 </html>

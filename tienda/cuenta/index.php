@@ -73,19 +73,62 @@ $idUsuario =
 
 
     // ==========================================
-// TOKEN CSRF PARA FAVORITOS
-// ==========================================
-if (
-    empty($_SESSION["csrf_favoritos"]) ||
-    !is_string($_SESSION["csrf_favoritos"])
-) {
-    $_SESSION["csrf_favoritos"] =
-        bin2hex(random_bytes(32));
-}
+    // TOKEN CSRF PARA FAVORITOS
+    // ==========================================
+    if (
+        empty($_SESSION["csrf_favoritos"]) ||
+        !is_string($_SESSION["csrf_favoritos"])
+    ) {
+        $_SESSION["csrf_favoritos"] =
+            bin2hex(random_bytes(32));
+    }
 
-$csrfFavoritos =
-    $_SESSION["csrf_favoritos"];
+    $csrfFavoritos =
+        $_SESSION["csrf_favoritos"];
 
+
+    // ==========================================
+    // TOKEN CSRF PARA CARRITO
+    // ==========================================
+    if (
+        empty($_SESSION["csrf_carrito"]) ||
+        !is_string($_SESSION["csrf_carrito"])
+    ) {
+        $_SESSION["csrf_carrito"] =
+            bin2hex(random_bytes(32));
+    }
+
+    $csrfCarrito =
+        $_SESSION["csrf_carrito"];
+
+    // ==========================================
+    // TOKEN CSRF PARA EDITAR DATOS
+    // ==========================================
+    if (
+        empty($_SESSION["csrf_editar_datos"]) ||
+        !is_string($_SESSION["csrf_editar_datos"])
+    ) {
+        $_SESSION["csrf_editar_datos"] =
+            bin2hex(random_bytes(32));
+    }
+
+    $csrfEditarDatos =
+        $_SESSION["csrf_editar_datos"];
+
+
+    // ==========================================
+    // TOKEN CSRF PARA DIRECCIONES
+    // ==========================================
+    if (
+        empty($_SESSION["csrf_direcciones"]) ||
+        !is_string($_SESSION["csrf_direcciones"])
+    ) {
+        $_SESSION["csrf_direcciones"] =
+            bin2hex(random_bytes(32));
+    }
+
+    $csrfDirecciones =
+        $_SESSION["csrf_direcciones"];
 
 // ==========================================
 // CONSULTAR CLIENTE
@@ -326,12 +369,226 @@ if (!empty($datosUsuario["fecha_registro"])) {
     $totalFavoritos =
         count($favoritos);
 
+
+    // ==========================================
+    // PEDIDOS DEL CLIENTE
+    // ==========================================
+
+    $pedidos = [];
+
+    $sqlPedidos = "
+        SELECT
+            p.id_pedido,
+            p.total,
+            p.metodo_pago,
+            ep.id_estado,
+            ep.nombre AS estado
+
+        FROM pedidos p
+
+        INNER JOIN estado_pedido ep
+            ON ep.id_estado = p.id_estado
+
+        WHERE p.id_usuario = ?
+
+        ORDER BY p.id_pedido DESC
+    ";
+
+
+    $stmtPedidos =
+        $conexion->prepare(
+            $sqlPedidos
+        );
+
+
+    if ($stmtPedidos) {
+
+        $stmtPedidos->bind_param(
+            "i",
+            $idUsuario
+        );
+
+        $stmtPedidos->execute();
+
+        $resultadoPedidos =
+            $stmtPedidos->get_result();
+
+
+        while (
+            $pedido =
+                $resultadoPedidos->fetch_assoc()
+        ) {
+
+            $pedidos[] =
+                $pedido;
+        }
+
+
+        $stmtPedidos->close();
+    }
+
+
+    // ==========================================
+    // CONTADOR DE PEDIDOS
+    // ==========================================
+
+    $totalPedidos =
+        count($pedidos);    
+
+
+    // ==========================================
+    // DIRECCIONES DEL CLIENTE
+    // ==========================================
+
+    $direcciones = [];
+
+    $sqlDirecciones = "
+        SELECT
+            id_direccion,
+            nombre,
+            telefono,
+            receptor,
+            direccion,
+            barrio,
+            municipio,
+            departamento,
+            referencia,
+            principal
+        FROM direcciones
+        WHERE id_usuario = ?
+        AND estado = 1
+        ORDER BY
+            principal DESC,
+            id_direccion DESC
+    ";
+
+
+    $stmtDirecciones =
+        $conexion->prepare(
+            $sqlDirecciones
+        );
+
+
+    if ($stmtDirecciones) {
+
+        $stmtDirecciones->bind_param(
+            "i",
+            $idUsuario
+        );
+
+        $stmtDirecciones->execute();
+
+        $resultadoDirecciones =
+            $stmtDirecciones->get_result();
+
+
+        while (
+            $direccionCliente =
+                $resultadoDirecciones->fetch_assoc()
+        ) {
+
+            $direcciones[] =
+                $direccionCliente;
+        }
+
+
+        $stmtDirecciones->close();
+    }
+
+
+    $totalDirecciones =
+        count($direcciones);
+
+
+    // =========================================
+    // MENSAJES DE DIRECCIONES
+    // =========================================
+
+    $direccionExito =
+        $_SESSION["direccion_exito"] ?? "";
+
+    $direccionError =
+        $_SESSION["direccion_error"] ?? "";
+
+    $direccionErrores =
+        $_SESSION["direccion_errores"] ?? [];
+
+    $direccionForm =
+        $_SESSION["direccion_form"] ?? [];
+
+    unset(
+        $_SESSION["direccion_exito"],
+        $_SESSION["direccion_error"],
+        $_SESSION["direccion_errores"],
+        $_SESSION["direccion_form"]
+    );
+
+
+    // =========================================
+    // VALORES DEL FORMULARIO
+    // =========================================
+
+    $dirNombre =
+        $direccionForm["nombre"] ?? "";
+
+    $dirReceptor =
+        $direccionForm["receptor"] ?? "";
+
+    $dirTelefono =
+        $direccionForm["telefono"] ?? "";
+
+    $dirDireccion =
+        $direccionForm["direccion"] ?? "";
+
+    $dirBarrio =
+        $direccionForm["barrio"] ?? "";
+
+    $dirMunicipio =
+        $direccionForm["municipio"] ?? "";
+
+    $dirDepartamento =
+        $direccionForm["departamento"] ?? "";
+
+    $dirReferencia =
+        $direccionForm["referencia"] ?? "";
+
+    $dirPrincipal =
+        !empty(
+            $direccionForm["principal"]
+        );
+
+// =========================================
+// MODO DEL FORMULARIO DE DIRECCIÓN
+// =========================================
+
+$modoDireccion =
+    $direccionForm["modo"] ?? "agregar";
+
+$idDireccionEditar =
+    isset($direccionForm["id_direccion"])
+        ? (int) $direccionForm["id_direccion"]
+        : 0;
+
+$editandoDireccion =
+    $modoDireccion === "editar" &&
+    $idDireccionEditar > 0;
+
+
 // ==========================================
 // HEADER
 // ==========================================
 require_once __DIR__ . "/../includes/header.php";
 
 ?>
+
+<link
+    rel="stylesheet"
+    href="<?= htmlspecialchars(
+        $base_url . "css/productos.css",
+        ENT_QUOTES,
+        "UTF-8"
+    ) ?>"
+>
 
 <main class="cuenta-page">
 
@@ -424,8 +681,9 @@ require_once __DIR__ . "/../includes/header.php";
                     </span>
 
                     <span class="cuenta-menu-contador">
-                        0
+                        <?= $totalPedidos ?>
                     </span>
+
                 </button>
 
 
@@ -456,8 +714,11 @@ require_once __DIR__ . "/../includes/header.php";
                     <span>
                         Direcciones
                     </span>
-                </button>
 
+                    <span class="cuenta-menu-contador">
+                        <?= $totalDirecciones ?>
+                    </span>
+                </button>
 
                 <button
                     type="button"
@@ -593,13 +854,209 @@ require_once __DIR__ . "/../includes/header.php";
                         <button
                             type="button"
                             class="cuenta-boton-secundario"
-                            disabled
+                            id="btnEditarDatos"
                         >
                             Editar datos
                         </button>
 
                     </div>
 
+                    <form
+                        action="actualizar_datos.php"
+                        method="POST"
+                        class="cuenta-formulario-edicion"
+                        id="formEditarDatos"
+                        hidden
+                    >
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?= htmlspecialchars(
+                                $csrfEditarDatos,
+                                ENT_QUOTES,
+                                "UTF-8"
+                            ) ?>"
+                        >
+
+
+                        <div class="campo">
+
+                            <label for="editarNombre">
+                                Nombre
+                            </label>
+
+                            <input
+                                type="text"
+                                id="editarNombre"
+                                name="nombre"
+                                value="<?= $nombreSeguro ?>"
+                                maxlength="50"
+                                required
+                                autocomplete="given-name"
+                                data-contador
+                            >
+
+                            <div class="contador">
+                                <span class="contador-actual">
+                                    <?= mb_strlen(
+                                        $datosUsuario["nombre"],
+                                        "UTF-8"
+                                    ) ?>
+                                </span>/100
+                            </div>
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label for="editarApellido">
+                                Apellido
+                            </label>
+
+                            <input
+                                type="text"
+                                id="editarApellido"
+                                name="apellido"
+                                value="<?= $apellidoSeguro ?>"
+                                maxlength="50"
+                                required
+                                autocomplete="family-name"
+                                data-contador
+                            >
+
+                            <div class="contador">
+                                <span class="contador-actual">
+                                    <?= mb_strlen(
+                                        $datosUsuario["apellido"],
+                                        "UTF-8"
+                                    ) ?>
+                                </span>/100
+                            </div>
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label for="editarTelefono">
+                                Teléfono
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="editarTelefono"
+                                name="telefono"
+                                value="<?= htmlspecialchars(
+                                    $datosUsuario["telefono"] ?? "",
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>"
+                                maxlength="20"
+                                autocomplete="tel"
+                                data-contador
+                            >
+
+                            <div class="contador">
+                                <span class="contador-actual">
+                                    <?= mb_strlen(
+                                        $datosUsuario["telefono"] ?? "",
+                                        "UTF-8"
+                                    ) ?>
+                                </span>/20
+                            </div>
+
+                        </div>
+
+
+                        <div class="campo campo-bloqueado">
+
+                            <label>
+                                Correo electrónico
+                            </label>
+
+                            <button
+                                type="button"
+                                class="cuenta-campo-bloqueado"
+                                id="btnCorreoBloqueado"
+                            >
+                                <span>
+                                    <?= $correoSeguro ?>
+                                </span>
+
+                                <small>
+                                    No editable
+                                </small>
+                            </button>
+
+                        </div>
+
+
+                        <div class="campo campo-bloqueado">
+
+                            <label>
+                                Miembro desde
+                            </label>
+
+                            <div class="cuenta-campo-informativo">
+                                <?= htmlspecialchars(
+                                    $fechaRegistro,
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="cuenta-aviso-correo"
+                            id="avisoCorreo"
+                            hidden
+                        >
+
+                            <strong>
+                                Este dato requiere atención especial.
+                            </strong>
+
+                            <p>
+                                Por seguridad, el correo electrónico
+                                no puede modificarse directamente
+                                desde tu cuenta.
+                            </p>
+
+                            <p>
+                                Más adelante podrás solicitar el cambio
+                                mediante nuestra sección de Contacto.
+                            </p>
+
+                        </div>
+
+
+                        <div class="cuenta-formulario-acciones">
+
+                            <button
+                                type="submit"
+                                class="cuenta-boton-primario"
+                                id="btnGuardarDatos"
+                            >
+                                Guardar cambios
+                            </button>
+
+                            <button
+                                type="button"
+                                class="cuenta-boton-secundario"
+                                id="btnCancelarEdicion"
+                            >
+                                Cancelar
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                    
                 </div>
 
 
@@ -634,18 +1091,138 @@ require_once __DIR__ . "/../includes/header.php";
                     </div>
 
 
-                    <div class="cuenta-estado-vacio">
+                    <?php if (empty($pedidos)): ?>
 
-                        <strong>
-                            Aún no hay pedidos para mostrar.
-                        </strong>
+                        <div class="cuenta-estado-vacio">
 
-                        <p>
-                            Cuando realices una compra,
-                            aparecerá aquí.
-                        </p>
+                            <strong>
+                                Aún no hay pedidos para mostrar.
+                            </strong>
 
-                    </div>
+                            <p>
+                                Cuando realices una compra,
+                                aparecerá aquí.
+                            </p>
+
+                            <a
+                                href="<?= htmlspecialchars(
+                                    $base_url . "productos/",
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>"
+                                class="cuenta-favoritos-explorar"
+                            >
+                                Explorar productos
+                            </a>
+
+                        </div>
+
+
+                    <?php else: ?>
+
+                        <div class="cuenta-pedidos-lista">
+
+                            <?php foreach ($pedidos as $pedido): ?>
+
+                                <article class="cuenta-pedido-card">
+
+                                    <div class="cuenta-pedido-superior">
+
+                                        <div>
+
+                                            <span class="cuenta-pedido-numero">
+                                                Pedido
+                                            </span>
+
+                                            <h3>
+                                                #<?= (int) $pedido["id_pedido"] ?>
+                                            </h3>
+
+                                        </div>
+
+
+                                        <span
+                                            class="
+                                                cuenta-pedido-estado
+                                                cuenta-pedido-estado-<?=
+                                                    (int) $pedido["id_estado"]
+                                                ?>
+                                            "
+                                        >
+
+                                            <?= htmlspecialchars(
+                                                $pedido["estado"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>
+
+                                        </span>
+                                        
+                                    </div>
+
+
+                                    <div class="cuenta-pedido-datos">
+
+                                        <div>
+
+                                            <span>
+                                                Método de pago
+                                            </span>
+
+                                            <strong>
+                                                <?= htmlspecialchars(
+                                                    $pedido["metodo_pago"],
+                                                    ENT_QUOTES,
+                                                    "UTF-8"
+                                                ) ?>
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <span>
+                                                Total
+                                            </span>
+
+                                            <strong>
+                                                $<?= number_format(
+                                                    (float) $pedido["total"],
+                                                    0,
+                                                    ",",
+                                                    "."
+                                                ) ?>
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="cuenta-pedido-acciones">
+
+                                        <a
+                                            href="<?= htmlspecialchars(
+                                                $base_url .
+                                                "pedidos/detalle.php?id=" .
+                                                (int) $pedido["id_pedido"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+                                            class="cuenta-boton-secundario"
+                                        >
+                                            Ver detalle
+                                        </a>
+
+                                    </div>
+                                    
+                                </article>
+
+                            <?php endforeach; ?>
+
+                        </div>
+
+                    <?php endif; ?>
 
                 </div>
 
@@ -858,19 +1435,14 @@ require_once __DIR__ . "/../includes/header.php";
 
                                     <div class="cuenta-favorito-acciones">
 
-                                        <a
-                                            href="<?= htmlspecialchars(
-                                                $base_url .
-                                                "productos/?producto=" .
-                                                (int) $favorito["id_producto"],
-                                                ENT_QUOTES,
-                                                "UTF-8"
-                                            ) ?>"
+                                        <button
+                                            type="button"
                                             class="cuenta-favorito-boton"
+                                            data-ver-producto
+                                            data-producto-id="<?= (int) $favorito["id_producto"] ?>"
                                         >
                                             Ver producto
-                                        </a>
-
+                                        </button>
 
                                         <button
                                             type="button"
@@ -897,6 +1469,8 @@ require_once __DIR__ . "/../includes/header.php";
                     </div>
 
                 <?php endif; ?>
+
+                </div>
 
                 <!-- =========================
                      DIRECCIONES
@@ -928,22 +1502,645 @@ require_once __DIR__ . "/../includes/header.php";
 
                     </div>
 
+                    <?php if (empty($direcciones)): ?>
 
-                    <div class="cuenta-estado-vacio">
+                        <div class="cuenta-estado-vacio">
 
-                        <strong>
-                            No hay direcciones registradas.
-                        </strong>
+                            <strong>
+                                No tienes direcciones registradas.
+                            </strong>
 
-                        <p>
-                            Más adelante podrás agregarlas desde aquí.
-                        </p>
+                            <p>
+                                Agrega una dirección para utilizarla
+                                en tus próximas compras.
+                            </p>
+
+                            <button
+                                type="button"
+                                class="cuenta-boton-primario"
+                                id="btnAgregarDireccion"
+                            >
+                                Agregar dirección
+                            </button>
+
+                        </div>
+
+                    <?php else: ?>
+
+                        <div class="cuenta-direcciones-lista">
+
+                            <?php foreach ($direcciones as $direccionCliente): ?>
+
+                                <article
+                                    class="cuenta-direccion-card"
+                                    data-direccion-id="<?= (int) $direccionCliente["id_direccion"] ?>"
+                                >
+
+                                    <div class="cuenta-direccion-superior">
+
+                                        <div>
+
+                                            <span>
+                                                DIRECCIÓN
+                                            </span>
+
+                                            <h3>
+                                                <?= htmlspecialchars(
+                                                    $direccionCliente["nombre"],
+                                                    ENT_QUOTES,
+                                                    "UTF-8"
+                                                ) ?>
+                                            </h3>
+
+                                        </div>
+
+
+                                        <?php if (
+                                            (int) $direccionCliente["principal"] === 1
+                                        ): ?>
+
+                                            <span class="cuenta-direccion-principal">
+                                                Principal
+                                            </span>
+
+                                        <?php endif; ?>
+
+                                    </div>
+
+
+                                    <div class="cuenta-direccion-datos">
+
+                                        <p>
+                                            <strong>
+                                                <?= htmlspecialchars(
+                                                    $direccionCliente["receptor"],
+                                                    ENT_QUOTES,
+                                                    "UTF-8"
+                                                ) ?>
+                                            </strong>
+                                        </p>
+
+
+                                        <p>
+                                            <?= htmlspecialchars(
+                                                $direccionCliente["direccion"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>
+                                        </p>
+
+
+                                        <?php if (
+                                            !empty($direccionCliente["barrio"])
+                                        ): ?>
+
+                                            <p>
+                                                Barrio:
+                                                <?= htmlspecialchars(
+                                                    $direccionCliente["barrio"],
+                                                    ENT_QUOTES,
+                                                    "UTF-8"
+                                                ) ?>
+                                            </p>
+
+                                        <?php endif; ?>
+
+
+                                        <p>
+                                            <?= htmlspecialchars(
+                                                $direccionCliente["municipio"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>,
+                                            <?= htmlspecialchars(
+                                                $direccionCliente["departamento"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>
+                                        </p>
+
+
+                                        <p>
+                                            Tel.
+                                            <?= htmlspecialchars(
+                                                $direccionCliente["telefono"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>
+                                        </p>
+
+
+                                        <?php if (
+                                            !empty($direccionCliente["referencia"])
+                                        ): ?>
+
+                                            <p>
+                                                Referencia:
+                                                <?= htmlspecialchars(
+                                                    $direccionCliente["referencia"],
+                                                    ENT_QUOTES,
+                                                    "UTF-8"
+                                                ) ?>
+                                            </p>
+
+                                        <?php endif; ?>
+
+                                    </div>
+
+
+                                    <div class="cuenta-direccion-acciones">
+
+                                        <button
+                                            type="button"
+                                            class="cuenta-boton-secundario"
+                                            data-editar-direccion
+
+                                            data-direccion-id="<?= (int) $direccionCliente["id_direccion"] ?>"
+
+                                            data-nombre="<?= htmlspecialchars(
+                                                $direccionCliente["nombre"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+
+                                            data-receptor="<?= htmlspecialchars(
+                                                $direccionCliente["receptor"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+
+                                            data-telefono="<?= htmlspecialchars(
+                                                $direccionCliente["telefono"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+
+                                            data-direccion="<?= htmlspecialchars(
+                                                $direccionCliente["direccion"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+
+                                            data-barrio="<?= htmlspecialchars(
+                                                $direccionCliente["barrio"] ?? "",
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+
+                                            data-municipio="<?= htmlspecialchars(
+                                                $direccionCliente["municipio"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+
+                                            data-departamento="<?= htmlspecialchars(
+                                                $direccionCliente["departamento"],
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+
+                                            data-referencia="<?= htmlspecialchars(
+                                                $direccionCliente["referencia"] ?? "",
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+
+                                            data-principal="<?= (int) $direccionCliente["principal"] ?>"
+                                        >
+                                            Editar
+                                        </button>
+
+                                        <?php if (
+                                            (int) $direccionCliente["principal"] !== 1
+                                        ): ?>
+
+                                            <button
+                                                type="button"
+                                                class="cuenta-boton-secundario"
+                                                data-principal-direccion
+                                                data-direccion-id="<?= (int) $direccionCliente["id_direccion"] ?>"
+                                            >
+                                                Hacer principal
+                                            </button>
+
+                                        <?php endif; ?>
+
+
+                                        <button
+                                            type="button"
+                                            class="cuenta-direccion-eliminar"
+                                            data-eliminar-direccion
+                                            data-direccion-id="<?= (int) $direccionCliente["id_direccion"] ?>"
+                                        >
+                                            Eliminar
+                                        </button>
+
+                                    </div>
+
+                                </article>
+
+                            <?php endforeach; ?>
+
+
+                            <div class="cuenta-vista-acciones">
+
+                                <button
+                                    type="button"
+                                    class="cuenta-boton-primario"
+                                    id="btnAgregarDireccion"
+                                >
+                                    Agregar dirección
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    <?php endif; ?>
+
+
+                    <div class="cuenta-direcciones">
+
+                        <div class="cuenta-seccion-encabezado">
+                            <div>
+                                <h2>Mis direcciones</h2>
+
+                                <p>
+                                    Administra las direcciones que utilizas
+                                    para recibir tus pedidos.
+                                </p>
+                            </div>
+                        </div>
+
+
+                        <?php if ($direccionExito !== ""): ?>
+
+                            <div class="cuenta-mensaje cuenta-mensaje-exito">
+                                <?= htmlspecialchars(
+                                    $direccionExito,
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>
+                            </div>
+
+                        <?php endif; ?>
+
+
+                        <?php if ($direccionError !== ""): ?>
+
+                            <div class="cuenta-mensaje cuenta-mensaje-error">
+                                <?= htmlspecialchars(
+                                    $direccionError,
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>
+                            </div>
+
+                        <?php endif; ?>
+
+
+                        <?php if (!empty($direccionErrores)): ?>
+
+                            <div class="cuenta-mensaje cuenta-mensaje-error">
+
+                                <ul>
+
+                                    <?php foreach ($direccionErrores as $error): ?>
+
+                                        <li>
+                                            <?= htmlspecialchars(
+                                                $error,
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>
+                                        </li>
+
+                                    <?php endforeach; ?>
+
+                                </ul>
+
+                            </div>
+
+                        <?php endif; ?>
+
+
+                        <!-- ===================================
+                            FORMULARIO NUEVA DIRECCIÓN
+                        ==================================== -->
+
+                        <div
+                            class="cuenta-direccion-formulario"
+                            <?= !empty($direccionErrores) ||
+                                $editandoDireccion
+                                ? ""
+                                : "hidden" ?>
+                        >
+
+                            <div class="cuenta-direccion-formulario-titulo">
+
+                                <h3 id="tituloFormularioDireccion">
+                                    <?= $editandoDireccion
+                                        ? "Editar dirección"
+                                        : "Agregar nueva dirección" ?>
+                                </h3>
+
+                                <p>
+                                    Completa la información de entrega.
+                                </p>
+
+                            </div>
+
+
+                            <form
+                                action="<?= $editandoDireccion
+                                    ? "actualizar_direccion.php"
+                                    : "guardar_direccion.php" ?>"
+                                method="POST"
+                                autocomplete="on"
+                                id="formDireccion"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="csrf"
+                                    value="<?= htmlspecialchars(
+                                        $csrfDirecciones,
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="id_direccion"
+                                    id="direccion_id"
+                                    value="<?= $idDireccionEditar ?>"
+                                >
+
+
+                                <div class="cuenta-form-grid">
+
+
+                                    <!-- NOMBRE DE LA DIRECCIÓN -->
+
+                                    <div class="cuenta-form-grupo">
+
+                                        <label for="direccion_nombre">
+                                            Nombre de la dirección
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="direccion_nombre"
+                                            name="nombre"
+                                            maxlength="50"
+                                            required
+                                            placeholder="Ej: Casa, finca, trabajo"
+                                            value="<?= htmlspecialchars(
+                                                $dirNombre,
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- RECEPTOR -->
+
+                                    <div class="cuenta-form-grupo">
+
+                                        <label for="direccion_receptor">
+                                            Persona que recibe
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="direccion_receptor"
+                                            name="receptor"
+                                            maxlength="100"
+                                            required
+                                            autocomplete="name"
+                                            placeholder="Nombre completo"
+                                            value="<?= htmlspecialchars(
+                                                $dirReceptor,
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- TELÉFONO -->
+
+                                    <div class="cuenta-form-grupo">
+
+                                        <label for="direccion_telefono">
+                                            Teléfono
+                                        </label>
+
+                                        <input
+                                            type="tel"
+                                            id="direccion_telefono"
+                                            name="telefono"
+                                            maxlength="20"
+                                            required
+                                            autocomplete="tel"
+                                            placeholder="Ej: 3001234567"
+                                            value="<?= htmlspecialchars(
+                                                $dirTelefono,
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- DIRECCIÓN -->
+
+                                    <div class="cuenta-form-grupo">
+
+                                        <label for="direccion_direccion">
+                                            Dirección
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="direccion_direccion"
+                                            name="direccion"
+                                            maxlength="120"
+                                            required
+                                            autocomplete="street-address"
+                                            placeholder="Ej: Calle 10 # 5-20"
+                                            value="<?= htmlspecialchars(
+                                                $dirDireccion,
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- BARRIO -->
+
+                                    <div class="cuenta-form-grupo">
+
+                                        <label for="direccion_barrio">
+                                            Barrio
+                                            <span>(opcional)</span>
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="direccion_barrio"
+                                            name="barrio"
+                                            maxlength="60"
+                                            placeholder="Ej: Centro"
+                                            value="<?= htmlspecialchars(
+                                                $dirBarrio,
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- MUNICIPIO -->
+
+                                    <div class="cuenta-form-grupo">
+
+                                        <label for="direccion_municipio">
+                                            Municipio
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="direccion_municipio"
+                                            name="municipio"
+                                            maxlength="50"
+                                            required
+                                            autocomplete="address-level2"
+                                            placeholder="Ej: Purificación"
+                                            value="<?= htmlspecialchars(
+                                                $dirMunicipio,
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- DEPARTAMENTO -->
+
+                                    <div class="cuenta-form-grupo">
+
+                                        <label for="direccion_departamento">
+                                            Departamento
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="direccion_departamento"
+                                            name="departamento"
+                                            maxlength="50"
+                                            required
+                                            autocomplete="address-level1"
+                                            placeholder="Ej: Tolima"
+                                            value="<?= htmlspecialchars(
+                                                $dirDepartamento,
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- REFERENCIA -->
+
+                                    <div class="cuenta-form-grupo cuenta-form-grupo-completo">
+
+                                        <label for="direccion_referencia">
+                                            Referencia
+                                            <span>(opcional)</span>
+                                        </label>
+
+                                        <textarea
+                                            id="direccion_referencia"
+                                            name="referencia"
+                                            maxlength="150"
+                                            rows="3"
+                                            placeholder="Ej: Casa de dos pisos, portón verde..."
+                                        ><?= htmlspecialchars(
+                                            $dirReferencia,
+                                            ENT_QUOTES,
+                                            "UTF-8"
+                                        ) ?></textarea>
+
+                                    </div>
+
+
+                                </div>
+
+
+                                <!-- PRINCIPAL -->
+
+                                <label class="cuenta-direccion-principal-opcion">
+
+                                    <input
+                                        type="checkbox"
+                                        name="principal"
+                                        value="1"
+                                        <?= $dirPrincipal
+                                            ? "checked"
+                                            : "" ?>
+                                    >
+
+                                    <span>
+                                        Usar como mi dirección principal
+                                    </span>
+
+                                </label>
+
+
+                                <!-- BOTÓN -->
+
+                                <div class="cuenta-direccion-acciones">
+
+                                    <button
+                                        type="submit"
+                                        class="btn-cuenta-principal"
+                                        id="btnGuardarDireccion"
+                                    >
+                                        <?= $editandoDireccion
+                                            ? "Guardar cambios"
+                                            : "Guardar dirección" ?>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="cuenta-boton-secundario"
+                                        id="btnCancelarDireccion"
+                                        hidden
+                                    >
+                                        Cancelar edición
+                                    </button>
+
+                                </div>
+
+                            </form>
+
+                        </div>
 
                     </div>
 
-                </div>
-
-
+                </div>  
+                    
                 <!-- =========================
                      CUPONES
                 ========================== -->
@@ -1021,6 +2218,9 @@ require_once __DIR__ . "/../includes/header.php";
 
 </main>
 
+<?php
+require_once __DIR__ . "/../includes/modal_producto.php";
+?>
 
 <script
     src="<?= htmlspecialchars(

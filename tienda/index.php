@@ -5,6 +5,43 @@
 // =================================
 require_once("includes/header.php");
 
+// =================================
+// IMAGEN HERO CONFIGURABLE
+// =================================
+
+$imagenHero = $base_url . "assets/tractor-banner.jpg";
+
+$stmtConfig = $conexion->prepare(
+    "SELECT imagen_hero
+     FROM configuracion_tienda
+     WHERE id_configuracion = ?
+     LIMIT 1"
+);
+
+if ($stmtConfig) {
+
+    $idConfiguracion = 1;
+
+    $stmtConfig->bind_param("i", $idConfiguracion);
+
+    $stmtConfig->execute();
+
+    $resultadoConfig = $stmtConfig->get_result();
+
+    if ($filaConfig = $resultadoConfig->fetch_assoc()) {
+
+        if (!empty($filaConfig["imagen_hero"])) {
+
+            $imagenHero =
+                $base_url .
+                "../" .
+                $filaConfig["imagen_hero"];
+        }
+    }
+
+    $stmtConfig->close();
+}
+
 ?>
 
 <link rel="stylesheet" href="<?= $base_url ?>css/inicio.css">
@@ -83,7 +120,10 @@ if ($resultadoProductos) {
          HERO
          ================================= -->
 
-    <section class="inicio-hero">
+    <section
+        class="inicio-hero"
+        style="--imagen-hero: url('<?= htmlspecialchars($imagenHero, ENT_QUOTES, 'UTF-8') ?>');"
+    >
 
         <div class="inicio-container">
 

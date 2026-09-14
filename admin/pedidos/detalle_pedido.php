@@ -31,16 +31,285 @@ $idPedido = filter_input(
     FILTER_VALIDATE_INT
 );
 
-
 if (
     !$idPedido ||
     $idPedido <= 0
 ) {
-
     header("Location: pedidos.php");
     exit();
 }
 
+/* =========================================
+   MENSAJES
+========================================= */
+
+$mensajeExito = "";
+$mensajeError = "";
+
+/* =========================================
+   ACTUALIZAR ESTADO DEL PEDIDO
+========================================= */
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    $csrf = $_POST["csrf"] ?? "";
+
+    if (
+        !is_string($csrf) ||
+        !hash_equals($_SESSION["csrf_pedidos"], $csrf)
+    ) {
+        $mensajeError = "La solicitud no es válida. Recarga la página e inténtalo nuevamente.";
+    }
+
+    $nuevoEstado = filter_input(
+        INPUT_POST,
+        "id_estado",
+        FILTER_VALIDATE_INT
+    );
+
+    $ubicacion = trim($_POST["ubicacion"] ?? "");
+    $descripcion = trim($_POST["descripcion"] ?? "");
+
+    if ($mensajeError === "") {
+
+        if (
+            !$nuevoEstado ||
+            $nuevoEstado <= 0
+        ) {
+            $mensajeError = "Selecciona un estado válido.";
+        }
+
+        if (
+            mb_strlen($ubicacion) > 150
+        ) {
+            $mensajeError = "La ubicación no puede superar los 150 caracteres.";
+        }
+
+        if (
+            mb_strlen($descripcion) > 500
+        ) {
+            $mensajeError = "La descripción no puede superar los 500 caracteres.";
+        }
+    }
+
+    /* =========================================
+       VALIDAR ESTADO
+    ========================================= */
+
+    if ($mensajeError === "") {
+
+        $sqlValidarEstado = "
+            SELECT id_estado
+            FROM estado_pedido
+            WHERE id_estado = ?
+            LIMIT 1
+        ";
+
+        $stmtValidarEstado =
+            $conexion->prepare($sqlValidarEstado);
+
+        if (!$stmtValidarEstado) {
+
+            $mensajeError =
+                "No fue posible validar el estado seleccionado.";
+
+        } else {
+
+            $stmtValidarEstado->bind_param(
+                "i",
+                $nuevoEstado
+            );
+
+            $stmtValidarEstado->execute();
+
+            $estadoExiste =
+                $stmtValidarEstado
+                    ->get_result()
+                    ->fetch_assoc();
+
+            $stmtValidarEstado->close();
+
+            if (!$estadoExiste) {
+                $mensajeError =
+                    "El estado seleccionado no existe.";
+            }
+        }
+    }
+
+    /* =========================================
+       VALIDAR PEDIDO Y ESTADO ACTUAL
+    ========================================= */
+
+    if ($mensajeError === "") {
+
+        $sqlEstadoActual = "
+            SELECT id_estado
+            FROM pedidos
+            WHERE id_pedido = ?
+            LIMIT 1
+        ";
+
+        $stmtEstadoActual =
+            $conexion->prepare($sqlEstadoActual);
+
+        if (!$stmtEstadoActual) {
+
+            $mensajeError =
+                "No fue posible validar el pedido.";
+
+        } else {
+
+            $stmtEstadoActual->bind_param(
+                "i",
+                $idPedido
+            );
+
+            $stmtEstadoActual->execute();
+
+            $pedidoActual =
+                $stmtEstadoActual
+                    ->get_result()
+                    ->fetch_assoc();
+
+            $stmtEstadoActual->close();
+
+            if (!$pedidoActual) {
+
+                $mensajeError =
+                    "El pedido no existe.";
+
+            } elseif (
+                (int) $pedidoActual["id_estado"] ===
+                (int) $nuevoEstado
+            ) {
+
+                $mensajeError =
+                    "El pedido ya se encuentra en ese estado.";
+            }
+        }
+    }
+
+    /* =========================================
+       GUARDAR CAMBIO
+    ========================================= */
+
+    if ($mensajeError === "") {
+
+        try {
+
+            $conexion->begin_transaction();
+
+            $sqlActualizar = "
+                UPDATE pedidos
+                SET id_estado = ?,
+                    fecha_actualizacion = NOW()
+                WHERE id_pedido = ?
+            ";
+
+            $stmtActualizar =
+                $conexion->prepare($sqlActualizar);
+
+            if (!$stmtActualizar) {
+                throw new Exception(
+                    "No fue posible preparar la actualización."
+                );
+            }
+
+            $stmtActualizar->bind_param(
+                "ii",
+                $nuevoEstado,
+                $idPedido
+            );
+
+            if (!$stmtActualizar->execute()) {
+                throw new Exception(
+                    "No fue posible actualizar el pedido."
+                );
+            }
+
+            $stmtActualizar->close();
+
+            /* =========================================
+               REGISTRAR HISTORIAL
+            ========================================= */
+
+            $sqlHistorialInsert = "
+                INSERT INTO historial_estado_pedido
+                (
+                    id_pedido,
+                    id_estado,
+                    ubicacion,
+                    descripcion
+                )
+                VALUES (?, ?, ?, ?)
+            ";
+
+            $stmtHistorialInsert =
+                $conexion->prepare($sqlHistorialInsert);
+
+            if (!$stmtHistorialInsert) {
+                throw new Exception(
+                    "No fue posible preparar el historial."
+                );
+            }
+
+            $ubicacionGuardar =
+                ($ubicacion !== "")
+                    ? $ubicacion
+                    : null;
+
+            $descripcionGuardar =
+                ($descripcion !== "")
+                    ? $descripcion
+                    : null;
+
+            $stmtHistorialInsert->bind_param(
+                "iiss",
+                $idPedido,
+                $nuevoEstado,
+                $ubicacionGuardar,
+                $descripcionGuardar
+            );
+
+            if (!$stmtHistorialInsert->execute()) {
+                throw new Exception(
+                    "No fue posible registrar el historial."
+                );
+            }
+
+            $stmtHistorialInsert->close();
+
+            $conexion->commit();
+
+            header(
+                "Location: detalle_pedido.php?id=" .
+                $idPedido .
+                "&actualizado=1"
+            );
+
+            exit();
+
+        } catch (Throwable $e) {
+
+            $conexion->rollback();
+
+            $mensajeError =
+                "No fue posible actualizar el estado del pedido.";
+        }
+    }
+}
+
+/* =========================================
+   MENSAJE DE ÉXITO
+========================================= */
+
+if (
+    isset($_GET["actualizado"]) &&
+    $_GET["actualizado"] === "1"
+) {
+    $mensajeExito =
+        "El estado del pedido se actualizó correctamente.";
+}
 
 /* =========================================
    CONSULTAR PEDIDO
@@ -89,16 +358,12 @@ $sqlPedido = "
     LIMIT 1
 ";
 
-
 $stmtPedido =
     $conexion->prepare($sqlPedido);
 
-
 if (!$stmtPedido) {
-
     die("No fue posible consultar el pedido.");
 }
-
 
 $stmtPedido->bind_param(
     "i",
@@ -114,13 +379,30 @@ $pedido =
 
 $stmtPedido->close();
 
-
 if (!$pedido) {
-
     header("Location: pedidos.php");
     exit();
 }
 
+/* =========================================
+   ESTADOS DISPONIBLES
+========================================= */
+
+$sqlEstados = "
+    SELECT
+        id_estado,
+        nombre,
+        descripcion
+    FROM estado_pedido
+    ORDER BY id_estado ASC
+";
+
+$resultadoEstados =
+    $conexion->query($sqlEstados);
+
+if (!$resultadoEstados) {
+    die("No fue posible consultar los estados del pedido.");
+}
 
 /* =========================================
    PRODUCTOS DEL PEDIDO
@@ -163,16 +445,12 @@ $sqlDetalles = "
     ORDER BY dp.id_detalle_pedido ASC
 ";
 
-
 $stmtDetalles =
     $conexion->prepare($sqlDetalles);
 
-
 if (!$stmtDetalles) {
-
     die("No fue posible consultar los productos del pedido.");
 }
-
 
 $stmtDetalles->bind_param(
     "i",
@@ -183,7 +461,6 @@ $stmtDetalles->execute();
 
 $resultadoDetalles =
     $stmtDetalles->get_result();
-
 
 /* =========================================
    HISTORIAL DEL PEDIDO
@@ -209,16 +486,12 @@ $sqlHistorial = "
              h.id_historial ASC
 ";
 
-
 $stmtHistorial =
     $conexion->prepare($sqlHistorial);
 
-
 if (!$stmtHistorial) {
-
     die("No fue posible consultar el historial del pedido.");
 }
-
 
 $stmtHistorial->bind_param(
     "i",
@@ -260,7 +533,6 @@ $resultadoHistorial =
 
 <div class="contenedor-dashboard">
 
-
     <!-- =====================================
          MENÚ LATERAL
     ====================================== -->
@@ -275,79 +547,31 @@ $resultadoHistorial =
 
         </div>
 
-
         <nav>
 
             <ul>
 
-                <li>
-                    <a href="../dashboard/dashboard.php">
-                        📊 Dashboard
-                    </a>
-                </li>
+                <li><a href="../dashboard/dashboard.php">📊 Dashboard</a></li>
 
-                <li>
-                    <a href="../productos/productos.php">
-                        📦 Productos
-                    </a>
-                </li>
+                <li><a href="../productos/productos.php">📦 Productos</a></li>
 
-                <li>
-                    <a href="../categorias/categorias.php">
-                        🗂️ Categorías
-                    </a>
-                </li>
+                <li><a href="../categorias/categorias.php">🗂️ Categorías</a></li>
 
-                <li>
-                    <a href="../marcas/marcas.php">
-                        🏷️ Marcas
-                    </a>
-                </li>
+                <li><a href="../marcas/marcas.php">🏷️ Marcas</a></li>
 
-                <li>
-                    <a href="../proveedores/proveedores.php">
-                        🚚 Proveedores
-                    </a>
-                </li>
+                <li><a href="../proveedores/proveedores.php">🚚 Proveedores</a></li>
 
-                <li>
-                    <a href="../inventario/inventario.php">
-                        📁 Inventario
-                    </a>
-                </li>
+                <li><a href="../inventario/inventario.php">📁 Inventario</a></li>
 
-                <li>
-                    <a
-                        href="pedidos.php"
-                        class="activo"
-                    >
-                        🛒 Pedidos
-                    </a>
-                </li>
+                <li><a href="pedidos.php" class="activo">🛒 Pedidos</a></li>
 
-                <li>
-                    <a href="../clientes/clientes.php">
-                        👥 Clientes
-                    </a>
-                </li>
+                <li><a href="../clientes/clientes.php">👥 Clientes</a></li>
 
-                <li>
-                    <a href="../contactos/contactos.php">
-                        ✉️ Contactos
-                    </a>
-                </li>
+                <li><a href="../contactos/contactos.php">✉️ Contactos</a></li>
 
-                <li>
-                    <a href="../promociones/promociones.php">
-                        🎁 Promociones
-                    </a>
-                </li>
+                <li><a href="../promociones/promociones.php">🎁 Promociones</a></li>
 
-                <li>
-                    <a href="../configuracion/configuracion.php">
-                        ⚙️ Configuración
-                    </a>
-                </li>
+                <li><a href="../configuracion/configuracion.php">⚙️ Configuración</a></li>
 
             </ul>
 
@@ -355,13 +579,11 @@ $resultadoHistorial =
 
     </aside>
 
-
     <!-- =====================================
          CONTENIDO
     ====================================== -->
 
     <main class="contenido">
-
 
         <!-- ENCABEZADO -->
 
@@ -384,7 +606,6 @@ $resultadoHistorial =
 
             </div>
 
-
             <div class="panel-usuario">
 
                 <div class="fecha-hora">
@@ -397,7 +618,6 @@ $resultadoHistorial =
 
                 </div>
 
-
                 <div class="usuario">
 
                     👤
@@ -408,7 +628,6 @@ $resultadoHistorial =
                     ) ?>
 
                 </div>
-
 
                 <a
                     href="../cerrar_sesion.php"
@@ -421,13 +640,39 @@ $resultadoHistorial =
 
         </header>
 
-
         <!-- =================================
              DETALLE
         ================================== -->
 
         <section class="resumen">
 
+            <?php if ($mensajeExito !== ""): ?>
+
+                <div class="mensaje-pedido mensaje-exito">
+
+                    <?= htmlspecialchars(
+                        $mensajeExito,
+                        ENT_QUOTES,
+                        "UTF-8"
+                    ) ?>
+
+                </div>
+
+            <?php endif; ?>
+
+            <?php if ($mensajeError !== ""): ?>
+
+                <div class="mensaje-pedido mensaje-error">
+
+                    <?= htmlspecialchars(
+                        $mensajeError,
+                        ENT_QUOTES,
+                        "UTF-8"
+                    ) ?>
+
+                </div>
+
+            <?php endif; ?>
 
             <div class="detalle-pedido-cabecera">
 
@@ -440,11 +685,9 @@ $resultadoHistorial =
                         ← Volver a pedidos
                     </a>
 
-
                     <h2>
                         Pedido #<?= $idPedido ?>
                     </h2>
-
 
                     <p>
                         Realizado el
@@ -457,7 +700,6 @@ $resultadoHistorial =
                     </p>
 
                 </div>
-
 
                 <span
                     class="estado estado-<?=
@@ -475,13 +717,153 @@ $resultadoHistorial =
 
             </div>
 
+            <!-- =================================
+                 GESTIÓN DEL ESTADO
+            ================================== -->
+
+            <div class="detalle-seccion gestion-estado">
+
+                <h3>
+                    Gestión del pedido
+                </h3>
+
+                <p class="estado-actual-texto">
+                    Estado actual:
+                    <strong>
+                        <?= htmlspecialchars(
+                            $pedido["estado"],
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>
+                    </strong>
+                </p>
+
+                <form
+                    method="POST"
+                    action="detalle_pedido.php?id=<?= $idPedido ?>"
+                    class="form-estado-pedido"
+                >
+
+                    <input
+                        type="hidden"
+                        name="csrf"
+                        value="<?= htmlspecialchars(
+                            $_SESSION["csrf_pedidos"],
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                    >
+
+                    <div class="campo-estado">
+
+                        <label for="id_estado">
+                            Nuevo estado
+                        </label>
+
+                        <select
+                            name="id_estado"
+                            id="id_estado"
+                            required
+                        >
+
+                            <?php
+                            while (
+                                $estadoDisponible =
+                                $resultadoEstados->fetch_assoc()
+                            ):
+                            ?>
+
+                                <option
+                                    value="<?= (int) $estadoDisponible["id_estado"] ?>"
+                                    <?=
+                                        (int) $estadoDisponible["id_estado"] ===
+                                        (int) $pedido["id_estado"]
+                                            ? "selected"
+                                            : ""
+                                    ?>
+                                >
+
+                                    <?= htmlspecialchars(
+                                        $estadoDisponible["nombre"],
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>
+
+                                </option>
+
+                            <?php endwhile; ?>
+
+                        </select>
+
+                    </div>
+
+                    <div class="campo-estado">
+
+                        <label for="ubicacion">
+                            Ubicación
+                            <span>(opcional)</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            name="ubicacion"
+                            id="ubicacion"
+                            maxlength="150"
+                            placeholder="Ej. Purificación, Tolima"
+                            value="<?= htmlspecialchars(
+                                $_POST["ubicacion"] ?? "",
+                                ENT_QUOTES,
+                                "UTF-8"
+                            ) ?>"
+                        >
+
+                        <small class="limite-campo">
+                            Máximo 150 caracteres.
+                        </small>
+
+                    </div>
+
+                    <div class="campo-estado">
+
+                        <label for="descripcion">
+                            Descripción
+                            <span>(opcional)</span>
+                        </label>
+
+                        <textarea
+                            name="descripcion"
+                            id="descripcion"
+                            maxlength="500"
+                            rows="4"
+                            placeholder="Ej. Pedido preparado para despacho."
+                        ><?= htmlspecialchars(
+                            $_POST["descripcion"] ?? "",
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?></textarea>
+
+                        <small class="limite-campo">
+                            Máximo 500 caracteres.
+                        </small>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-actualizar-estado"
+                    >
+                        Actualizar estado
+                    </button>
+
+                </form>
+
+            </div>
 
             <!-- =================================
                  INFORMACIÓN GENERAL
             ================================== -->
 
             <div class="detalle-grid">
-
 
                 <div class="detalle-tarjeta">
 
@@ -517,7 +899,6 @@ $resultadoHistorial =
 
                 </div>
 
-
                 <div class="detalle-tarjeta">
 
                     <h3>Entrega</h3>
@@ -540,7 +921,6 @@ $resultadoHistorial =
                         ) ?>
                     </p>
 
-
                     <?php if (!empty($pedido["barrio"])): ?>
 
                         <p>
@@ -553,7 +933,6 @@ $resultadoHistorial =
                         </p>
 
                     <?php endif; ?>
-
 
                     <p>
 
@@ -573,7 +952,6 @@ $resultadoHistorial =
 
                     </p>
 
-
                     <p>
                         Tel:
                         <?= htmlspecialchars(
@@ -582,7 +960,6 @@ $resultadoHistorial =
                             "UTF-8"
                         ) ?>
                     </p>
-
 
                     <?php if (!empty($pedido["referencia"])): ?>
 
@@ -598,7 +975,6 @@ $resultadoHistorial =
                     <?php endif; ?>
 
                 </div>
-
 
                 <div class="detalle-tarjeta">
 
@@ -631,7 +1007,6 @@ $resultadoHistorial =
 
             </div>
 
-
             <!-- =================================
                  PRODUCTOS
             ================================== -->
@@ -641,7 +1016,6 @@ $resultadoHistorial =
                 <h3>
                     Productos del pedido
                 </h3>
-
 
                 <div class="tabla-contenedor">
 
@@ -667,7 +1041,6 @@ $resultadoHistorial =
 
                         </thead>
 
-
                         <tbody>
 
                         <?php
@@ -691,7 +1064,6 @@ $resultadoHistorial =
 
                                 </td>
 
-
                                 <td>
 
                                     <?= htmlspecialchars(
@@ -702,13 +1074,11 @@ $resultadoHistorial =
 
                                 </td>
 
-
                                 <td>
 
                                     <?= (int) $detalle["cantidad"] ?>
 
                                 </td>
-
 
                                 <td>
 
@@ -721,7 +1091,6 @@ $resultadoHistorial =
 
                                 </td>
 
-
                                 <td>
 
                                     $<?= number_format(
@@ -732,7 +1101,6 @@ $resultadoHistorial =
                                     ) ?>
 
                                 </td>
-
 
                                 <td>
 
@@ -761,7 +1129,6 @@ $resultadoHistorial =
 
             </div>
 
-
             <!-- =================================
                  HISTORIAL
             ================================== -->
@@ -771,7 +1138,6 @@ $resultadoHistorial =
                 <h3>
                     Historial del pedido
                 </h3>
-
 
                 <?php
                 if (
@@ -800,7 +1166,6 @@ $resultadoHistorial =
 
                                 </strong>
 
-
                                 <span>
 
                                     <?= date(
@@ -811,7 +1176,6 @@ $resultadoHistorial =
                                     ) ?>
 
                                 </span>
-
 
                                 <?php
                                 if (
@@ -832,7 +1196,6 @@ $resultadoHistorial =
                                     </p>
 
                                 <?php endif; ?>
-
 
                                 <?php
                                 if (
@@ -861,7 +1224,6 @@ $resultadoHistorial =
 
                     </div>
 
-
                 <?php else: ?>
 
                     <p>
@@ -878,7 +1240,6 @@ $resultadoHistorial =
     </main>
 
 </div>
-
 
 <script src="../dashboard/dashboard.js"></script>
 

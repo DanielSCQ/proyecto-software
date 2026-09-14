@@ -487,13 +487,10 @@ $total_pedidos = $resultado->num_rows;
 
                                         <a
                                             href="detalle_pedido.php?id=<?php echo $pedido["id_pedido"]; ?>"
-                                            class="btn-ver"
+                                            class="btn-ver-pedido"
                                         >
-
                                             👁️ Ver detalle
-
                                         </a>
-
                                     </td>
 
                                 </tr>

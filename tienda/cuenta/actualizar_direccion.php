@@ -1,0 +1,604 @@
+<?php
+
+// =========================================
+// SESIÓN
+// =========================================
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+
+// =========================================
+// CONEXIÓN
+// =========================================
+
+require_once("../../config/conexion.php");
+
+
+// =========================================
+// URL BASE
+// =========================================
+
+$scriptDir =
+    str_replace(
+        "\\",
+        "/",
+        dirname($_SERVER["SCRIPT_NAME"])
+    );
+
+$posTienda =
+    strpos(
+        $scriptDir,
+        "/tienda"
+    );
+
+if ($posTienda !== false) {
+
+    $base_url =
+        substr(
+            $scriptDir,
+            0,
+            $posTienda + strlen("/tienda")
+        ) . "/";
+
+} else {
+
+    $base_url = "/tienda/";
+}
+
+
+// =========================================
+// REDIRECCIÓN
+// =========================================
+
+$urlDirecciones =
+    $base_url .
+    "cuenta/?vista=direcciones";
+
+
+// =========================================
+// SOLO POST
+// =========================================
+
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+
+    header(
+        "Location: " .
+        $urlDirecciones
+    );
+
+    exit;
+}
+
+
+// =========================================
+// SOLO CLIENTES
+// =========================================
+
+if (
+    !isset($_SESSION["id_usuario"]) ||
+    !is_numeric($_SESSION["id_usuario"]) ||
+    ($_SESSION["rol"] ?? "") !== "cliente"
+) {
+
+    header(
+        "Location: " .
+        $base_url .
+        "cuenta/login.php"
+    );
+
+    exit;
+}
+
+
+$idUsuario =
+    (int) $_SESSION["id_usuario"];
+
+
+// =========================================
+// CSRF
+// =========================================
+
+$csrfRecibido =
+    $_POST["csrf"] ?? "";
+
+$csrfSesion =
+    $_SESSION["csrf_direcciones"] ?? "";
+
+
+if (
+    !is_string($csrfRecibido) ||
+    !is_string($csrfSesion) ||
+    $csrfRecibido === "" ||
+    $csrfSesion === "" ||
+    !hash_equals(
+        $csrfSesion,
+        $csrfRecibido
+    )
+) {
+
+    $_SESSION["direccion_error"] =
+        "La solicitud no es válida. Recarga la página e inténtalo nuevamente.";
+
+    header(
+        "Location: " .
+        $urlDirecciones
+    );
+
+    exit;
+}
+
+
+// =========================================
+// ID DIRECCIÓN
+// =========================================
+
+$idDireccion =
+    filter_input(
+        INPUT_POST,
+        "id_direccion",
+        FILTER_VALIDATE_INT
+    );
+
+
+if (
+    $idDireccion === false ||
+    $idDireccion === null ||
+    $idDireccion <= 0
+) {
+
+    $_SESSION["direccion_error"] =
+        "La dirección seleccionada no es válida.";
+
+    header(
+        "Location: " .
+        $urlDirecciones
+    );
+
+    exit;
+}
+
+
+// =========================================
+// RECIBIR DATOS
+// =========================================
+
+$nombre =
+    trim(
+        $_POST["nombre"] ?? ""
+    );
+
+$receptor =
+    trim(
+        $_POST["receptor"] ?? ""
+    );
+
+$telefono =
+    trim(
+        $_POST["telefono"] ?? ""
+    );
+
+$direccion =
+    trim(
+        $_POST["direccion"] ?? ""
+    );
+
+$barrio =
+    trim(
+        $_POST["barrio"] ?? ""
+    );
+
+$municipio =
+    trim(
+        $_POST["municipio"] ?? ""
+    );
+
+$departamento =
+    trim(
+        $_POST["departamento"] ?? ""
+    );
+
+$referencia =
+    trim(
+        $_POST["referencia"] ?? ""
+    );
+
+$principal =
+    isset($_POST["principal"]) &&
+    $_POST["principal"] === "1"
+        ? 1
+        : 0;
+
+
+// =========================================
+// GUARDAR DATOS TEMPORALES
+// =========================================
+
+$_SESSION["direccion_form"] = [
+    "id_direccion" => $idDireccion,
+    "nombre" => $nombre,
+    "receptor" => $receptor,
+    "telefono" => $telefono,
+    "direccion" => $direccion,
+    "barrio" => $barrio,
+    "municipio" => $municipio,
+    "departamento" => $departamento,
+    "referencia" => $referencia,
+    "principal" => $principal,
+    "modo" => "editar"
+];
+
+
+// =========================================
+// VALIDACIONES
+// =========================================
+
+$errores = [];
+
+
+// NOMBRE
+if ($nombre === "") {
+
+    $errores[] =
+        "Escribe un nombre para la dirección.";
+
+} elseif (mb_strlen($nombre) > 50) {
+
+    $errores[] =
+        "El nombre de la dirección no puede superar los 50 caracteres.";
+}
+
+
+// RECEPTOR
+if ($receptor === "") {
+
+    $errores[] =
+        "Escribe el nombre de quien recibirá el pedido.";
+
+} elseif (mb_strlen($receptor) > 100) {
+
+    $errores[] =
+        "El nombre del receptor no puede superar los 100 caracteres.";
+}
+
+
+// TELÉFONO
+if ($telefono === "") {
+
+    $errores[] =
+        "Escribe un número de teléfono.";
+
+} elseif (mb_strlen($telefono) > 20) {
+
+    $errores[] =
+        "El teléfono no puede superar los 20 caracteres.";
+
+} elseif (
+    !preg_match(
+        '/^[0-9+\s()-]{7,20}$/',
+        $telefono
+    )
+) {
+
+    $errores[] =
+        "El teléfono contiene caracteres no válidos.";
+}
+
+
+// DIRECCIÓN
+if ($direccion === "") {
+
+    $errores[] =
+        "Escribe la dirección de entrega.";
+
+} elseif (mb_strlen($direccion) > 120) {
+
+    $errores[] =
+        "La dirección no puede superar los 120 caracteres.";
+}
+
+
+// BARRIO
+if (
+    $barrio !== "" &&
+    mb_strlen($barrio) > 60
+) {
+
+    $errores[] =
+        "El barrio no puede superar los 60 caracteres.";
+}
+
+
+// MUNICIPIO
+if ($municipio === "") {
+
+    $errores[] =
+        "Escribe el municipio.";
+
+} elseif (mb_strlen($municipio) > 50) {
+
+    $errores[] =
+        "El municipio no puede superar los 50 caracteres.";
+}
+
+
+// DEPARTAMENTO
+if ($departamento === "") {
+
+    $errores[] =
+        "Escribe el departamento.";
+
+} elseif (mb_strlen($departamento) > 50) {
+
+    $errores[] =
+        "El departamento no puede superar los 50 caracteres.";
+}
+
+
+// REFERENCIA
+if (
+    $referencia !== "" &&
+    mb_strlen($referencia) > 150
+) {
+
+    $errores[] =
+        "La referencia no puede superar los 150 caracteres.";
+}
+
+
+// =========================================
+// SI HAY ERRORES
+// =========================================
+
+if (!empty($errores)) {
+
+    $_SESSION["direccion_errores"] =
+        $errores;
+
+    header(
+        "Location: " .
+        $urlDirecciones
+    );
+
+    exit;
+}
+
+
+// =========================================
+// VERIFICAR QUE LE PERTENECE AL CLIENTE
+// =========================================
+
+$sqlExiste = "
+    SELECT
+        id_direccion,
+        principal
+    FROM direcciones
+    WHERE id_direccion = ?
+      AND id_usuario = ?
+      AND estado = 1
+    LIMIT 1
+";
+
+
+$stmtExiste =
+    $conexion->prepare(
+        $sqlExiste
+    );
+
+
+if (!$stmtExiste) {
+
+    $_SESSION["direccion_error"] =
+        "No fue posible actualizar la dirección.";
+
+    header(
+        "Location: " .
+        $urlDirecciones
+    );
+
+    exit;
+}
+
+
+$stmtExiste->bind_param(
+    "ii",
+    $idDireccion,
+    $idUsuario
+);
+
+$stmtExiste->execute();
+
+$direccionActual =
+    $stmtExiste
+        ->get_result()
+        ->fetch_assoc();
+
+$stmtExiste->close();
+
+
+if (!$direccionActual) {
+
+    $_SESSION["direccion_error"] =
+        "La dirección seleccionada no existe.";
+
+    header(
+        "Location: " .
+        $urlDirecciones
+    );
+
+    exit;
+}
+
+
+// =========================================
+// EVITAR QUITAR LA PRINCIPAL
+// DESDE LA EDICIÓN
+// =========================================
+
+if (
+    (int) $direccionActual["principal"] === 1
+) {
+
+    $principal = 1;
+}
+
+
+// =========================================
+// TRANSACCIÓN
+// =========================================
+
+$conexion->begin_transaction();
+
+
+try {
+
+    // =====================================
+    // SI SE MARCA COMO PRINCIPAL
+    // =====================================
+
+    if ($principal === 1) {
+
+        $sqlQuitarPrincipal = "
+            UPDATE direcciones
+            SET principal = 0
+            WHERE id_usuario = ?
+              AND estado = 1
+              AND id_direccion <> ?
+        ";
+
+        $stmtQuitarPrincipal =
+            $conexion->prepare(
+                $sqlQuitarPrincipal
+            );
+
+
+        if (!$stmtQuitarPrincipal) {
+
+            throw new Exception(
+                "No fue posible actualizar la dirección principal."
+            );
+        }
+
+
+        $stmtQuitarPrincipal->bind_param(
+            "ii",
+            $idUsuario,
+            $idDireccion
+        );
+
+
+        if (
+            !$stmtQuitarPrincipal->execute()
+        ) {
+
+            throw new Exception(
+                "No fue posible actualizar la dirección principal."
+            );
+        }
+
+
+        $stmtQuitarPrincipal->close();
+    }
+
+
+    // =====================================
+    // ACTUALIZAR DIRECCIÓN
+    // =====================================
+
+    $sqlActualizar = "
+        UPDATE direcciones
+        SET
+            nombre = ?,
+            telefono = ?,
+            receptor = ?,
+            direccion = ?,
+            barrio = NULLIF(?, ''),
+            municipio = ?,
+            departamento = ?,
+            referencia = NULLIF(?, ''),
+            principal = ?
+        WHERE id_direccion = ?
+          AND id_usuario = ?
+          AND estado = 1
+    ";
+
+
+    $stmtActualizar =
+        $conexion->prepare(
+            $sqlActualizar
+        );
+
+
+    if (!$stmtActualizar) {
+
+        throw new Exception(
+            "No fue posible preparar la actualización."
+        );
+    }
+
+
+    $stmtActualizar->bind_param(
+        "ssssssssiii",
+        $nombre,
+        $telefono,
+        $receptor,
+        $direccion,
+        $barrio,
+        $municipio,
+        $departamento,
+        $referencia,
+        $principal,
+        $idDireccion,
+        $idUsuario
+    );
+
+
+    if (!$stmtActualizar->execute()) {
+
+        throw new Exception(
+            "No fue posible actualizar la dirección."
+        );
+    }
+
+
+    $stmtActualizar->close();
+
+
+    // =====================================
+    // CONFIRMAR
+    // =====================================
+
+    $conexion->commit();
+
+
+    unset(
+        $_SESSION["direccion_form"],
+        $_SESSION["direccion_errores"]
+    );
+
+
+    $_SESSION["direccion_exito"] =
+        "Dirección actualizada correctamente.";
+
+
+} catch (Throwable $e) {
+
+    $conexion->rollback();
+
+
+    $_SESSION["direccion_error"] =
+        "No fue posible actualizar la dirección en este momento.";
+}
+
+
+// =========================================
+// VOLVER
+// =========================================
+
+header(
+    "Location: " .
+    $urlDirecciones
+);
+
+exit;

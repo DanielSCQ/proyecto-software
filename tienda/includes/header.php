@@ -112,11 +112,62 @@ if (
     <div class="header-container">
 
         <!-- LOGO -->
-        <a href="<?= $base_url ?>index.php" class="brand">
-            <span class="brand-name">AGRANDA</span>
-            <span class="brand-subtitle">Repuestos agrícolas de confianza</span>
-        </a>
+        <?php
 
+        $logoTienda = "";
+
+        $stmtLogo = $conexion->prepare(
+            "SELECT logo
+            FROM configuracion_tienda
+            WHERE id_configuracion = ?
+            LIMIT 1"
+        );
+
+        if ($stmtLogo) {
+
+            $idConfiguracion = 1;
+
+            $stmtLogo->bind_param("i", $idConfiguracion);
+
+            $stmtLogo->execute();
+
+            $resultadoLogo = $stmtLogo->get_result();
+
+            if ($filaLogo = $resultadoLogo->fetch_assoc()) {
+
+                if (!empty($filaLogo["logo"])) {
+                    $logoTienda = $base_url . "../" . $filaLogo["logo"];
+                }
+            }
+
+            $stmtLogo->close();
+        }
+
+        ?>
+
+        <a href="<?= $base_url ?>index.php" class="brand">
+
+            <?php if ($logoTienda !== ""): ?>
+
+                <img
+                    src="<?= htmlspecialchars($logoTienda, ENT_QUOTES, 'UTF-8') ?>"
+                    alt="Logo AGRANDA"
+                    class="brand-logo"
+                >
+
+            <?php endif; ?>
+
+            <span class="brand-texto">
+
+                <span class="brand-name">AGRANDA</span>
+
+                <span class="brand-subtitle">
+                    Repuestos agrícolas de confianza
+                </span>
+
+            </span>
+
+        </a>
 
         <!-- NAVEGACIÓN PRINCIPAL -->
         <nav class="main-nav" aria-label="Navegación principal">
@@ -143,19 +194,39 @@ if (
         <!-- ACCIONES DEL USUARIO -->
         <div class="header-actions">
 
-            <!-- Buscar -->
-            <a href="<?= $base_url ?>productos/" 
-               class="header-action"
-               aria-label="Buscar productos"
-               title="Buscar productos">
+            <!-- BUSCADOR -->
+            <form
+                action="<?= $base_url ?>productos/"
+                method="GET"
+                class="header-search"
+                role="search"
+            >
 
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="11" cy="11" r="7"></circle>
-                    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
-                </svg>
+                <input
+                    type="search"
+                    name="busqueda"
+                    class="header-search-input"
+                    placeholder="Buscar productos..."
+                    maxlength="100"
+                    autocomplete="off"
+                    aria-label="Buscar productos"
+                >
 
-            </a>
+                <button
+                    type="submit"
+                    class="header-action header-search-button"
+                    aria-label="Buscar productos"
+                    title="Buscar productos"
+                >
 
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                    </svg>
+
+                </button>
+
+            </form>
 
             <!-- Cuenta -->
             

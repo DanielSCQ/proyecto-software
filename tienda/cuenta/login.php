@@ -116,6 +116,23 @@ $error = "";
 
 
 // ==========================================
+// ERROR DEVUELTO POR GOOGLE
+// ==========================================
+if (
+    isset($_SESSION["google_error"]) &&
+    is_string($_SESSION["google_error"]) &&
+    $_SESSION["google_error"] !== ""
+) {
+
+    $error =
+        $_SESSION["google_error"];
+
+    unset(
+        $_SESSION["google_error"]
+    );
+}
+
+// ==========================================
 // PROCESAR LOGIN
 // ==========================================
 if ($_SERVER["REQUEST_METHOD"] === "POST") {

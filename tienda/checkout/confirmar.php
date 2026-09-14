@@ -329,7 +329,8 @@ $metodoPago =
 
 
 $metodosPermitidos = [
-    "Contra entrega"
+    "Contra entrega",
+    "Pago simulado"
 ];
 
 
@@ -360,7 +361,15 @@ if (
 
 $sqlDireccion = "
     SELECT
-        id_direccion
+        id_direccion,
+        nombre,
+        receptor,
+        telefono,
+        direccion,
+        barrio,
+        municipio,
+        departamento,
+        referencia
     FROM direcciones
     WHERE id_direccion = ?
       AND id_usuario = ?
@@ -420,6 +429,210 @@ if (!$direccionValida) {
     exit;
 }
 
+// =========================================
+// PROTECCIÓN CONTRA ENVÍOS MUY RÁPIDOS
+// =========================================
+
+$ahora = time();
+
+$ultimoIntentoConfirmacion =
+    (int) (
+        $_SESSION["ultimo_intento_confirmacion"] ?? 0
+    );
+
+
+if (
+    $ultimoIntentoConfirmacion > 0 &&
+    ($ahora - $ultimoIntentoConfirmacion) < 2
+) {
+
+    $_SESSION["checkout_error"] =
+        "La solicitud se está procesando demasiado rápido. Espera un momento e inténtalo nuevamente.";
+
+    header(
+        "Location: " .
+        $base_url .
+        "checkout/"
+    );
+
+    exit;
+}
+
+
+$_SESSION["ultimo_intento_confirmacion"] =
+    $ahora;
+
+
+// =========================================
+// VALIDAR PAGO EN LÍNEA
+// =========================================
+
+if ($metodoPago === "Pago simulado") {
+
+    $autorizacionPago =
+        $_SESSION["pago_simulado_aprobado"] ?? null;
+
+
+    // -------------------------------------
+    // DEBE EXISTIR AUTORIZACIÓN
+    // -------------------------------------
+
+    if (!is_array($autorizacionPago)) {
+
+        $_SESSION["checkout_error"] =
+            "El pago en línea no pudo ser validado. Inténtalo nuevamente.";
+
+        header(
+            "Location: " .
+            $base_url .
+            "checkout/"
+        );
+
+        exit;
+    }
+
+
+    // -------------------------------------
+    // DATOS DE LA AUTORIZACIÓN
+    // -------------------------------------
+
+    $usuarioAutorizado =
+        (int) (
+            $autorizacionPago["id_usuario"] ?? 0
+        );
+
+    $direccionAutorizada =
+        (int) (
+            $autorizacionPago["direccion"] ?? 0
+        );
+
+    $tokenAutorizado =
+        $autorizacionPago["token_checkout"] ?? "";
+
+    $fechaAutorizacion =
+        (int) (
+            $autorizacionPago["fecha"] ?? 0
+        );
+
+
+    // -------------------------------------
+    // USUARIO
+    // -------------------------------------
+
+    if ($usuarioAutorizado !== $idUsuario) {
+
+        unset(
+            $_SESSION["pago_simulado_aprobado"]
+        );
+
+        $_SESSION["checkout_error"] =
+            "La autorización del pago no corresponde a esta cuenta.";
+
+        header(
+            "Location: " .
+            $base_url .
+            "checkout/"
+        );
+
+        exit;
+    }
+
+
+    // -------------------------------------
+    // DIRECCIÓN
+    // -------------------------------------
+
+    if ($direccionAutorizada !== $idDireccion) {
+
+        unset(
+            $_SESSION["pago_simulado_aprobado"]
+        );
+
+        $_SESSION["checkout_error"] =
+            "La autorización del pago no corresponde a la dirección seleccionada.";
+
+        header(
+            "Location: " .
+            $base_url .
+            "checkout/"
+        );
+
+        exit;
+    }
+
+
+    // -------------------------------------
+    // TOKEN
+    // -------------------------------------
+
+    if (
+        !is_string($tokenAutorizado) ||
+        $tokenAutorizado === "" ||
+        !hash_equals(
+            $tokenCheckout,
+            $tokenAutorizado
+        )
+    ) {
+
+        unset(
+            $_SESSION["pago_simulado_aprobado"]
+        );
+
+        $_SESSION["checkout_error"] =
+            "La autorización del pago ya no es válida.";
+
+        header(
+            "Location: " .
+            $base_url .
+            "checkout/"
+        );
+
+        exit;
+    }
+
+
+    // -------------------------------------
+    // TIEMPO MÁXIMO: 5 MINUTOS
+    // -------------------------------------
+
+    if (
+        $fechaAutorizacion < 1 ||
+        $fechaAutorizacion > $ahora ||
+        ($ahora - $fechaAutorizacion) > 300
+    ) {
+
+        unset(
+            $_SESSION["pago_simulado_aprobado"]
+        );
+
+        $_SESSION["checkout_error"] =
+            "La autorización del pago expiró. Realiza nuevamente el proceso de pago.";
+
+        header(
+            "Location: " .
+            $base_url .
+            "checkout/"
+        );
+
+        exit;
+    }
+
+
+    // -------------------------------------
+    // AUTORIZACIÓN DE UN SOLO USO
+    // -------------------------------------
+    //
+    // Ya comprobamos usuario, dirección,
+    // token y tiempo.
+    //
+    // Se elimina antes de crear el pedido
+    // para que no pueda reutilizarse.
+    //
+
+    unset(
+        $_SESSION["pago_simulado_aprobado"]
+    );
+}
 
 // =========================================
 // COMENZAR TRANSACCIÓN
@@ -799,6 +1012,74 @@ try {
         );
     }
 
+    // =====================================
+    // GUARDAR COPIA DE LA DIRECCIÓN
+    // DEL PEDIDO
+    // =====================================
+
+    $sqlDireccionPedido = "
+        INSERT INTO direccion_pedido (
+            id_pedido,
+            nombre,
+            receptor,
+            telefono,
+            direccion,
+            barrio,
+            municipio,
+            departamento,
+            referencia
+        )
+        VALUES (
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            NULLIF(?, ''),
+            ?,
+            ?,
+            NULLIF(?, '')
+        )
+    ";
+
+
+    $stmtDireccionPedido =
+        $conexion->prepare(
+            $sqlDireccionPedido
+        );
+
+
+    if (!$stmtDireccionPedido) {
+
+        throw new Exception(
+            "No fue posible preparar la dirección del pedido."
+        );
+    }
+
+
+    $stmtDireccionPedido->bind_param(
+        "issssssss",
+        $idPedido,
+        $direccionValida["nombre"],
+        $direccionValida["receptor"],
+        $direccionValida["telefono"],
+        $direccionValida["direccion"],
+        $direccionValida["barrio"],
+        $direccionValida["municipio"],
+        $direccionValida["departamento"],
+        $direccionValida["referencia"]
+    );
+
+
+    if (!$stmtDireccionPedido->execute()) {
+
+        throw new Exception(
+            "No fue posible guardar la dirección del pedido."
+        );
+    }
+
+
+    $stmtDireccionPedido->close();
 
     // =====================================
     // PREPARAR DETALLE DEL PEDIDO
@@ -1085,6 +1366,185 @@ try {
 
 
     // =====================================
+    // REGISTRAR PAGO EN LÍNEA
+    // =====================================
+
+    if ($metodoPago === "Pago simulado") {
+
+        // ---------------------------------
+        // REFERENCIA ÚNICA
+        // ---------------------------------
+
+        $referenciaPago =
+            "AGR-" .
+            strtoupper(
+                bin2hex(
+                    random_bytes(8)
+                )
+            );
+
+
+        $moneda =
+            "COP";
+
+        $estadoPago =
+            "Aprobado";
+
+
+        // ---------------------------------
+        // CREAR PAGO
+        // ---------------------------------
+
+        $sqlPago = "
+            INSERT INTO pagos (
+                id_pedido,
+                monto_total,
+                moneda,
+                metodo_pago,
+                estado,
+                referencia_unica,
+                endpoint_key
+            )
+            VALUES (
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                NULL
+            )
+        ";
+
+
+        $stmtPago =
+            $conexion->prepare(
+                $sqlPago
+            );
+
+
+        if (!$stmtPago) {
+
+            throw new Exception(
+                "No fue posible preparar el registro del pago."
+            );
+        }
+
+
+        $stmtPago->bind_param(
+            "idssss",
+            $idPedido,
+            $totalPedido,
+            $moneda,
+            $metodoPago,
+            $estadoPago,
+            $referenciaPago
+        );
+
+
+        if (!$stmtPago->execute()) {
+
+            throw new Exception(
+                "No fue posible registrar el pago."
+            );
+        }
+
+
+        $idPago =
+            (int) $conexion->insert_id;
+
+
+        $stmtPago->close();
+
+
+        if ($idPago < 1) {
+
+            throw new Exception(
+                "No fue posible identificar el pago registrado."
+            );
+        }
+
+
+        // =================================
+        // REGISTRAR INTENTO DE PAGO
+        // =================================
+
+        $numeroIntento =
+            1;
+
+        $estadoIntento =
+            "Exitoso";
+
+        $respuestaPago =
+            json_encode(
+                [
+                    "entorno" =>
+                        "demostrativo",
+
+                    "resultado" =>
+                        "aprobado"
+                ],
+                JSON_UNESCAPED_UNICODE
+            );
+
+        $codigoError =
+            null;
+
+
+        $sqlIntento = "
+            INSERT INTO intentos_pago (
+                id_pago,
+                numero_intento,
+                estado,
+                respuesta_pasarela,
+                codigo_error
+            )
+            VALUES (
+                ?,
+                ?,
+                ?,
+                ?,
+                ?
+            )
+        ";
+
+
+        $stmtIntento =
+            $conexion->prepare(
+                $sqlIntento
+            );
+
+
+        if (!$stmtIntento) {
+
+            throw new Exception(
+                "No fue posible preparar el intento de pago."
+            );
+        }
+
+
+        $stmtIntento->bind_param(
+            "iisss",
+            $idPago,
+            $numeroIntento,
+            $estadoIntento,
+            $respuestaPago,
+            $codigoError
+        );
+
+
+        if (!$stmtIntento->execute()) {
+
+            throw new Exception(
+                "No fue posible registrar el intento de pago."
+            );
+        }
+
+
+        $stmtIntento->close();
+    }
+
+    // =====================================
     // CONFIRMAR TODO
     // =====================================
 
@@ -1097,9 +1557,10 @@ try {
 
     unset(
         $_SESSION["carrito"],
-        $_SESSION["token_checkout"]
+        $_SESSION["token_checkout"],
+        $_SESSION["pago_simulado_aprobado"],
+        $_SESSION["ultimo_intento_confirmacion"]
     );
-
 
     // Nuevo CSRF para operaciones futuras
     $_SESSION["csrf_checkout"] =

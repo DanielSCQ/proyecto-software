@@ -10,12 +10,15 @@
 }
 
 body{
-    background:#f4f6f9;
+    background:#f4f6f2;
     color:#333;
+
     display:flex;
     flex-direction:column;
+
     min-height:100vh;
 }
+
 
 /*=========================
     CONTENEDOR PRINCIPAL
@@ -23,126 +26,438 @@ body{
 
 .contenedor-login{
     display:flex;
+
     flex:1;
+
     align-items:stretch;
+
+    min-height:calc(100vh - 48px);
 }
+
 
 /*=========================
     LADO IZQUIERDO
 ==========================*/
 
 .lado-izquierdo{
-    width:30%;
-    min-width:320px;
-    background:#2e7d32;
-    color:white;
+    position:relative;
+
+    width:34%;
+    min-width:340px;
+
     display:flex;
+
     flex-direction:column;
+
     justify-content:space-between;
-    padding:30px;
+
+    padding:35px;
+
+    overflow:hidden;
+
+    color:white;
+
+    background:
+        linear-gradient(
+            145deg,
+            #17491e 0%,
+            #1f5f28 55%,
+            #2e7d32 100%
+        );
 }
+
+
+/*=========================
+    DECORACIÓN IZQUIERDA
+==========================*/
+
+.lado-izquierdo::before{
+    content:"";
+
+    position:absolute;
+
+    width:240px;
+    height:240px;
+
+    right:-110px;
+    top:-90px;
+
+    border-radius:50%;
+
+    background:rgba(242,140,40,.12);
+}
+
+.lado-izquierdo::after{
+    content:"";
+
+    position:absolute;
+
+    width:180px;
+    height:180px;
+
+    left:-90px;
+    bottom:-90px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.06);
+}
+
 
 /*=========================
     LOGO
 ==========================*/
 
+.logo-admin{
+    position:relative;
+
+    z-index:2;
+}
+
 .logo-admin h1{
-    font-size:42px;
-    margin-bottom:10px;
-    font-weight:bold;
+    margin-bottom:8px;
+
+    font-size:44px;
+
+    font-weight:800;
+
+    letter-spacing:1px;
+}
+
+.logo-admin h1::after{
+    content:"";
+
+    display:block;
+
+    width:55px;
+    height:4px;
+
+    margin-top:10px;
+
+    border-radius:5px;
+
+    background:#f28c28;
 }
 
 .logo-admin h2{
-    font-size:22px;
+    margin-top:12px;
+
+    color:#e7f5e9;
+
+    font-size:20px;
+
     font-weight:normal;
 }
+
 
 /*=========================
     BANNER
 ==========================*/
 
 .banner-admin{
+    position:relative;
+
+    z-index:2;
+
     width:100%;
-    height:260px;
-    margin:25px 0;
-    border-radius:15px;
-    background:#4caf50;
+    height:270px;
+
+    margin:28px 0;
+
+    overflow:hidden;
+
+    border-radius:18px;
+
+    background-color:#245f2b;
+
+    background-size:cover;
+
+    background-position:center;
+
+    background-repeat:no-repeat;
+
+    border:1px solid rgba(255,255,255,.18);
+
+    box-shadow:
+        0 16px 35px rgba(0,0,0,.22);
 }
+
+
+/*=========================
+    CAPA DEL BANNER
+==========================*/
+
+.banner-admin::after{
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(0,0,0,.02),
+            rgba(0,0,0,.12)
+        );
+
+    pointer-events:none;
+}
+
+
+/*=========================
+    BANNER SIN IMAGEN
+==========================*/
+
+.banner-admin-vacio{
+    position:relative;
+
+    z-index:2;
+
+    width:100%;
+    height:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:7px;
+
+    padding:25px;
+
+    text-align:center;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.08),
+            rgba(242,140,40,.10)
+        );
+}
+
+.banner-admin-vacio span{
+    color:white;
+
+    font-size:25px;
+
+    font-weight:800;
+
+    letter-spacing:1px;
+}
+
+.banner-admin-vacio small{
+    color:#d8eadb;
+
+    font-size:13px;
+}
+
 
 /*=========================
     INFORMACIÓN
 ==========================*/
 
 .informacion-admin{
-    margin-bottom:20px;
+    position:relative;
+
+    z-index:2;
+
+    margin-bottom:10px;
 }
 
 .informacion-admin p{
-    margin:12px 0;
-    font-size:17px;
-    line-height:1.5;
+    margin:10px 0;
+
+    padding:9px 11px;
+
+    border-left:3px solid #f28c28;
+
+    border-radius:8px;
+
+    background:rgba(255,255,255,.05);
+
+    color:#edf8ef;
+
+    font-size:15px;
+
+    line-height:1.4;
 }
+
 
 /*=========================
     LADO DERECHO
 ==========================*/
 
 .lado-derecho{
-    width:70%;
+    position:relative;
+
+    width:66%;
+
     display:flex;
+
     justify-content:center;
+
     align-items:center;
-    background:white;
-    padding:30px;
+
+    padding:45px;
+
+    background-color:#f8faf7;
+
+    background-size:cover;
+
+    background-position:center;
+
+    background-repeat:no-repeat;
 }
+
 
 /*=========================
     FORMULARIO
 ==========================*/
 
 .formulario-login{
+    position:relative;
+
+    z-index:2;
+
     width:100%;
-    max-width:420px;
-    padding:20px;
-    border-radius:15px;
-    background:white;
-    box-shadow:0 0 20px rgba(0,0,0,.15);
+
+    max-width:440px;
+
+    padding:38px;
+
+    background:rgba(255,255,255,.94);
+
+    backdrop-filter:blur(5px);
+
+    border:1px solid rgba(225,231,226,.95);
+
+    border-radius:18px;
+
+    box-shadow:
+        0 14px 38px rgba(0,0,0,.14);
+}
+
+
+/*=========================
+    DETALLE NARANJA
+==========================*/
+
+.formulario-login::before{
+    content:"";
+
+    position:absolute;
+
+    top:0;
+    left:38px;
+
+    width:65px;
+    height:4px;
+
+    border-radius:0 0 5px 5px;
+
+    background:#f28c28;
+}
+
+
+/*=========================
+    ENCABEZADO LOGIN
+==========================*/
+
+.login-encabezado{
+    margin-bottom:28px;
+}
+
+.login-etiqueta{
+    display:block;
+
+    margin-bottom:10px;
+
+    color:#d96f0b;
+
+    font-size:11px;
+
+    font-weight:800;
+
+    letter-spacing:1.4px;
 }
 
 .formulario-login h2{
-    text-align:center;
-    margin-bottom:15px;
-    color:#2e7d32;
+    margin-bottom:10px;
+
+    color:#1f5f28;
+
+    font-size:30px;
+
+    text-align:left;
 }
 
 .formulario-login p{
-    text-align:center;
-    margin-bottom:25px;
+    margin-bottom:0;
+
     color:#666;
+
+    font-size:14px;
+
+    line-height:1.6;
+
+    text-align:left;
+}
+
+
+/*=========================
+    CAMPOS
+==========================*/
+
+.campo-login{
+    margin-bottom:20px;
 }
 
 .formulario-login label{
-    font-weight:bold;
-}
+    display:block;
 
-/*=========================
-    INPUTS
-==========================*/
+    margin-bottom:8px;
+
+    color:#3d4a3f;
+
+    font-size:14px;
+
+    font-weight:700;
+}
 
 .formulario-login input{
     width:100%;
-    padding:12px;
-    margin-top:8px;
-    margin-bottom:20px;
-    border:1px solid #ccc;
-    border-radius:8px;
+
+    padding:13px 14px;
+
+    border:1px solid #ccd4cd;
+
+    border-radius:9px;
+
     outline:none;
-    transition:.3s;
+
+    background:rgba(251,252,251,.95);
+
+    font-size:15px;
+
+    transition:
+        border-color .25s ease,
+        box-shadow .25s ease,
+        background .25s ease;
 }
 
 .formulario-login input:focus{
-    border:1px solid #2e7d32;
+    border-color:#2e7d32;
+
+    background:white;
+
+    box-shadow:
+        0 0 0 3px rgba(46,125,50,.10);
 }
+
 
 /*=========================
     BOTÓN
@@ -150,63 +465,138 @@ body{
 
 .formulario-login button{
     width:100%;
+
+    margin-top:5px;
+
     padding:14px;
+
     border:none;
-    border-radius:8px;
-    background:#2e7d32;
+
+    border-radius:9px;
+
+    background:#f28c28;
+
     color:white;
-    font-size:16px;
-    font-weight:bold;
+
+    font-size:15px;
+
+    font-weight:800;
+
     cursor:pointer;
-    transition:.3s;
+
+    box-shadow:
+        0 7px 16px rgba(217,111,11,.18);
+
+    transition:
+        background .25s ease,
+        transform .2s ease,
+        box-shadow .25s ease;
 }
 
 .formulario-login button:hover{
-    background:#1b5e20;
+    background:#d96f0b;
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 10px 22px rgba(217,111,11,.24);
 }
+
+
+/*=========================
+    MENSAJE DE ERROR
+==========================*/
+
+.mensaje-error{
+    width:100%;
+
+    margin:0 0 20px;
+
+    padding:13px 15px;
+
+    background:#fdecea;
+
+    color:#b42318;
+
+    border:1px solid #f3c3bf;
+
+    border-left:4px solid #c62828;
+
+    border-radius:8px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    text-align:left;
+}
+
 
 /*=========================
     PIE DE PÁGINA
 ==========================*/
 
 footer{
-    min-height:60px;
-    background:#1f5f28;
-    color:white;
+    min-height:48px;
+
     display:flex;
+
     justify-content:center;
+
     align-items:center;
-    border-top:1px solid rgba(255,255,255,.25);
+
+    padding:10px 20px;
+
+    background:#1d211e;
+
+    color:#cfd5d0;
+
+    border-top:3px solid #f28c28;
+
+    font-size:12px;
 }
+
+footer p{
+    margin:0;
+}
+
+footer:hover{
+    color:white;
+}
+
 
 /*=========================
     RESPONSIVE - TABLET
 ==========================*/
 
-@media (max-width: 992px){
+@media(max-width:992px){
 
     .lado-izquierdo{
         width:40%;
-        min-width:280px;
-        padding:25px;
+
+        min-width:290px;
+
+        padding:28px;
     }
 
     .lado-derecho{
         width:60%;
-        padding:20px;
-    }
 
-    .formulario-login{
-        max-width:380px;
         padding:30px;
     }
 
+    .formulario-login{
+        max-width:400px;
+
+        padding:32px;
+    }
+
     .logo-admin h1{
-        font-size:34px;
+        font-size:36px;
     }
 
     .logo-admin h2{
-        font-size:18px;
+        font-size:17px;
     }
 
     .banner-admin{
@@ -214,16 +604,17 @@ footer{
     }
 
     .informacion-admin p{
-        font-size:15px;
+        font-size:14px;
     }
 
 }
+
 
 /*=========================
     RESPONSIVE - CELULAR
 ==========================*/
 
-@media (max-width: 768px){
+@media(max-width:768px){
 
     .contenedor-login{
         flex-direction:column;
@@ -236,50 +627,48 @@ footer{
 
     .lado-izquierdo{
         min-width:100%;
-        padding:25px;
+
+        padding:28px 22px;
     }
 
     .banner-admin{
-        height:180px;
+        height:210px;
+
+        margin:22px 0;
     }
 
     .lado-derecho{
-        padding:30px 20px;
+        padding:32px 18px;
+
+        min-height:500px;
     }
 
     .formulario-login{
         width:100%;
+
         max-width:100%;
-        padding:30px;
+
+        padding:28px 24px;
     }
 
     .logo-admin h1{
-        font-size:30px;
+        font-size:32px;
     }
 
     .logo-admin h2{
-        font-size:18px;
+        font-size:17px;
     }
 
     .informacion-admin p{
-        font-size:15px;
+        font-size:14px;
+    }
+
+    .formulario-login h2{
+        font-size:26px;
     }
 
     footer{
         text-align:center;
-        padding:15px;
     }
 
-}
-
-.mensaje-error{
-    width:100%;
-    background:#fdecea;
-    color:#c62828;
-    border:1px solid #ef9a9a;
-    padding:12px;
-    border-radius:8px;
-    margin:15px 0;
-    text-align:center;
-    font-weight:600;
 }
