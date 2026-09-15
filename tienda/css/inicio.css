@@ -3,9 +3,9 @@
    ========================================================= */
 
 
-/* -------------------------
+/* =========================================================
    CONTENEDOR GENERAL
-   ------------------------- */
+   ========================================================= */
 
 .inicio-container {
     width: min(1200px, 92%);
@@ -24,11 +24,6 @@
     background-color: var(--blanco);
 }
 
-
-/*
-   Contenedor interno del hero.
-*/
-
 .inicio-hero .inicio-container {
     min-height: 560px;
 
@@ -37,9 +32,9 @@
 }
 
 
-/* -------------------------
-   CONTENIDO DEL HERO
-   ------------------------- */
+/* =========================================================
+   CONTENIDO HERO
+   ========================================================= */
 
 .hero-contenido {
     position: relative;
@@ -50,7 +45,6 @@
 
     padding: 70px 25px 70px 95px;
 }
-
 
 .hero-etiqueta {
     display: inline-block;
@@ -64,7 +58,6 @@
     letter-spacing: 1.5px;
 }
 
-
 .hero-contenido h1 {
     max-width: 560px;
 
@@ -76,7 +69,6 @@
     font-weight: 800;
     line-height: 1.08;
 }
-
 
 .hero-contenido p {
     max-width: 500px;
@@ -90,9 +82,9 @@
 }
 
 
-/* -------------------------
+/* =========================================================
    BOTÓN HERO
-   ------------------------- */
+   ========================================================= */
 
 .btn-hero {
     display: inline-flex;
@@ -116,7 +108,6 @@
         transform 0.2s ease;
 }
 
-
 .btn-hero:hover {
     background-color: var(--naranja-oscuro);
     transform: translateY(-2px);
@@ -124,7 +115,7 @@
 
 
 /* =========================================================
-   ZONA VISUAL DEL TRACTOR
+   IMAGEN HERO - ESCRITORIO
    ========================================================= */
 
 .inicio-hero::before {
@@ -151,14 +142,6 @@
 
     z-index: 1;
 }
-
-
-/*
-   Zona preparada para la futura imagen del banner.
-
-   Por ahora utiliza una imagen externa de demostración.
-   Cuando hagamos Configuración, esta ruta será dinámica.
-*/
 
 .inicio-hero::after {
     content: "";
@@ -198,23 +181,20 @@
    ========================================================= */
 
 .inicio-seccion {
-    padding: 80px 0;
+    padding: 75px 0;
 }
-
 
 .productos-seccion {
     background-color: var(--blanco);
 }
 
-
 .seccion-encabezado {
     max-width: 700px;
 
-    margin: 0 auto 45px;
+    margin: 0 auto 40px;
 
     text-align: center;
 }
-
 
 .seccion-etiqueta {
     display: block;
@@ -228,7 +208,6 @@
     letter-spacing: 1.5px;
 }
 
-
 .seccion-encabezado h2 {
     margin-bottom: 12px;
 
@@ -238,9 +217,9 @@
     line-height: 1.2;
 }
 
-
 .seccion-encabezado p {
     color: var(--gris-texto);
+
     font-size: 15px;
 }
 
@@ -252,13 +231,14 @@
 .categorias-grid {
     display: grid;
 
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 
-    gap: 24px;
+    gap: 22px;
 }
 
-
 .categoria-card {
+    min-width: 0;
+
     overflow: hidden;
 
     background-color: var(--blanco);
@@ -271,40 +251,35 @@
         box-shadow 0.2s ease;
 }
 
-
 .categoria-card:hover {
     transform: translateY(-5px);
 
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-
 .categoria-imagen {
     width: 100%;
-    height: 190px;
+    height: 180px;
 
     overflow: hidden;
 
     background-color: #eef1ee;
 }
 
-
 .categoria-imagen img {
+    display: block;
+
     width: 100%;
     height: 100%;
 
     object-fit: cover;
 
-    display: block;
-
     transition: transform 0.3s ease;
 }
-
 
 .categoria-card:hover .categoria-imagen img {
     transform: scale(1.05);
 }
-
 
 .categoria-sin-imagen {
     display: flex;
@@ -316,20 +291,17 @@
     font-weight: 800;
 }
 
-
 .categoria-contenido {
-    padding: 20px;
+    padding: 18px;
 }
-
 
 .categoria-contenido h3 {
     margin-bottom: 8px;
 
     color: var(--negro);
 
-    font-size: 18px;
+    font-size: 17px;
 }
-
 
 .categoria-contenido p {
     margin-bottom: 14px;
@@ -342,9 +314,9 @@
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+
     overflow: hidden;
 }
-
 
 .categoria-enlace {
     color: var(--naranja-oscuro);
@@ -361,14 +333,18 @@
 .productos-grid {
     display: grid;
 
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 
-    gap: 24px;
+    gap: 22px;
 }
 
-
 .producto-card {
+    min-width: 0;
+
     overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
 
     background-color: var(--blanco);
 
@@ -380,42 +356,37 @@
         box-shadow 0.2s ease;
 }
 
-
 .producto-card:hover {
     transform: translateY(-5px);
 
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-
 .producto-imagen {
     display: block;
 
     width: 100%;
-    height: 220px;
+    height: 210px;
 
     overflow: hidden;
 
-    background-color: #f0f2f0;
+    background-color: #f4f5f4;
 }
 
-
 .producto-imagen img {
+    display: block;
+
     width: 100%;
     height: 100%;
-
-    display: block;
 
     object-fit: contain;
 
     transition: transform 0.3s ease;
 }
 
-
 .producto-card:hover .producto-imagen img {
     transform: scale(1.05);
 }
-
 
 .producto-sin-imagen {
     width: 100%;
@@ -430,11 +401,14 @@
     font-size: 13px;
 }
 
-
 .producto-contenido {
-    padding: 20px;
-}
+    flex: 1;
 
+    display: flex;
+    flex-direction: column;
+
+    padding: 18px;
+}
 
 .producto-codigo {
     display: block;
@@ -446,7 +420,6 @@
     font-size: 11px;
 }
 
-
 .producto-contenido h3 {
     min-height: 44px;
 
@@ -456,18 +429,15 @@
     line-height: 1.3;
 }
 
-
 .producto-contenido h3 a {
     color: var(--negro);
 
     transition: color 0.2s ease;
 }
 
-
 .producto-contenido h3 a:hover {
     color: var(--verde-principal);
 }
-
 
 .producto-precio {
     margin-bottom: 18px;
@@ -478,11 +448,11 @@
     font-weight: 800;
 }
 
-
 .producto-boton {
     display: block;
 
     width: 100%;
+    margin-top: auto;
 
     padding: 11px;
 
@@ -501,7 +471,6 @@
         color 0.2s ease;
 }
 
-
 .producto-boton:hover {
     background-color: var(--verde-principal);
     color: var(--blanco);
@@ -517,7 +486,6 @@
 
     text-align: center;
 }
-
 
 .btn-secundario {
     display: inline-flex;
@@ -539,7 +507,6 @@
         color 0.2s ease;
 }
 
-
 .btn-secundario:hover {
     background-color: var(--verde-principal);
     color: var(--blanco);
@@ -551,23 +518,21 @@
    ========================================================= */
 
 .inicio-confianza {
-    padding: 80px 0;
+    padding: 75px 0;
 
     background-color: var(--gris-fondo);
 }
 
-
 .confianza-grid {
     display: grid;
 
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 
-    gap: 30px;
+    gap: 25px;
 }
 
-
 .confianza-item {
-    padding: 35px 25px;
+    padding: 32px 24px;
 
     background-color: var(--blanco);
 
@@ -576,7 +541,6 @@
 
     text-align: center;
 }
-
 
 .confianza-icono {
     width: 48px;
@@ -597,7 +561,6 @@
     font-weight: 800;
 }
 
-
 .confianza-item h3 {
     margin-bottom: 10px;
 
@@ -605,7 +568,6 @@
 
     font-size: 18px;
 }
-
 
 .confianza-item p {
     color: var(--gris-texto);
@@ -630,150 +592,526 @@
     text-align: center;
 }
 
-
 .inicio-vacio p {
     color: var(--gris-texto);
+
     font-size: 14px;
 }
 
 
 /* =========================================================
-   RESPONSIVE
+   TABLET
    ========================================================= */
 
 @media (max-width: 1000px) {
 
     .categorias-grid,
     .productos-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-
-    .inicio-hero {
-        min-height: 520px;
-    }
-
-
+    .inicio-hero,
     .inicio-hero .inicio-container {
         min-height: 520px;
     }
 
-
     .hero-contenido {
         width: 50%;
+
         padding-left: 40px;
     }
-
 
     .inicio-hero::before,
     .inicio-hero::after {
         width: 55%;
     }
-
 }
 
 
+/* =========================================================
+   MÓVIL
+   Diseño propio:
+   imagen panorámica arriba + contenido debajo
+   ========================================================= */
+
 @media (max-width: 750px) {
 
-    .inicio-hero {
-        min-height: auto;
+    .inicio-container {
+        width: 92%;
     }
 
 
-    .inicio-hero .inicio-container {
-        min-height: auto;
+    /* =====================================================
+       HERO MÓVIL
+       ===================================================== */
 
-        padding: 0;
+    .inicio-hero {
+        min-height: 0;
+
+        padding-top: 255px;
+
+        overflow: hidden;
+
+        background-color: var(--blanco);
     }
 
 
     /*
-       En pantallas pequeñas la composición pasa
-       a una distribución vertical.
+       Eliminamos completamente la forma diagonal
+       utilizada en escritorio.
     */
-
-    .inicio-hero::before,
-    .inicio-hero::after {
-        position: relative;
-
-        top: auto;
-        left: auto;
-
-        width: 100%;
-        height: 300px;
-
-        clip-path: none;
-    }
-
 
     .inicio-hero::before {
         display: none;
     }
 
 
+    /*
+       La imagen pasa a ocupar toda la zona superior.
+    */
+
     .inicio-hero::after {
+        content: "";
+
         display: block;
 
-        background-position: center;
+        position: absolute;
+
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 255px;
+
+        background-image:
+            linear-gradient(
+                to bottom,
+                rgba(23, 73, 30, 0.05) 0%,
+                rgba(23, 73, 30, 0.08) 65%,
+                rgba(23, 73, 30, 0.20) 100%
+            ),
+            var(--imagen-hero);
+
+        /*
+           contain evita perder grandes partes
+           del banner en pantallas estrechas.
+        */
+
+        background-size: cover;
+
+        /*
+           Priorizamos el centro de la fotografía.
+        */
+
+        background-position: center center;
+
+        background-repeat: no-repeat;
+
+        clip-path: none;
+
+        z-index: 1;
     }
 
+
+    /*
+       El contenido queda debajo de la fotografía.
+    */
+
+    .inicio-hero .inicio-container {
+        position: relative;
+
+        z-index: 3;
+
+        width: 100%;
+        min-height: 0;
+
+        display: block;
+
+        padding: 0;
+    }
 
     .hero-contenido {
         width: 100%;
 
         margin: 0;
 
-        padding: 55px 0 60px;
+        padding: 34px 7% 40px;
+
+        background-color: var(--blanco);
 
         text-align: center;
     }
 
+    .hero-etiqueta {
+        margin-bottom: 10px;
 
-    .hero-contenido h1,
-    .hero-contenido p {
-        margin-left: auto;
-        margin-right: auto;
+        font-size: 10px;
+        letter-spacing: 1.3px;
     }
 
+    .hero-contenido h1 {
+        max-width: 500px;
+
+        margin:
+            0
+            auto
+            14px;
+
+        font-size: 32px;
+        line-height: 1.08;
+    }
+
+    .hero-contenido p {
+        max-width: 460px;
+
+        margin:
+            0
+            auto
+            20px;
+
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .btn-hero {
+        min-width: 155px;
+
+        padding: 12px 22px;
+
+        font-size: 12px;
+    }
+
+
+    /* =====================================================
+       SECCIONES
+       ===================================================== */
 
     .inicio-seccion,
     .inicio-confianza {
-        padding: 60px 0;
+        padding: 55px 0;
     }
 
+    .seccion-encabezado {
+        margin-bottom: 30px;
+    }
+
+    .seccion-encabezado h2 {
+        font-size: 30px;
+    }
 
     .confianza-grid {
         grid-template-columns: 1fr;
     }
-
 }
 
 
+/* =========================================================
+   CELULAR
+   ========================================================= */
+
 @media (max-width: 550px) {
+
+    .inicio-container {
+        width: 94%;
+    }
+
+
+    /* =====================================================
+       HERO CELULAR
+       ===================================================== */
+
+    .inicio-hero {
+        padding-top: 210px;
+    }
+
+    .inicio-hero::after {
+        height: 210px;
+
+        /*
+           El banner ocupa el ancho completo.
+           La posición puede ajustarse aquí si cambia
+           la fotografía desde Configuración.
+        */
+
+        background-size: cover;
+        background-position: center center;
+    }
+
+    .hero-contenido {
+        padding:
+            29px
+            22px
+            34px;
+    }
+
+    .hero-etiqueta {
+        margin-bottom: 9px;
+
+        font-size: 9px;
+        letter-spacing: 1.2px;
+    }
+
+    .hero-contenido h1 {
+        max-width: 330px;
+
+        margin-bottom: 12px;
+
+        font-size: 27px;
+        line-height: 1.08;
+    }
+
+    .hero-contenido p {
+        max-width: 330px;
+
+        margin-bottom: 18px;
+
+        font-size: 12.5px;
+        line-height: 1.5;
+    }
+
+    .btn-hero {
+        min-width: 145px;
+
+        padding: 11px 19px;
+
+        font-size: 11px;
+    }
+
+
+    /* =====================================================
+       ENCABEZADOS
+       ===================================================== */
+
+    .seccion-encabezado {
+        width: 94%;
+
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 26px;
+    }
+
+    .seccion-etiqueta {
+        font-size: 10px;
+    }
+
+    .seccion-encabezado h2 {
+        margin-bottom: 8px;
+
+        font-size: 25px;
+    }
+
+    .seccion-encabezado p {
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+
+    /* =====================================================
+       CATEGORÍAS - 2 POR FILA
+       ===================================================== */
+
+    .categorias-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        gap: 12px;
+    }
+
+    .categoria-imagen {
+        height: 115px;
+    }
+
+    .categoria-contenido {
+        padding: 12px;
+    }
+
+    .categoria-contenido h3 {
+        margin-bottom: 5px;
+
+        font-size: 14px;
+        line-height: 1.25;
+    }
+
+    .categoria-contenido p {
+        margin-bottom: 8px;
+
+        font-size: 11px;
+        line-height: 1.4;
+
+        -webkit-line-clamp: 2;
+    }
+
+    .categoria-enlace {
+        font-size: 11px;
+    }
+
+
+    /* =====================================================
+       PRODUCTOS - 2 POR FILA
+       ===================================================== */
+
+    .productos-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        gap: 12px;
+    }
+
+    .producto-imagen {
+        height: 145px;
+    }
+
+    .producto-contenido {
+        padding: 12px;
+    }
+
+    .producto-codigo {
+        margin-bottom: 5px;
+
+        font-size: 9px;
+    }
+
+    .producto-contenido h3 {
+        min-height: 36px;
+
+        margin-bottom: 8px;
+
+        font-size: 13px;
+        line-height: 1.3;
+    }
+
+    .producto-precio {
+        margin-bottom: 11px;
+
+        font-size: 17px;
+    }
+
+    .producto-boton {
+        padding: 9px 5px;
+
+        font-size: 11px;
+    }
+
+
+    /* =====================================================
+       CONFIANZA
+       ===================================================== */
+
+    .confianza-grid {
+        gap: 14px;
+    }
+
+    .confianza-item {
+        padding: 25px 18px;
+    }
+
+    .confianza-icono {
+        width: 42px;
+        height: 42px;
+
+        margin-bottom: 14px;
+
+        font-size: 18px;
+    }
+
+    .confianza-item h3 {
+        font-size: 16px;
+    }
+
+    .confianza-item p {
+        font-size: 13px;
+    }
+
+
+    /* =====================================================
+       BOTÓN VER TODOS
+       ===================================================== */
+
+    .seccion-boton {
+        margin-top: 28px;
+    }
+
+    .btn-secundario {
+        padding: 11px 20px;
+
+        font-size: 12px;
+    }
+}
+
+
+/* =========================================================
+   CELULARES PEQUEÑOS - 320px
+   ========================================================= */
+
+@media (max-width: 350px) {
+
+    .inicio-hero {
+        padding-top: 190px;
+    }
+
+    .inicio-hero::after {
+        height: 190px;
+
+        background-position: center center;
+    }
+
+    .hero-contenido {
+        padding:
+            26px
+            18px
+            31px;
+    }
+
+    .hero-etiqueta {
+        font-size: 8px;
+    }
+
+    .hero-contenido h1 {
+        max-width: 285px;
+
+        font-size: 24px;
+    }
+
+    .hero-contenido p {
+        max-width: 280px;
+
+        font-size: 11.5px;
+    }
+
+    .btn-hero {
+        min-width: 135px;
+
+        padding: 10px 16px;
+
+        font-size: 10px;
+    }
+
+
+    /* -------------------------
+       GRIDS
+       ------------------------- */
 
     .categorias-grid,
     .productos-grid {
-        grid-template-columns: 1fr;
+        gap: 9px;
     }
 
-
-    .seccion-encabezado h2 {
-        font-size: 28px;
+    .categoria-imagen {
+        height: 105px;
     }
 
-
-    .hero-contenido h1 {
-        font-size: 36px;
+    .producto-imagen {
+        height: 130px;
     }
 
-
-    .hero-contenido p {
-        font-size: 15px;
+    .categoria-contenido,
+    .producto-contenido {
+        padding: 10px;
     }
 
-
-    .inicio-hero::after {
-        height: 240px;
+    .producto-precio {
+        font-size: 16px;
     }
 
+    .producto-boton {
+        font-size: 10px;
+    }
 }

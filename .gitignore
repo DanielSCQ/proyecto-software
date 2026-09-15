@@ -4,6 +4,8 @@
 .env
 .env.*
 config/correo.local.php
+config/correo.servidor.php
+
 # Credenciales privadas del servidor
 /config/credenciales_servidor.php
 

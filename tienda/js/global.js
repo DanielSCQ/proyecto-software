@@ -1921,3 +1921,236 @@ document.addEventListener(
 
     }
 );
+
+/* =========================================
+   BUSCADOR DESPLEGABLE DEL HEADER
+========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const buscadorWrapper =
+            document.querySelector(
+                ".header-search-wrapper"
+            );
+
+        const botonAbrir =
+            document.getElementById(
+                "headerSearchToggle"
+            );
+
+        const panelBuscador =
+            document.getElementById(
+                "headerSearchPanel"
+            );
+
+        const campoBusqueda =
+            document.getElementById(
+                "headerSearchInput"
+            );
+
+        const botonCerrar =
+            document.getElementById(
+                "headerSearchClose"
+            );
+
+
+        // Si el header no existe en alguna página,
+        // simplemente no hacemos nada.
+        if (
+            !buscadorWrapper ||
+            !botonAbrir ||
+            !panelBuscador
+        ) {
+            return;
+        }
+
+
+        /* =====================================
+           ABRIR BUSCADOR
+        ===================================== */
+
+        function abrirBuscador() {
+
+            buscadorWrapper.classList.add(
+                "search-activo"
+            );
+
+            botonAbrir.setAttribute(
+                "aria-expanded",
+                "true"
+            );
+
+            botonAbrir.setAttribute(
+                "aria-label",
+                "Cerrar buscador"
+            );
+
+            panelBuscador.setAttribute(
+                "aria-hidden",
+                "false"
+            );
+
+
+            // Esperamos a que comience la animación
+            // y colocamos el cursor en el campo.
+            window.setTimeout(
+                () => {
+
+                    campoBusqueda?.focus();
+
+                },
+                120
+            );
+        }
+
+
+        /* =====================================
+           CERRAR BUSCADOR
+        ===================================== */
+
+        function cerrarBuscador() {
+
+            buscadorWrapper.classList.remove(
+                "search-activo"
+            );
+
+            botonAbrir.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+            botonAbrir.setAttribute(
+                "aria-label",
+                "Abrir buscador"
+            );
+
+            panelBuscador.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+        }
+
+
+        /* =====================================
+           LUPA PRINCIPAL
+        ===================================== */
+
+        botonAbrir.addEventListener(
+            "click",
+            (evento) => {
+
+                evento.stopPropagation();
+
+
+                const estaAbierto =
+                    buscadorWrapper.classList.contains(
+                        "search-activo"
+                    );
+
+
+                if (estaAbierto) {
+
+                    cerrarBuscador();
+
+                } else {
+
+                    abrirBuscador();
+                }
+
+            }
+        );
+
+
+        /* =====================================
+           BOTÓN X
+        ===================================== */
+
+        botonCerrar?.addEventListener(
+            "click",
+            (evento) => {
+
+                evento.stopPropagation();
+
+                cerrarBuscador();
+
+                botonAbrir.focus();
+
+            }
+        );
+
+
+        /* =====================================
+           NO CERRAR AL TOCAR DENTRO
+        ===================================== */
+
+        panelBuscador.addEventListener(
+            "click",
+            (evento) => {
+
+                evento.stopPropagation();
+
+            }
+        );
+
+
+        /* =====================================
+           CERRAR AL TOCAR FUERA
+        ===================================== */
+
+        document.addEventListener(
+            "click",
+            (evento) => {
+
+                if (
+                    !buscadorWrapper.classList.contains(
+                        "search-activo"
+                    )
+                ) {
+                    return;
+                }
+
+
+                if (
+                    buscadorWrapper.contains(
+                        evento.target
+                    )
+                ) {
+                    return;
+                }
+
+
+                cerrarBuscador();
+
+            }
+        );
+
+
+        /* =====================================
+           CERRAR CON ESCAPE
+        ===================================== */
+
+        document.addEventListener(
+            "keydown",
+            (evento) => {
+
+                if (
+                    evento.key !== "Escape" ||
+                    !buscadorWrapper.classList.contains(
+                        "search-activo"
+                    )
+                ) {
+                    return;
+                }
+
+
+                cerrarBuscador();
+
+                botonAbrir.focus();
+
+            }
+        );
+
+    }
+);

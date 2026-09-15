@@ -8,62 +8,34 @@ if (!isset($_SESSION["id_usuario"])) {
 }
 
 require_once("../../config/conexion.php");
+require_once("../../config/correo.php");
+
+
+// =================================
+// TOKEN CSRF
+// =================================
+
+if (
+    !isset($_SESSION["csrf_respuesta_contacto"]) ||
+    !is_string($_SESSION["csrf_respuesta_contacto"])
+) {
+    $_SESSION["csrf_respuesta_contacto"] =
+        bin2hex(random_bytes(32));
+}
 
 
 // =================================
 // VALIDAR ID DEL CONTACTO
 // =================================
 
-$id_contacto = filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT);
+$id_contacto = filter_input(
+    INPUT_GET,
+    "id",
+    FILTER_VALIDATE_INT
+);
 
-if (!$id_contacto) {
+if (!$id_contacto || $id_contacto < 1) {
     header("Location: contactos.php");
-    exit();
-}
-
-
-// =================================
-// PROCESAR RESPUESTA
-// =================================
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-
-    $respuesta = trim($_POST["respuesta"] ?? "");
-    $estado_nuevo = $_POST["estado"] ?? "";
-
-    $estados_validos = [
-        "pendiente",
-        "leido",
-        "respondido",
-        "cerrado"
-    ];
-
-    if (!in_array($estado_nuevo, $estados_validos, true)) {
-        $estado_nuevo = "leido";
-    }
-
-    $sql_actualizar = "UPDATE contactos
-                       SET respuesta = ?, estado = ?
-                       WHERE id_contacto = ?";
-
-    $stmt_actualizar = $conexion->prepare($sql_actualizar);
-
-    if (!$stmt_actualizar) {
-        die("Error al actualizar el contacto: " . $conexion->error);
-    }
-
-    $stmt_actualizar->bind_param(
-        "ssi",
-        $respuesta,
-        $estado_nuevo,
-        $id_contacto
-    );
-
-    $stmt_actualizar->execute();
-
-    $stmt_actualizar->close();
-
-    header("Location: ver_contacto.php?id=" . $id_contacto . "&guardado=1");
     exit();
 }
 
@@ -84,15 +56,20 @@ $sql = "SELECT
             estado,
             respuesta
         FROM contactos
-        WHERE id_contacto = ?";
+        WHERE id_contacto = ?
+        LIMIT 1";
 
 $stmt = $conexion->prepare($sql);
 
 if (!$stmt) {
-    die("Error en la consulta: " . $conexion->error);
+    header("Location: contactos.php");
+    exit();
 }
 
-$stmt->bind_param("i", $id_contacto);
+$stmt->bind_param(
+    "i",
+    $id_contacto
+);
 
 $stmt->execute();
 
@@ -104,6 +81,9 @@ $resultado = $stmt->get_result();
 // =================================
 
 if ($resultado->num_rows === 0) {
+
+    $stmt->close();
+
     header("Location: contactos.php");
     exit();
 }
@@ -119,19 +99,432 @@ $stmt->close();
 
 if ($contacto["estado"] === "pendiente") {
 
-    $sql_leido = "UPDATE contactos
-                  SET estado = 'leido'
-                  WHERE id_contacto = ?";
+    $sql_leido = "
+        UPDATE contactos
+        SET estado = 'leido'
+        WHERE id_contacto = ?
+        AND estado = 'pendiente'
+    ";
 
     $stmt_leido = $conexion->prepare($sql_leido);
 
     if ($stmt_leido) {
 
-        $stmt_leido->bind_param("i", $id_contacto);
+        $stmt_leido->bind_param(
+            "i",
+            $id_contacto
+        );
+
         $stmt_leido->execute();
         $stmt_leido->close();
 
         $contacto["estado"] = "leido";
+    }
+}
+
+
+// =================================
+// VARIABLES
+// =================================
+
+$errores = [];
+
+$respuestaFormulario =
+    $contacto["respuesta"] ?? "";
+
+
+// =================================
+// FUNCIÓN PARA LONGITUD
+// =================================
+
+function longitudRespuestaContacto(
+    string $texto
+): int {
+
+    return function_exists("mb_strlen")
+        ? mb_strlen($texto, "UTF-8")
+        : strlen($texto);
+}
+
+
+// =================================
+// PROCESAR ACCIONES
+// =================================
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    // ---------------------------------
+    // VALIDAR CSRF
+    // ---------------------------------
+
+    $csrf =
+        $_POST["csrf_token"] ?? "";
+
+    if (
+        !is_string($csrf) ||
+        !hash_equals(
+            $_SESSION["csrf_respuesta_contacto"],
+            $csrf
+        )
+    ) {
+
+        $errores[] =
+            "La solicitud no es válida. Recarga la página e inténtalo nuevamente.";
+    }
+
+
+    // ---------------------------------
+    // IDENTIFICAR ACCIÓN
+    // ---------------------------------
+
+    $accion =
+        $_POST["accion"] ?? "";
+
+
+    // =================================
+    // ACCIÓN: ENVIAR RESPUESTA
+    // =================================
+
+    if (
+        empty($errores) &&
+        $accion === "responder"
+    ) {
+
+        // ---------------------------------
+        // SOLO PERMITIR SI NO ESTÁ CERRADO
+        // ---------------------------------
+
+        if ($contacto["estado"] === "cerrado") {
+
+            $errores[] =
+                "Este contacto ya está cerrado.";
+
+        } else {
+
+            // ---------------------------------
+            // RECIBIR RESPUESTA
+            // ---------------------------------
+
+            $respuestaFormulario =
+                trim($_POST["respuesta"] ?? "");
+
+
+            // ---------------------------------
+            // VALIDAR RESPUESTA
+            // ---------------------------------
+
+            if ($respuestaFormulario === "") {
+
+                $errores[] =
+                    "Debes escribir una respuesta antes de enviarla.";
+
+            } elseif (
+                longitudRespuestaContacto(
+                    $respuestaFormulario
+                ) > 3000
+            ) {
+
+                $errores[] =
+                    "La respuesta no puede superar los 3000 caracteres.";
+            }
+
+
+            // ---------------------------------
+            // VALIDAR CORREO
+            // ---------------------------------
+
+            $correoDestino =
+                trim($contacto["correo"] ?? "");
+
+            if (
+                $correoDestino === "" ||
+                !filter_var(
+                    $correoDestino,
+                    FILTER_VALIDATE_EMAIL
+                )
+            ) {
+
+                $errores[] =
+                    "El contacto no tiene un correo electrónico válido.";
+            }
+
+
+            // =================================
+            // ENVIAR CORREO
+            // =================================
+
+            if (empty($errores)) {
+
+                $correoEnviado =
+                    enviarRespuestaContacto(
+                        $correoDestino,
+                        $contacto["nombre"],
+                        $contacto["asunto"],
+                        $contacto["mensaje"],
+                        $respuestaFormulario
+                    );
+
+
+                // =================================
+                // CORREO ENVIADO
+                // =================================
+
+                if ($correoEnviado) {
+
+                    $estadoRespondido =
+                        "respondido";
+
+
+                    // ---------------------------------
+                    // GUARDAR RESPUESTA
+                    // ---------------------------------
+
+                    $sql_actualizar = "
+                        UPDATE contactos
+                        SET
+                            respuesta = ?,
+                            estado = ?
+                        WHERE id_contacto = ?
+                        AND estado <> 'cerrado'
+                    ";
+
+                    $stmt_actualizar =
+                        $conexion->prepare(
+                            $sql_actualizar
+                        );
+
+
+                    if (!$stmt_actualizar) {
+
+                        $errores[] =
+                            "El correo fue enviado, pero no fue posible actualizar el contacto.";
+
+                    } else {
+
+                        $stmt_actualizar->bind_param(
+                            "ssi",
+                            $respuestaFormulario,
+                            $estadoRespondido,
+                            $id_contacto
+                        );
+
+
+                        if ($stmt_actualizar->execute()) {
+
+                            $stmt_actualizar->close();
+
+
+                            // ---------------------------------
+                            // RENOVAR TOKEN
+                            // ---------------------------------
+
+                            $_SESSION["csrf_respuesta_contacto"] =
+                                bin2hex(
+                                    random_bytes(32)
+                                );
+
+
+                            // ---------------------------------
+                            // REDIRECCIÓN PRG
+                            // ---------------------------------
+
+                            header(
+                                "Location: ver_contacto.php?id="
+                                . $id_contacto
+                                . "&enviado=1"
+                            );
+
+                            exit();
+
+                        } else {
+
+                            $errores[] =
+                                "El correo fue enviado, pero no fue posible guardar la respuesta.";
+
+                            $stmt_actualizar->close();
+                        }
+                    }
+
+                } else {
+
+                    $errores[] =
+                        "No fue posible enviar la respuesta por correo. Inténtalo nuevamente.";
+                }
+            }
+        }
+    }
+
+
+    // =================================
+    // ACCIÓN: CERRAR CONTACTO
+    // =================================
+
+    elseif (
+        empty($errores) &&
+        $accion === "cerrar"
+    ) {
+
+        // ---------------------------------
+        // SOLO SE CIERRA SI ESTÁ RESPONDIDO
+        // ---------------------------------
+
+        if ($contacto["estado"] !== "respondido") {
+
+            $errores[] =
+                "Solo se puede cerrar un contacto que ya haya sido respondido.";
+
+        } else {
+
+            $estadoCerrado =
+                "cerrado";
+
+
+            $sql_cerrar = "
+                UPDATE contactos
+                SET estado = ?
+                WHERE id_contacto = ?
+                AND estado = 'respondido'
+            ";
+
+            $stmt_cerrar =
+                $conexion->prepare(
+                    $sql_cerrar
+                );
+
+
+            if (!$stmt_cerrar) {
+
+                $errores[] =
+                    "No fue posible cerrar el contacto.";
+
+            } else {
+
+                $stmt_cerrar->bind_param(
+                    "si",
+                    $estadoCerrado,
+                    $id_contacto
+                );
+
+
+                if ($stmt_cerrar->execute()) {
+
+                    $stmt_cerrar->close();
+
+
+                    // ---------------------------------
+                    // RENOVAR TOKEN
+                    // ---------------------------------
+
+                    $_SESSION["csrf_respuesta_contacto"] =
+                        bin2hex(
+                            random_bytes(32)
+                        );
+
+
+                    // ---------------------------------
+                    // REDIRECCIÓN PRG
+                    // ---------------------------------
+
+                    header(
+                        "Location: ver_contacto.php?id="
+                        . $id_contacto
+                        . "&cerrado=1"
+                    );
+
+                    exit();
+
+                } else {
+
+                    $errores[] =
+                        "No fue posible cerrar el contacto.";
+
+                    $stmt_cerrar->close();
+                }
+            }
+        }
+    }
+
+
+    // =================================
+    // ACCIÓN NO VÁLIDA
+    // =================================
+
+    elseif (
+        empty($errores) &&
+        !in_array(
+            $accion,
+            ["responder", "cerrar"],
+            true
+        )
+    ) {
+
+        $errores[] =
+            "La acción solicitada no es válida.";
+    }
+}
+
+
+// =================================
+// RECARGAR CONTACTO DESPUÉS DE ACCIÓN
+// =================================
+
+if (
+    (
+        isset($_GET["enviado"]) &&
+        $_GET["enviado"] === "1"
+    ) ||
+    (
+        isset($_GET["cerrado"]) &&
+        $_GET["cerrado"] === "1"
+    )
+) {
+
+    $sql_recargar = "
+        SELECT
+            id_contacto,
+            id_usuario,
+            nombre,
+            correo,
+            telefono,
+            asunto,
+            mensaje,
+            fecha_envio,
+            estado,
+            respuesta
+        FROM contactos
+        WHERE id_contacto = ?
+        LIMIT 1
+    ";
+
+    $stmt_recargar =
+        $conexion->prepare(
+            $sql_recargar
+        );
+
+    if ($stmt_recargar) {
+
+        $stmt_recargar->bind_param(
+            "i",
+            $id_contacto
+        );
+
+        $stmt_recargar->execute();
+
+        $resultado_recargar =
+            $stmt_recargar->get_result();
+
+        if (
+            $resultado_recargar->num_rows === 1
+        ) {
+
+            $contacto =
+                $resultado_recargar->fetch_assoc();
+
+            $respuestaFormulario =
+                $contacto["respuesta"] ?? "";
+        }
+
+        $stmt_recargar->close();
     }
 }
 
@@ -144,11 +537,17 @@ if ($contacto["estado"] === "pendiente") {
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Ver contacto | AGRANDA</title>
 
-    <link rel="stylesheet" href="contactos.css">
+    <link
+        rel="stylesheet"
+        href="contactos.css"
+    >
 
 </head>
 
@@ -222,10 +621,18 @@ if ($contacto["estado"] === "pendiente") {
 
                 <h2>
                     ¡Bienvenido,
-                    <?php echo htmlspecialchars($_SESSION["nombre"]); ?>!
+                    <?php
+                    echo htmlspecialchars(
+                        $_SESSION["nombre"],
+                        ENT_QUOTES,
+                        "UTF-8"
+                    );
+                    ?>!
                 </h2>
 
-                <p>Panel de Administración AGRANDA</p>
+                <p>
+                    Panel de Administración AGRANDA
+                </p>
 
             </div>
 
@@ -234,17 +641,31 @@ if ($contacto["estado"] === "pendiente") {
 
                 <div class="fecha-hora">
 
-                    <span id="fecha"></span><br>
-
+                    <span id="fecha"></span>
+                    <br>
                     <span id="hora"></span>
 
                 </div>
 
+
                 <div class="usuario">
-                    👤<?php echo htmlspecialchars($_SESSION["nombre"]); ?>
+
+                    👤
+                    <?php
+                    echo htmlspecialchars(
+                        $_SESSION["nombre"],
+                        ENT_QUOTES,
+                        "UTF-8"
+                    );
+                    ?>
+
                 </div>
 
-                <a href="../cerrar_sesion.php" class="btn-salir">
+
+                <a
+                    href="../cerrar_sesion.php"
+                    class="btn-salir"
+                >
                     Cerrar sesión
                 </a>
 
@@ -264,10 +685,13 @@ if ($contacto["estado"] === "pendiente") {
 
                 <div>
 
-                    <h2>✉️ Detalle del contacto</h2>
+                    <h2>
+                        ✉️ Detalle del contacto
+                    </h2>
 
                     <p>
-                        Consulta la información y responde el mensaje recibido.
+                        Consulta la información y responde
+                        el mensaje recibido.
                     </p>
 
                 </div>
@@ -275,17 +699,83 @@ if ($contacto["estado"] === "pendiente") {
             </div>
 
 
-            <?php if (isset($_GET["guardado"])): ?>
+            <!-- =================================
+                 RESPUESTA ENVIADA
+            ================================== -->
 
-                <div class="mensaje-exito">
-                    ✓ El contacto fue actualizado correctamente.
+            <?php if (
+                isset($_GET["enviado"]) &&
+                $_GET["enviado"] === "1"
+            ): ?>
+
+                <div
+                    class="mensaje-exito"
+                    role="status"
+                >
+                    ✓ La respuesta fue enviada al correo
+                    del contacto correctamente.
                 </div>
 
             <?php endif; ?>
 
 
             <!-- =================================
-                 INFORMACIÓN DEL CONTACTO
+                 CONTACTO CERRADO
+            ================================== -->
+
+            <?php if (
+                isset($_GET["cerrado"]) &&
+                $_GET["cerrado"] === "1"
+            ): ?>
+
+                <div
+                    class="mensaje-exito"
+                    role="status"
+                >
+                    ✓ El contacto fue cerrado correctamente.
+                </div>
+
+            <?php endif; ?>
+
+
+            <!-- =================================
+                 ERRORES
+            ================================== -->
+
+            <?php if (!empty($errores)): ?>
+
+                <div
+                    class="mensaje-error"
+                    role="alert"
+                >
+
+                    <ul>
+
+                        <?php foreach (
+                            $errores as $error
+                        ): ?>
+
+                            <li>
+                                <?=
+                                htmlspecialchars(
+                                    $error,
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                )
+                                ?>
+                            </li>
+
+                        <?php endforeach; ?>
+
+                    </ul>
+
+                </div>
+
+            <?php endif; ?>
+
+
+            <!-- =================================
+                 DETALLE
             ================================== -->
 
             <div class="detalle-contacto">
@@ -299,7 +789,13 @@ if ($contacto["estado"] === "pendiente") {
                         <span>Nombre</span>
 
                         <strong>
-                            <?php echo htmlspecialchars($contacto["nombre"]); ?>
+                            <?=
+                            htmlspecialchars(
+                                $contacto["nombre"],
+                                ENT_QUOTES,
+                                "UTF-8"
+                            )
+                            ?>
                         </strong>
 
                     </div>
@@ -310,7 +806,13 @@ if ($contacto["estado"] === "pendiente") {
                         <span>Correo</span>
 
                         <strong>
-                            <?php echo htmlspecialchars($contacto["correo"]); ?>
+                            <?=
+                            htmlspecialchars(
+                                $contacto["correo"],
+                                ENT_QUOTES,
+                                "UTF-8"
+                            )
+                            ?>
                         </strong>
 
                     </div>
@@ -321,11 +823,19 @@ if ($contacto["estado"] === "pendiente") {
                         <span>Teléfono</span>
 
                         <strong>
+
                             <?php
-                            echo !empty($contacto["telefono"])
-                                ? htmlspecialchars($contacto["telefono"])
+                            echo !empty(
+                                $contacto["telefono"]
+                            )
+                                ? htmlspecialchars(
+                                    $contacto["telefono"],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                )
                                 : "No registrado";
                             ?>
+
                         </strong>
 
                     </div>
@@ -340,7 +850,9 @@ if ($contacto["estado"] === "pendiente") {
                             <?php
                             echo date(
                                 "d/m/Y H:i",
-                                strtotime($contacto["fecha_envio"])
+                                strtotime(
+                                    $contacto["fecha_envio"]
+                                )
                             );
                             ?>
 
@@ -354,7 +866,13 @@ if ($contacto["estado"] === "pendiente") {
                         <span>Asunto</span>
 
                         <strong>
-                            <?php echo htmlspecialchars($contacto["asunto"]); ?>
+                            <?=
+                            htmlspecialchars(
+                                $contacto["asunto"],
+                                ENT_QUOTES,
+                                "UTF-8"
+                            )
+                            ?>
                         </strong>
 
                     </div>
@@ -371,27 +889,60 @@ if ($contacto["estado"] === "pendiente") {
                             switch ($contacto["estado"]) {
 
                                 case "pendiente":
-                                    echo '<span class="estado-cliente estado-inactivo">
+
+                                    echo '
+                                        <span
+                                            class="
+                                                estado-cliente
+                                                estado-inactivo
+                                            "
+                                        >
                                             Pendiente
-                                          </span>';
+                                        </span>
+                                    ';
+
                                     break;
+
 
                                 case "leido":
-                                    echo '<span class="estado-cliente">
+
+                                    echo '
+                                        <span
+                                            class="estado-cliente"
+                                        >
                                             Leído
-                                          </span>';
+                                        </span>
+                                    ';
+
                                     break;
+
 
                                 case "respondido":
-                                    echo '<span class="estado-cliente estado-activo">
+
+                                    echo '
+                                        <span
+                                            class="
+                                                estado-cliente
+                                                estado-activo
+                                            "
+                                        >
                                             Respondido
-                                          </span>';
+                                        </span>
+                                    ';
+
                                     break;
 
+
                                 case "cerrado":
-                                    echo '<span class="estado-cliente">
+
+                                    echo '
+                                        <span
+                                            class="estado-cliente"
+                                        >
                                             Cerrado
-                                          </span>';
+                                        </span>
+                                    ';
+
                                     break;
                             }
 
@@ -405,36 +956,29 @@ if ($contacto["estado"] === "pendiente") {
 
 
                 <!-- =================================
-                     RESPONDER
+                     MENSAJE ORIGINAL
                 ================================== -->
 
                 <div class="mensaje-contacto">
 
-                    <h3>💬 Mensaje</h3>
+                    <h3>
+                        💬 Mensaje
+                    </h3>
 
                     <div class="contenido-mensaje">
 
-                        <?php
-                        /*
-                         * IMPORTANTE:
-                         * Aquí mostramos el mensaje que viene
-                         * almacenado en la base de datos.
-                         *
-                         * Si tu tabla contactos actualmente no tiene
-                         * una columna llamada "mensaje", debemos agregarla.
-                         */
-                        ?>
-
                         <p>
+
                             <?php
-                            if (isset($contacto["mensaje"])) {
-                                echo nl2br(
-                                    htmlspecialchars($contacto["mensaje"])
-                                );
-                            } else {
-                                echo "No hay mensaje registrado.";
-                            }
+                            echo nl2br(
+                                htmlspecialchars(
+                                    $contacto["mensaje"],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                )
+                            );
                             ?>
+
                         </p>
 
                     </div>
@@ -443,66 +987,214 @@ if ($contacto["estado"] === "pendiente") {
 
 
                 <!-- =================================
-                     FORMULARIO DE RESPUESTA
+                     CONTACTO NO CERRADO
                 ================================== -->
 
-                <form method="POST" class="formulario-respuesta">
-
-                    <h3>✍️ Responder contacto</h3>
-
-
-                    <label for="respuesta">
-                        Respuesta
-                    </label>
-
-                    <textarea
-                        name="respuesta"
-                        id="respuesta"
-                        rows="7"
-                        placeholder="Escriba aquí la respuesta..."
-                    ><?php echo htmlspecialchars($contacto["respuesta"] ?? ""); ?></textarea>
+                <?php if (
+                    $contacto["estado"] !== "cerrado"
+                ): ?>
 
 
-                    <label for="estado">
-                        Estado
-                    </label>
+                    <!-- =================================
+                         FORMULARIO RESPUESTA
+                    ================================== -->
 
-                    <select name="estado" id="estado">
+                    <form
+                        method="POST"
+                        class="formulario-respuesta"
+                        autocomplete="off"
+                    >
 
-                        <option
-                            value="leido"
-                            <?php echo $contacto["estado"] === "leido" ? "selected" : ""; ?>
+                        <h3>
+                            ✍️ Responder contacto
+                        </h3>
+
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?=
+                            htmlspecialchars(
+                                $_SESSION[
+                                    "csrf_respuesta_contacto"
+                                ],
+                                ENT_QUOTES,
+                                "UTF-8"
+                            )
+                            ?>"
                         >
-                            Leído
-                        </option>
 
-                        <option
-                            value="respondido"
-                            <?php echo $contacto["estado"] === "respondido" ? "selected" : ""; ?>
+
+                        <input
+                            type="hidden"
+                            name="accion"
+                            value="responder"
                         >
-                            Respondido
-                        </option>
 
-                        <option
-                            value="cerrado"
-                            <?php echo $contacto["estado"] === "cerrado" ? "selected" : ""; ?>
+
+                        <label for="respuesta">
+                            Respuesta
+                        </label>
+
+
+                        <textarea
+                            name="respuesta"
+                            id="respuesta"
+                            rows="7"
+                            maxlength="3000"
+                            required
+                            placeholder="Escriba aquí la respuesta..."
+                        ><?= htmlspecialchars(
+                            $respuestaFormulario,
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?></textarea>
+
+
+                        <div class="acciones-contacto">
+
+                            <a
+                                href="contactos.php"
+                                class="btn-cancelar"
+                            >
+                                ← Volver
+                            </a>
+
+
+                            <button
+                                type="submit"
+                                class="btn-ver"
+                            >
+                                ✉️ Enviar respuesta
+                            </button>
+
+                        </div>
+
+                    </form>
+
+
+                    <!-- =================================
+                         CERRAR CONTACTO
+                    ================================== -->
+
+                    <?php if (
+                        $contacto["estado"] === "respondido"
+                    ): ?>
+
+                        <form
+                            method="POST"
+                            class="formulario-respuesta"
                         >
-                            Cerrado
-                        </option>
 
-                    </select>
+                            <h3>
+                                ✓ Finalizar atención
+                            </h3>
 
-                    <div class="acciones-contacto">
+                            <p>
+                                La consulta ya fue respondida.
+                                Cuando consideres que el caso está
+                                terminado, puedes cerrar el contacto.
+                            </p>
 
-                        <a href="contactos.php"
-                            class="btn-cancelar">← Volver</a>
 
-                        <button type="submit"
-                            class="btn-ver">💾 Guardar respuesta</button>
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="<?=
+                                htmlspecialchars(
+                                    $_SESSION[
+                                        "csrf_respuesta_contacto"
+                                    ],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                )
+                                ?>"
+                            >
+
+
+                            <input
+                                type="hidden"
+                                name="accion"
+                                value="cerrar"
+                            >
+
+
+                            <div class="acciones-contacto">
+
+                                <button
+                                    type="submit"
+                                    class="btn-ver"
+                                >
+                                    ✓ Cerrar contacto
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    <?php endif; ?>
+
+
+                <?php else: ?>
+
+
+                    <!-- =================================
+                         CONTACTO YA CERRADO
+                    ================================== -->
+
+                    <div class="formulario-respuesta">
+
+                        <h3>
+                            ✓ Contacto cerrado
+                        </h3>
+
+                        <p>
+                            Esta consulta ya fue atendida
+                            y se encuentra cerrada.
+                        </p>
+
+
+                        <?php if (
+                            !empty($contacto["respuesta"])
+                        ): ?>
+
+                            <label>
+                                Respuesta enviada
+                            </label>
+
+                            <div class="contenido-mensaje">
+
+                                <?php
+                                echo nl2br(
+                                    htmlspecialchars(
+                                        $contacto["respuesta"],
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    )
+                                );
+                                ?>
+
+                            </div>
+
+                        <?php endif; ?>
+
+
+                        <div class="acciones-contacto">
+
+                            <a
+                                href="contactos.php"
+                                class="btn-cancelar"
+                            >
+                                ← Volver
+                            </a>
+
+                        </div>
 
                     </div>
 
-                </form>
+
+                <?php endif; ?>
+
 
             </div>
 
@@ -512,6 +1204,9 @@ if ($contacto["estado"] === "pendiente") {
 
 </div>
 
+
 <script src="../dashboard/dashboard.js"></script>
+
 </body>
+
 </html>

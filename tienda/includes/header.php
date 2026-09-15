@@ -194,29 +194,18 @@ if (
         <!-- ACCIONES DEL USUARIO -->
         <div class="header-actions">
 
-            <!-- BUSCADOR -->
-            <form
-                action="<?= $base_url ?>productos/"
-                method="GET"
-                class="header-search"
-                role="search"
-            >
+           <!-- BUSCADOR -->
+            <div class="header-search-wrapper">
 
-                <input
-                    type="search"
-                    name="busqueda"
-                    class="header-search-input"
-                    placeholder="Buscar productos..."
-                    maxlength="100"
-                    autocomplete="off"
-                    aria-label="Buscar productos"
-                >
-
+                <!-- LUPA PRINCIPAL -->
                 <button
-                    type="submit"
-                    class="header-action header-search-button"
-                    aria-label="Buscar productos"
+                    type="button"
+                    class="header-action header-search-toggle"
+                    id="headerSearchToggle"
+                    aria-label="Abrir buscador"
                     title="Buscar productos"
+                    aria-expanded="false"
+                    aria-controls="headerSearchPanel"
                 >
 
                     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -226,8 +215,71 @@ if (
 
                 </button>
 
-            </form>
 
+                <!-- PANEL DESPLEGABLE DEL BUSCADOR -->
+                <div
+                    class="header-search-panel"
+                    id="headerSearchPanel"
+                    aria-hidden="true"
+                >
+
+                    <form
+                        action="<?= $base_url ?>productos/"
+                        method="GET"
+                        class="header-search"
+                        role="search"
+                    >
+
+                        <svg
+                            class="header-search-icon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <line
+                                x1="16.5"
+                                y1="16.5"
+                                x2="21"
+                                y2="21"
+                            ></line>
+                        </svg>
+
+                        <input
+                            type="search"
+                            name="busqueda"
+                            class="header-search-input"
+                            id="headerSearchInput"
+                            placeholder="¿Qué repuesto estás buscando?"
+                            maxlength="100"
+                            autocomplete="off"
+                            aria-label="Buscar productos"
+                        >
+
+                        <button
+                            type="submit"
+                            class="header-search-submit"
+                            aria-label="Buscar"
+                            title="Buscar"
+                        >
+                            Buscar
+                        </button>
+
+                    </form>
+
+                    <button
+                        type="button"
+                        class="header-search-close"
+                        id="headerSearchClose"
+                        aria-label="Cerrar buscador"
+                        title="Cerrar"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+            </div>
+            
             <!-- Cuenta -->
             
             <?php if ($clienteLogueado): ?>
