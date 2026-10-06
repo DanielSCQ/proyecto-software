@@ -7,7 +7,9 @@ session_start();
 // PROTEGER PANEL
 // =================================
 
-if (!isset($_SESSION["id_usuario"])) {
+require_once __DIR__ . "/../includes/auth.php";
+
+if (!agranda_admin_autorizado()) {
     header("Location: ../login.php");
     exit();
 }
@@ -241,7 +243,11 @@ if ($stmtConfiguracion) {
 
     <link
         rel="stylesheet"
-        href="dashboard.css"
+        href="<?= htmlspecialchars(
+            v_admin("dashboard.css", __DIR__),
+            ENT_QUOTES,
+            "UTF-8"
+        ) ?>"
     >
 
 </head>
@@ -947,7 +953,13 @@ if ($stmtConfiguracion) {
      FECHA Y HORA
 ================================= -->
 
-<script src="dashboard.js"></script>
+<script
+    src="<?= htmlspecialchars(
+        v_admin("dashboard.js", __DIR__),
+        ENT_QUOTES,
+        "UTF-8"
+    ) ?>"
+></script>
 
 
 </body>

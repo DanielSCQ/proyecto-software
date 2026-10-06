@@ -43,7 +43,7 @@ $rol = $_SESSION["rol"] ?? null;
 if (
     !is_numeric($idUsuario) ||
     (int) $idUsuario < 1 ||
-    $rol !== "cliente"
+    !in_array($rol, ["cliente", "administrador"], true)
 ) {
 
     responder(

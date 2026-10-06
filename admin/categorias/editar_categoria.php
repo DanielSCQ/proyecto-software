@@ -7,7 +7,9 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 
-if (!isset($_SESSION["id_usuario"])) {
+require_once __DIR__ . "/../includes/auth.php";
+
+if (!agranda_admin_autorizado()) {
 
     header("Location: ../login.php");
     exit();
@@ -323,7 +325,14 @@ if (isset($_FILES["imagen"]) && $_FILES["imagen"]["error"] !== UPLOAD_ERR_NO_FIL
 
     <title>Editar Categoría</title>
 
-    <link rel="stylesheet" href="categorias.css">
+    <link
+        rel="stylesheet"
+        href="<?= htmlspecialchars(
+            v_admin("categorias.css", __DIR__),
+            ENT_QUOTES,
+            "UTF-8"
+        ) ?>"
+    >
 
 </head>
 
@@ -595,7 +604,13 @@ if (isset($_FILES["imagen"]) && $_FILES["imagen"]["error"] !== UPLOAD_ERR_NO_FIL
 
     </main>
 </div>
-<script src="../dashboard/dashboard.js"></script>
+<script
+    src="<?= htmlspecialchars(
+        v_admin("../dashboard/dashboard.js", __DIR__),
+        ENT_QUOTES,
+        "UTF-8"
+    ) ?>"
+></script>
 
 <script>
 

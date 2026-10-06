@@ -1136,3 +1136,4 @@
     }
 
 }
+.checkout-cupon { padding:18px 0; border-top:1px solid #e2e5e2; }.checkout-cupon h3 { color:#1f5f28; }.checkout-cupon label { display:block; margin:12px 0 6px; }.checkout-cupon input:not([type=hidden]) { width:100%; min-width:0; padding:10px; border:1px solid #cfd8d0; border-radius:8px; font:inherit; }.checkout-cupon button { padding:10px 16px; margin-top:10px; border:0; border-radius:8px; background:#1f5f28; color:#fff; cursor:pointer; font:inherit; }.checkout-cupon p { line-height:1.6; overflow-wrap:anywhere; }

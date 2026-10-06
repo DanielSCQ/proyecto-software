@@ -44,7 +44,7 @@ if ($stmtConfig) {
 
 ?>
 
-<link rel="stylesheet" href="<?= $base_url ?>css/inicio.css">
+<link rel="stylesheet" href="<?= $base_url . v_tienda('css/inicio.css') ?>">
 
 <?php
 

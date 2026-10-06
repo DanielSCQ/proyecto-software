@@ -3,7 +3,9 @@
 session_start();
 
 // Verificar que el usuario haya iniciado sesión
-if (!isset($_SESSION["id_usuario"])) {
+require_once __DIR__ . "/../includes/auth.php";
+
+if (!agranda_admin_autorizado()) {
 
     header("Location: ../login.php");
     exit();
@@ -322,7 +324,14 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
 
     <title>Editar Proveedores</title>
 
-    <link rel="stylesheet" href="proveedores.css">
+    <link
+        rel="stylesheet"
+        href="<?= htmlspecialchars(
+            v_admin("proveedores.css", __DIR__),
+            ENT_QUOTES,
+            "UTF-8"
+        ) ?>"
+    >
 
 </head>
 
@@ -638,7 +647,13 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
     </main>
 </div>
 
-<script src="../dashboard/dashboard.js"></script>
+<script
+    src="<?= htmlspecialchars(
+        v_admin("../dashboard/dashboard.js", __DIR__),
+        ENT_QUOTES,
+        "UTF-8"
+    ) ?>"
+></script>
 
 <script>
 

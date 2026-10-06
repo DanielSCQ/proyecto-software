@@ -1,0 +1,36 @@
+/* El CSS global ya incorpora las reglas compartidas de selección. */
+.nosotros-page { background:#f7f8f7; color:#1f1f1f; }
+.nosotros-contenedor { width:min(1200px, calc(100% - 48px)); margin-inline:auto; }
+.nosotros-presentacion { padding:72px 0; background:linear-gradient(120deg,#17491e,#1f5f28); color:#fff; border-bottom:5px solid #f28c28; }
+.nosotros-etiqueta { display:block; color:#ffc184; font-size:.85rem; font-weight:700; letter-spacing:.14em; margin-bottom:18px; }
+.nosotros-presentacion h1 { max-width:850px; font-size:clamp(2rem,4.5vw,3.5rem); line-height:1.15; margin:0; overflow-wrap:anywhere; }
+.nosotros-secciones { padding-block:42px 64px; display:grid; gap:26px; }
+.nosotros-tarjeta { min-width:0; padding:32px; background:#fff; border:1px solid #e2e5e2; border-radius:18px; box-shadow:0 8px 24px rgba(23,73,30,.04); }
+.nosotros-tarjeta h2 { color:#1f5f28; font-size:1.5rem; margin:0 0 18px; }
+.nosotros-tarjeta h2::after { content:""; display:block; width:42px; height:3px; background:#f28c28; margin-top:12px; }
+.nosotros-tarjeta p { margin:0; color:#555; line-height:1.85; white-space:pre-line; overflow-wrap:anywhere; }
+.nosotros-proposito { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:26px; }
+.nosotros-proposito > :only-child { grid-column:1 / -1; }
+.nosotros-valores { margin:0; padding:0; list-style:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; }
+.nosotros-valores li { padding:18px; border-left:3px solid #f28c28; border-radius:8px; background:#f2f7f1; color:#17491e; font-weight:600; overflow-wrap:anywhere; }
+.nosotros-aviso { color:#555; line-height:1.7; }
+@media (max-width:700px) {
+    .nosotros-contenedor { width:calc(100% - 32px); }
+    .nosotros-presentacion { padding:44px 0; }
+    .nosotros-proposito { grid-template-columns:1fr; }
+    .nosotros-tarjeta { padding:24px; }
+    .nosotros-secciones { padding-block:28px 40px; gap:20px; }
+}
+
+/* Imágenes opcionales: sin columnas reservadas cuando no existen. */
+.nosotros-hero-con-imagen { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); align-items:center; gap:40px; }
+.nosotros-hero-texto { min-width:0; }
+.nosotros-imagen-hero { display:block; width:100%; height:auto; max-height:320px; object-fit:contain; border-radius:18px; }
+.nosotros-descripcion-con-imagen { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:32px; align-items:center; }
+.nosotros-descripcion-con-imagen > div { min-width:0; }
+.nosotros-imagen-institucional { display:block; width:100%; height:auto; border-radius:12px; }
+@media (max-width:900px) {
+    .nosotros-hero-con-imagen, .nosotros-descripcion-con-imagen { grid-template-columns:1fr; gap:24px; }
+    .nosotros-imagen-hero { max-width:560px; max-height:260px; margin-inline:auto; }
+    .nosotros-imagen-institucional { max-width:560px; margin-inline:auto; }
+}

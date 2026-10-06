@@ -55,7 +55,7 @@ $id_usuario = null;
 if (
     isset($_SESSION["id_usuario"]) &&
     isset($_SESSION["rol"]) &&
-    $_SESSION["rol"] === "cliente"
+    in_array($_SESSION["rol"] ?? null, ["cliente", "administrador"], true)
 ) {
 
     $id_usuario = (int) $_SESSION["id_usuario"];
@@ -74,7 +74,7 @@ if (
         FROM usuarios
         WHERE id_usuario = ?
           AND estado = 1
-          AND rol = 'cliente'
+          AND rol IN ('cliente', 'administrador')
         LIMIT 1
     ";
 
@@ -314,11 +314,49 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 // HEADER
 // =========================================
 
+// Atención por WhatsApp: independiente de los datos del formulario del visitante.
+$urlWhatsApp = "";
+$telefonoWhatsAppConfigurado = "";
+try {
+    $idConfiguracionWhatsApp = 1;
+    $stmtWhatsApp = $conexion->prepare("SELECT telefono_contacto FROM configuracion_tienda WHERE id_configuracion = ? LIMIT 1");
+    if ($stmtWhatsApp) {
+        $stmtWhatsApp->bind_param("i", $idConfiguracionWhatsApp);
+        $stmtWhatsApp->execute();
+        $configWhatsApp = $stmtWhatsApp->get_result()->fetch_assoc();
+        $telefonoWhatsAppConfigurado = trim((string) ($configWhatsApp["telefono_contacto"] ?? ""));
+        $stmtWhatsApp->close();
+    }
+} catch (Throwable $error) {
+    $telefonoWhatsAppConfigurado = "";
+}
+
+if (
+    $telefonoWhatsAppConfigurado !== "" &&
+    strlen($telefonoWhatsAppConfigurado) <= 40 &&
+    preg_match('/^\+?[0-9 ()-]+$/D', $telefonoWhatsAppConfigurado)
+) {
+    $digitosWhatsApp = preg_replace('/[ ()+\-]/', '', $telefonoWhatsAppConfigurado);
+    $numeroWhatsApp = null;
+    if (preg_match('/^573[0-9]{9}$/D', $digitosWhatsApp)) {
+        $numeroWhatsApp = $digitosWhatsApp;
+    } elseif (
+        !str_starts_with($telefonoWhatsAppConfigurado, "+") &&
+        preg_match('/^3[0-9]{9}$/D', $digitosWhatsApp)
+    ) {
+        $numeroWhatsApp = "57" . $digitosWhatsApp;
+    }
+    if ($numeroWhatsApp !== null) {
+        $mensajeWhatsApp = "Hola, estoy visitando la tienda AGRANDA y necesito información sobre un producto.";
+        $urlWhatsApp = "https://wa.me/" . $numeroWhatsApp . "?text=" . rawurlencode($mensajeWhatsApp);
+    }
+}
+
 require_once("../includes/header.php");
 
 ?>
 
-<link rel="stylesheet" href="<?= $base_url ?>css/contacto.css">
+<link rel="stylesheet" href="<?= $base_url . v_tienda('css/contacto.css') ?>">
 
 <main class="contacto-page">
 
@@ -751,7 +789,7 @@ require_once("../includes/header.php");
                     <div>
 
                         <span class="contacto-mini-etiqueta">
-                            WHATSAPP BUSINESS
+                            WHATSAPP
                         </span>
 
                         <h3>
@@ -759,28 +797,25 @@ require_once("../includes/header.php");
                         </h3>
 
                         <p>
-                            Próximamente podrás comunicarte directamente
-                            con AGRANDA mediante WhatsApp.
+                            <?= $urlWhatsApp !== ""
+                                ? "Abre una conversación con AGRANDA. Podrás revisar y editar el mensaje antes de enviarlo."
+                                : "La atención por WhatsApp no está disponible actualmente. Puedes utilizar el formulario de contacto." ?>
                         </p>
 
                     </div>
 
-                    <!--
-                        IMPORTANTE:
-                        Cuando configuremos el número oficial de
-                        WhatsApp Business, este bloque se convierte
-                        en el botón real.
-
-                        No colocamos todavía un número inventado.
-                    -->
-
-                    <button
-                        type="button"
-                        class="contacto-btn-whatsapp"
-                        disabled
-                    >
-                        WhatsApp próximamente
-                    </button>
+                    <?php if ($urlWhatsApp !== ""): ?>
+                        <a
+                            href="<?= htmlspecialchars($urlWhatsApp, ENT_QUOTES, "UTF-8") ?>"
+                            class="contacto-btn-whatsapp"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >Hablar por WhatsApp</a>
+                    <?php else: ?>
+                        <button type="button" class="contacto-btn-whatsapp" disabled>
+                            WhatsApp no disponible
+                        </button>
+                    <?php endif; ?>
 
                 </div>
 

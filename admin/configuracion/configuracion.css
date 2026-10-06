@@ -1,3 +1,5 @@
+@import url("../../assets/css/seleccion.css");
+
 /*=================================
     ESTILOS GENERALES
 =================================*/
@@ -1217,3 +1219,17 @@ body{
 
     font-weight:bold;
 }
+/* Campos propios de Nosotros. */
+.formulario-nosotros input[type="text"], .formulario-nosotros textarea { width:100%; padding:12px 14px; border:1px solid #cfd8d0; border-radius:8px; font:inherit; background:#fff; color:#1f1f1f; }
+.formulario-nosotros textarea { resize:vertical; min-height:130px; }
+.formulario-nosotros input:focus-visible, .formulario-nosotros textarea:focus-visible { outline:2px solid #1f5f28; outline-offset:2px; }
+
+.formulario-nosotros .nosotros-preview { display:block; width:100%; max-width:400px; max-height:240px; object-fit:contain; margin-bottom:16px; border-radius:10px; background:#f7f8f7; }
+.formulario-nosotros .nosotros-eliminar { display:flex; align-items:center; gap:8px; margin-top:16px; }
+
+/* Módulo de cupones. */
+.cupones-admin-lista,.cupon-admin-form { background:#fff; border:1px solid #e2e5e2; padding:24px; border-radius:14px; margin-bottom:24px; }
+.cupones-tabla { overflow-x:auto; }.cupones-tabla table { width:100%; border-collapse:collapse; }.cupones-tabla td,.cupones-tabla th { padding:12px; text-align:left; border-bottom:1px solid #e2e5e2; }
+.cupon-admin-campos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; border:0; padding:0; margin:20px 0; }
+.cupon-admin-form label { display:block; margin-bottom:8px; font-weight:600; }.cupon-admin-form input,.cupon-admin-form textarea,.cupon-admin-form select { width:100%; padding:10px; border:1px solid #cfd8d0; border-radius:8px; font:inherit; }.cupon-admin-form textarea { resize:vertical; }.cupon-admin-form small { display:block; margin-top:6px; color:#555; }
+@media(max-width:700px){.cupon-admin-campos{grid-template-columns:1fr;}}

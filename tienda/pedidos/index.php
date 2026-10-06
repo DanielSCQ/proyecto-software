@@ -54,7 +54,7 @@ if ($posTienda !== false) {
 
 if (
     !isset($_SESSION["id_usuario"]) ||
-    ($_SESSION["rol"] ?? "") !== "cliente"
+    !in_array($_SESSION["rol"] ?? null, ["cliente", "administrador"], true)
 ) {
 
     header(
@@ -636,13 +636,11 @@ require_once("../includes/header.php");
 <link
     rel="stylesheet"
     href="<?= htmlspecialchars(
-        $base_url .
-        "css/checkout.css",
+        $base_url . v_tienda("css/checkout.css"),
         ENT_QUOTES,
         "UTF-8"
     ) ?>"
 >
-
 
 <main class="checkout-page">
 

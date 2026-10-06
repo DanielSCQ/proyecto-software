@@ -76,7 +76,7 @@ function responderJson(
 // ==========================================
 if (
     isset($_SESSION["id_usuario"]) &&
-    ($_SESSION["rol"] ?? "") === "cliente"
+    in_array($_SESSION["rol"] ?? null, ["cliente", "administrador"], true)
 ) {
 
     if ($esAjax) {
@@ -690,27 +690,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link
         rel="stylesheet"
         href="<?= htmlspecialchars(
-            $base_url,
+            $base_url . v_tienda("css/global.css"),
             ENT_QUOTES,
             "UTF-8"
-        ) ?>css/global.css"
+        ) ?>"
     >
 
     <link
         rel="stylesheet"
         href="<?= htmlspecialchars(
-            $base_url,
+            $base_url . v_tienda("css/cuenta.css"),
             ENT_QUOTES,
             "UTF-8"
-        ) ?>css/cuenta.css"
+        ) ?>"
     >
 
     <script
         src="<?= htmlspecialchars(
-            $base_url,
+            $base_url . v_tienda("js/cuenta.js"),
             ENT_QUOTES,
             "UTF-8"
-        ) ?>js/cuenta.js"
+        ) ?>"
         defer
     ></script>
 

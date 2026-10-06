@@ -54,9 +54,8 @@ if ($posTienda !== false) {
 // =================================
 // ESTADO DE SESIÓN DEL CLIENTE
 // =================================
-// Solo se considera "cliente logueado" si el rol es "cliente",
-// para no confundir una sesión de administrador con una de tienda.
-$clienteLogueado = isset($_SESSION["id_usuario"]) && ($_SESSION["rol"] ?? "") === "cliente";
+// La tienda reconoce a clientes y administradores sin cambiar su rol real.
+$clienteLogueado = isset($_SESSION["id_usuario"]) && in_array($_SESSION["rol"] ?? null, ["cliente", "administrador"], true);
 $nombreCliente = $clienteLogueado ? htmlspecialchars($_SESSION["nombre"], ENT_QUOTES, "UTF-8") : "";
 
 // =================================
@@ -98,10 +97,10 @@ if (
 
     <title>AGRANDA</title>
 
-    <link rel="stylesheet" href="<?= $base_url ?>css/global.css">
-    <link rel="stylesheet" href="<?= $base_url ?>css/cuenta.css">
+    <link rel="stylesheet" href="<?= $base_url . v_tienda('css/global.css') ?>">
+    <link rel="stylesheet" href="<?= $base_url . v_tienda('css/cuenta.css') ?>">
 
-    <script src="<?= $base_url ?>js/global.js" defer></script>
+    <script src="<?= $base_url . v_tienda('js/global.js') ?>" defer></script>
 
 </head>
 

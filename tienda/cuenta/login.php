@@ -11,6 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // CONEXIÓN
 // ==========================================
 require_once __DIR__ . "/../../config/conexion.php";
+require_once __DIR__ . "/../../config/autenticacion.php";
 
 
 // ==========================================
@@ -73,7 +74,7 @@ function responderJson(
 // ==========================================
 if (
     isset($_SESSION["id_usuario"]) &&
-    ($_SESSION["rol"] ?? "") === "cliente"
+    in_array($_SESSION["rol"] ?? null, ["cliente", "administrador"], true)
 ) {
 
     if ($esAjax) {
@@ -242,11 +243,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $credencialesCorrectas =
                 $usuario !== null &&
                 (int) $usuario["estado"] === 1 &&
-                $usuario["rol"] === "cliente" &&
+                in_array($usuario["rol"], ["cliente", "administrador"], true) &&
                 !empty($usuario["clave"]) &&
-                password_verify(
+                agranda_verificar_clave(
                     $clave,
-                    $usuario["clave"]
+                    $usuario["clave"],
+                    $usuario["rol"]
                 );
 
 
@@ -278,7 +280,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $usuario["correo"];
 
                 $_SESSION["rol"] =
-                    "cliente";
+                    $usuario["rol"];
 
 
                 // ==================================
@@ -357,27 +359,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link
         rel="stylesheet"
         href="<?= htmlspecialchars(
-            $base_url,
+            $base_url . v_tienda("css/global.css"),
             ENT_QUOTES,
             "UTF-8"
-        ) ?>css/global.css"
+        ) ?>"
     >
 
     <link
         rel="stylesheet"
         href="<?= htmlspecialchars(
-            $base_url,
+            $base_url . v_tienda("css/cuenta.css"),
             ENT_QUOTES,
             "UTF-8"
-        ) ?>css/cuenta.css"
+        ) ?>"
     >
 
     <script
         src="<?= htmlspecialchars(
-            $base_url,
+            $base_url . v_tienda("js/cuenta.js"),
             ENT_QUOTES,
             "UTF-8"
-        ) ?>js/cuenta.js"
+        ) ?>"
         defer
     ></script>
 

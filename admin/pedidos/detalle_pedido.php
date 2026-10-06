@@ -2,7 +2,9 @@
 
 session_start();
 
-if (!isset($_SESSION["id_usuario"])) {
+require_once __DIR__ . "/../includes/auth.php";
+
+if (!agranda_admin_autorizado()) {
     header("Location: ../login.php");
     exit();
 }
@@ -503,6 +505,9 @@ $stmtHistorial->execute();
 $resultadoHistorial =
     $stmtHistorial->get_result();
 
+require_once __DIR__ . '/../../config/cupones.php';
+$cuponPedido = agranda_cupon_detalle($conexion, $idPedido);
+
 ?>
 
 <!DOCTYPE html>
@@ -524,7 +529,11 @@ $resultadoHistorial =
 
     <link
         rel="stylesheet"
-        href="pedidos.css"
+        href="<?= htmlspecialchars(
+            v_admin("pedidos.css", __DIR__),
+            ENT_QUOTES,
+            "UTF-8"
+        ) ?>"
     >
 
 </head>
@@ -979,6 +988,8 @@ $resultadoHistorial =
                 <div class="detalle-tarjeta">
 
                     <h3>Pago</h3>
+<?php if ($cuponPedido): ?><div class="detalle-tarjeta"><div><p>Subtotal de productos: $<?= number_format((float)$cuponPedido['subtotal'],2,',','.') ?></p><p>Cupón: <code><?= htmlspecialchars($cuponPedido['codigo'],ENT_QUOTES,'UTF-8') ?></code></p><p>Descuento: -$<?= number_format((float)$cuponPedido['descuento_aplicado'],2,',','.') ?></p></div></div><?php endif; ?>
+
 
                     <p>
                         Método:
@@ -996,7 +1007,7 @@ $resultadoHistorial =
                         <strong>
                             $<?= number_format(
                                 $pedido["total"],
-                                0,
+                                $cuponPedido ? 2 : 0,
                                 ",",
                                 "."
                             ) ?>
@@ -1241,7 +1252,13 @@ $resultadoHistorial =
 
 </div>
 
-<script src="../dashboard/dashboard.js"></script>
+<script
+    src="<?= htmlspecialchars(
+        v_admin("../dashboard/dashboard.js", __DIR__),
+        ENT_QUOTES,
+        "UTF-8"
+    ) ?>"
+></script>
 
 </body>
 

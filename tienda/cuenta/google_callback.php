@@ -540,7 +540,7 @@ if (!$usuario) {
         // SOLO CLIENTES
         // ----------------------------------
         if (
-            $usuario["rol"] !== "cliente"
+            !in_array($usuario["rol"], ["cliente", "administrador"], true)
         ) {
 
             errorGoogle(
@@ -593,7 +593,7 @@ if (!$usuario) {
                 token_verificacion_hash = NULL,
                 token_expira = NULL
             WHERE id_usuario = ?
-              AND rol = 'cliente'
+              AND rol IN ('cliente', 'administrador')
               AND estado = 1
             LIMIT 1
         ";
@@ -754,7 +754,7 @@ if (!$usuario) {
 // ==========================================
 if (
     !$usuario ||
-    $usuario["rol"] !== "cliente" ||
+    !in_array($usuario["rol"], ["cliente", "administrador"], true) ||
     (int) $usuario["estado"] !== 1
 ) {
 
@@ -783,7 +783,7 @@ $_SESSION["correo"] =
     $usuario["correo"];
 
 $_SESSION["rol"] =
-    "cliente";
+    $usuario["rol"];
 
 
 // ==========================================

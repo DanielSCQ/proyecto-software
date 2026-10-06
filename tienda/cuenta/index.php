@@ -45,7 +45,7 @@ if ($posTienda !== false) {
 $clienteLogueado =
     isset($_SESSION["id_usuario"]) &&
     is_numeric($_SESSION["id_usuario"]) &&
-    ($_SESSION["rol"] ?? "") === "cliente";
+    in_array($_SESSION["rol"] ?? null, ["cliente", "administrador"], true);
 
 if (!$clienteLogueado) {
 
@@ -140,10 +140,11 @@ $sqlUsuario = "
         apellido,
         correo,
         telefono,
-        fecha_registro
+        fecha_registro,
+        rol
     FROM usuarios
     WHERE id_usuario = ?
-      AND rol = 'cliente'
+      AND rol IN ('cliente', 'administrador')
       AND estado = 1
     LIMIT 1
 ";
@@ -225,7 +226,7 @@ $_SESSION["correo"] =
     $datosUsuario["correo"];
 
 $_SESSION["rol"] =
-    "cliente";
+    $datosUsuario["rol"];
 
 
 // ==========================================
@@ -577,6 +578,9 @@ $editandoDireccion =
 // ==========================================
 // HEADER
 // ==========================================
+require_once __DIR__ . '/../../config/cupones.php';
+$cuponesDisponibles = []; $errorCupones = false;
+try { $cuponesDisponibles = agranda_cupon_disponibles($conexion, $idUsuario); } catch (Throwable $error) { $errorCupones = true; }
 require_once __DIR__ . "/../includes/header.php";
 
 ?>
@@ -584,7 +588,7 @@ require_once __DIR__ . "/../includes/header.php";
 <link
     rel="stylesheet"
     href="<?= htmlspecialchars(
-        $base_url . "css/productos.css",
+        $base_url . v_tienda("css/productos.css"),
         ENT_QUOTES,
         "UTF-8"
     ) ?>"
@@ -2173,13 +2177,16 @@ require_once __DIR__ . "/../includes/header.php";
                     </div>
 
 
-                    <div class="cuenta-estado-vacio">
-
-                        <strong>
-                            No tienes cupones disponibles.
-                        </strong>
-
-                    </div>
+                    <?php if (!$cuponesDisponibles): ?><div class="cuenta-estado-vacio"><strong><?= $errorCupones ? 'No fue posible consultar tus cupones. Inténtalo nuevamente.' : 'No tienes cupones disponibles.' ?></strong></div>
+                    <?php else: ?><div class="cuenta-cupones">
+                    <?php foreach ($cuponesDisponibles as $c): ?><article class="cuenta-cupon"><h3><code><?= htmlspecialchars($c['codigo'],ENT_QUOTES,'UTF-8') ?></code></h3><strong><?= htmlspecialchars($c['valor_descuento'],ENT_QUOTES,'UTF-8') ?> <?= $c['tipo_descuento'] === 'Porcentaje' ? '% de descuento' : 'COP de descuento' ?></strong>
+                    <?php if ($c['descripcion']): ?><p><?= htmlspecialchars($c['descripcion'],ENT_QUOTES,'UTF-8') ?></p><?php endif; ?>
+                    <p>Vigencia: <?= htmlspecialchars($c['fecha_inicio'].' a '.$c['fecha_fin'],ENT_QUOTES,'UTF-8') ?></p>
+                    <?php if ((float)$c['monto_minimo_compra'] > 0): ?><p>Compra mínima: $<?= number_format((float)$c['monto_minimo_compra'],2,',','.') ?></p><?php endif; ?>
+                    <?php if ((int)$c['compras_minimas'] > 0): ?><p>Requiere <?= (int)$c['compras_minimas'] ?> compras entregadas.</p><?php endif; ?>
+                    <?php if ($c['uso_maximo_por_cliente'] !== null): ?><p>Hasta <?= (int)$c['uso_maximo_por_cliente'] ?> usos por cuenta.</p><?php endif; ?>
+                    <?php if ($c['uso_maximo'] !== null): ?><p>Disponible hasta agotar <?= (int)$c['uso_maximo'] ?> usos totales.</p><?php endif; ?>
+                    </article><?php endforeach; ?></div><?php endif; ?>
 
                 </div>
 
@@ -2224,13 +2231,12 @@ require_once __DIR__ . "/../includes/modal_producto.php";
 
 <script
     src="<?= htmlspecialchars(
-        $base_url . "js/cuenta.js",
+        $base_url . v_tienda("js/cuenta.js"),
         ENT_QUOTES,
         "UTF-8"
     ) ?>"
     defer
 ></script>
-
 
 <?php
 

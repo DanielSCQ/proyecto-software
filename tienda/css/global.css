@@ -1,3 +1,5 @@
+@import url("../../assets/css/seleccion.css");
+
 /* =========================================================
    AGRANDA - ESTILOS GLOBALES
    ========================================================= */
@@ -997,6 +999,11 @@ body > main {
 
     .header-container {
         width: min(100% - 18px, var(--ancho-contenido));
+    }
+
+    .main-nav {
+        width: calc(100% + 18px);
+        margin-left: -9px;
     }
 
     .brand-logo {

@@ -79,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 if (
     !isset($_SESSION["id_usuario"]) ||
     !is_numeric($_SESSION["id_usuario"]) ||
-    ($_SESSION["rol"] ?? "") !== "cliente"
+    !in_array($_SESSION["rol"] ?? null, ["cliente", "administrador"], true)
 ) {
 
     header(

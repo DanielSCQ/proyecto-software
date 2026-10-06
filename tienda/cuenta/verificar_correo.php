@@ -255,19 +255,19 @@ if (
     <link
         rel="stylesheet"
         href="<?= htmlspecialchars(
-            $base_url,
+            $base_url . v_tienda("css/global.css"),
             ENT_QUOTES,
             "UTF-8"
-        ) ?>css/global.css"
+        ) ?>"
     >
 
     <link
         rel="stylesheet"
         href="<?= htmlspecialchars(
-            $base_url,
+            $base_url . v_tienda("css/cuenta.css"),
             ENT_QUOTES,
             "UTF-8"
-        ) ?>css/cuenta.css"
+        ) ?>"
     >
 
 </head>

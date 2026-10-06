@@ -128,7 +128,11 @@ if ($stmtImagenLogin) {
 
     <link
         rel="stylesheet"
-        href="admin.css"
+        href="<?= htmlspecialchars(
+            v_admin("admin.css", __DIR__),
+            ENT_QUOTES,
+            "UTF-8"
+        ) ?>"
     >
 
 </head>
@@ -344,7 +348,13 @@ if ($stmtImagenLogin) {
 </footer>
 
 
-<script src="admin.js"></script>
+<script
+    src="<?= htmlspecialchars(
+        v_admin("admin.js", __DIR__),
+        ENT_QUOTES,
+        "UTF-8"
+    ) ?>"
+></script>
 
 
 </body>

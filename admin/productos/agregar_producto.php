@@ -3,7 +3,9 @@
 session_start();
 
 // Si no ha iniciado sesión, vuelve al login
-if (!isset($_SESSION["id_usuario"])) {
+require_once __DIR__ . "/../includes/auth.php";
+
+if (!agranda_admin_autorizado()) {
     header("Location: ../login.php");
     exit();
 }
@@ -61,7 +63,14 @@ require_once("../../config/conexion.php");
 
     <title>Panel de Control | AGRANDA</title>
 
-    <link rel="stylesheet" href="productos.css">
+    <link
+        rel="stylesheet"
+        href="<?= htmlspecialchars(
+            v_admin("productos.css", __DIR__),
+            ENT_QUOTES,
+            "UTF-8"
+        ) ?>"
+    >
 
 </head>
 
@@ -452,7 +461,14 @@ require_once("../../config/conexion.php");
 
     </div>
 
-    <script src="../dashboard/dashboard.js"></script>
+    <script
+    src="<?= htmlspecialchars(
+        v_admin("../dashboard/dashboard.js", __DIR__),
+        ENT_QUOTES,
+        "UTF-8"
+    ) ?>"
+></script>
+
 <script>
 
 const nombre = document.getElementById("nombre");

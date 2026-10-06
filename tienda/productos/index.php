@@ -33,7 +33,7 @@ $csrfFavoritos =
 
 ?>
 
-<link rel="stylesheet" href="<?= $base_url ?>css/productos.css">
+<link rel="stylesheet" href="<?= $base_url . v_tienda('css/productos.css') ?>">
 
 <?php
 

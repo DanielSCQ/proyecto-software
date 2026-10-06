@@ -3,6 +3,7 @@
 session_start();
 
 require_once("../config/conexion.php");
+require_once __DIR__ . "/../config/autenticacion.php";
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -38,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $usuario = $resultado->fetch_assoc();
 
 
-        if($clave == $usuario["clave"]){
+        if(agranda_verificar_clave($clave, (string) ($usuario["clave"] ?? ""), (string) $usuario["rol"])){
 
 
             if($usuario["rol"] == "administrador"){

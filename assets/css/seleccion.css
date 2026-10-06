@@ -1,0 +1,94 @@
+/* AGRANDA: seleccion de texto compartida entre tienda y administracion.
+   Solo se cambia user-select; los datos y campos siguen siendo copiables. */
+
+/* Presentacion y contenedores visuales; no bloquear body ni todos los enlaces. */
+:where(
+    .site-header, .main-nav, .menu-lateral, .cuenta-menu,
+    .brand, .logo-panel, .logo-admin, .footer-brand, .footer-links,
+    .site-footer,
+    .nosotros-presentacion, .nosotros-tarjeta, .nosotros-valores,
+    .nosotros-etiqueta, .nosotros-page img,
+    .contacto-info-card, .contacto-whatsapp-card, .contacto-whatsapp-icono,
+    .inicio-confianza, .confianza-icono,
+    .site-header ~ main h1, .site-header ~ main h2, .site-header ~ main h3,
+    .site-header ~ main img,
+    .contacto-btn-whatsapp,
+    .hero-contenido, .contacto-hero-contenido, .dashboard-presentacion-texto,
+    .titulo-panel, .auth-header, .login-encabezado, .informacion-admin,
+    .banner-admin-vacio, .productos-encabezado, .productos-seccion-encabezado,
+    .cuenta-page-encabezado, .cuenta-vista-encabezado, .cuenta-encabezado,
+    .checkout-encabezado, .checkout-bloque-titulo, .carrito-encabezado,
+    .contacto-formulario-header, .seccion-encabezado,
+    .producto-card, .categoria-card, .cuenta-favorito-card, .cuenta-pedido-card,
+    .checkout-direccion-card, .tarjeta-dashboard, .tarjeta-detalle,
+    .detalle-tarjeta, .auth-card,
+    .tarjeta-icono, .estadistica-icono, .cart-count, .cuenta-menu-contador,
+    .hero-etiqueta, .dashboard-etiqueta, .productos-etiqueta,
+    .checkout-etiqueta, .carrito-etiqueta, .contacto-etiqueta,
+    .contacto-mini-etiqueta, .pedido-detalle-etiqueta,
+    .pedido-detalle-card-etiqueta, .pedido-progreso, .tarjeta-titulo,
+    .dato-titulo, .estado-cliente, .estado-pedido, .cuenta-pedido-estado,
+    .pedido-detalle-estado, .direccion-principal, th
+) {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Datos utiles, incluso cuando estan dentro de una tarjeta o de un enlace. */
+:where(
+    td, code, pre, address,
+    a[href^="mailto:"], a[href^="tel:"],
+    .usuario, .action-text strong, .dato-valor,
+    .cuenta-dato, .checkout-dato,
+    .producto-codigo, .producto-contenido h3,
+    .producto-categoria, .producto-marca, .producto-precio,
+    .cuenta-favorito-info, .cuenta-pedido-numero, .cuenta-pedido-datos,
+    .cuenta-pedido-superior h3,
+    .checkout-direccion-info, .checkout-producto-info, .checkout-total,
+    .carrito-item-info, .carrito-item-precio, .carrito-item-subtotal,
+    .carrito-resumen-fila, .carrito-resumen-total,
+    .modal-producto-info h2, .modal-producto-codigo,
+    .modal-producto-descripcion, .modal-producto-caracteristicas,
+    .modal-producto-datos, .modal-producto-precio,
+    .pedido-detalle-encabezado h1, .pedido-detalle-card p,
+    .pedido-resumen-linea, .pedido-resumen-total,
+    .detalle-tarjeta p, .direccion p,
+    .tarjeta-dashboard strong, .tarjeta-dashboard small, .estadistica strong,
+    .contacto-info-item strong, .contacto-info-item span,
+    .nosotros-tarjeta p
+) {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* Los controles conservan su comportamiento incluso dentro de datos copiables. */
+:where(
+    button, [role="button"],
+    input[type="button"], input[type="submit"], input[type="reset"],
+    a[class^="btn-"], a[class*=" btn-"],
+    a[class^="boton-"], a[class*=" boton-"],
+    .producto-boton, .categoria-enlace, .google-button, .cuenta-google,
+    .auth-close, .auth-submit, .mostrar-clave,
+    .cuenta-boton-primario, .cuenta-boton-secundario,
+    .cuenta-favorito-boton, .cuenta-favoritos-explorar, .cuenta-favorito-quitar,
+    .checkout-btn-secundario, .checkout-confirmar, .checkout-volver,
+    .carrito-comprar, .carrito-seguir, .carrito-eliminar,
+    .carrito-btn-principal, .pedido-detalle-volver,
+    .acceso-principal, .acceso-secundario,
+    .header-action, .header-search-toggle, .header-search-submit,
+    .header-search-close, .modal-producto-cerrar,
+    .modal-btn-carrito, .modal-btn-favorito, svg
+) {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Ultima excepcion: escritura, seleccion y copiar/pegar dentro de formularios. */
+:where(
+    input:not([type="button"]):not([type="submit"]):not([type="reset"]),
+    textarea, select, option, label,
+    [contenteditable]:not([contenteditable="false"])
+) {
+    -webkit-user-select: text;
+    user-select: text;
+}

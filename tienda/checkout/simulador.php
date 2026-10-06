@@ -14,6 +14,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 // =========================================
 
 require_once("../../config/conexion.php");
+require_once __DIR__ . "/../../config/cupones.php";
 
 
 // =========================================
@@ -54,7 +55,7 @@ if ($posTienda !== false) {
 
 if (
     !isset($_SESSION["id_usuario"]) ||
-    ($_SESSION["rol"] ?? "") !== "cliente"
+    !in_array($_SESSION["rol"] ?? null, ["cliente", "administrador"], true)
 ) {
 
     header(
@@ -517,9 +518,27 @@ if (
      * pasó correctamente por esta pantalla.
      */
 
+    try {
+        $subtotalSimulacion = agranda_cupon_subtotal_carrito($conexion, $_SESSION['carrito'] ?? []);
+        $descuentoSimulacion = 0; $codigoSimulacion = '';
+        if (isset($_SESSION['cupon_checkout'])) {
+            $seleccion = $_SESSION['cupon_checkout'];
+            if (!is_array($seleccion) || (int)($seleccion['id_usuario'] ?? 0) !== $idUsuario || !is_string($seleccion['codigo'] ?? null)) { throw new RuntimeException('El cupón no corresponde a esta cuenta.'); }
+            $cupon = agranda_cupon_buscar($conexion, $seleccion['codigo']);
+            if (!$cupon) { throw new RuntimeException('El cupón no existe.'); }
+            $descuentoSimulacion = agranda_cupon_validar($conexion, $cupon, $idUsuario, $subtotalSimulacion);
+            $codigoSimulacion = $cupon['codigo'];
+        }
+    } catch (Throwable $error) {
+        $_SESSION['checkout_error'] = $error instanceof RuntimeException || $error instanceof InvalidArgumentException ? $error->getMessage() : 'No fue posible validar el cupón.';
+        header('Location: index.php'); exit();
+    }
     $_SESSION[
         "pago_simulado_aprobado"
     ] = [
+        'cupon_codigo' => $codigoSimulacion,
+        'subtotal_cupon' => $subtotalSimulacion,
+        'descuento_cupon' => $descuentoSimulacion,
 
         "token_checkout" =>
             $tokenCheckout,
@@ -636,13 +655,11 @@ require_once("../includes/header.php");
 <link
     rel="stylesheet"
     href="<?= htmlspecialchars(
-        $base_url .
-        "css/checkout.css",
+        $base_url . v_tienda("css/checkout.css"),
         ENT_QUOTES,
         "UTF-8"
     ) ?>"
 >
-
 
 <main class="checkout-page">
 

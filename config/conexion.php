@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . "/assets.php";
+
 // Detectar si AGRANDA está ejecutándose localmente o en el hosting
 $esLocal = in_array(
     $_SERVER["HTTP_HOST"] ?? "",

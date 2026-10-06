@@ -14,6 +14,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 // =========================================
 
 require_once("../../config/conexion.php");
+require_once __DIR__ . "/../../config/cupones.php";
 
 
 // =========================================
@@ -54,7 +55,7 @@ if ($posTienda !== false) {
 
 if (
     !isset($_SESSION["id_usuario"]) ||
-    ($_SESSION["rol"] ?? "") !== "cliente"
+    !in_array($_SESSION["rol"] ?? null, ["cliente", "administrador"], true)
 ) {
 
     header(
@@ -136,7 +137,7 @@ $sqlCliente = "
         telefono
     FROM usuarios
     WHERE id_usuario = ?
-      AND rol = 'cliente'
+      AND rol IN ('cliente', 'administrador')
       AND estado = 1
     LIMIT 1
 ";
@@ -531,6 +532,24 @@ foreach (
 
 
 $stmtProducto->close();
+$cuponVista = null; $descuentoVista = 0; $subtotalCuponVista = 0;
+$cuponMensaje = $_SESSION['cupon_checkout_exito'] ?? ''; unset($_SESSION['cupon_checkout_exito']);
+try {
+    $subtotalCuponVista = agranda_cupon_subtotal_carrito($conexion, $_SESSION['carrito']);
+    if (isset($_SESSION['cupon_checkout'])) {
+        $seleccion = $_SESSION['cupon_checkout'];
+        if (!is_array($seleccion) || (int)($seleccion['id_usuario'] ?? 0) !== $idUsuario || !is_string($seleccion['codigo'] ?? null)) { throw new RuntimeException('El cupón no corresponde a esta cuenta.'); }
+        $cuponVista = agranda_cupon_buscar($conexion, $seleccion['codigo']);
+        if (!$cuponVista) { throw new RuntimeException('El cupón ya no existe.'); }
+        $descuentoVista = agranda_cupon_validar($conexion, $cuponVista, $idUsuario, $subtotalCuponVista);
+    }
+    $totalCompra = agranda_cupon_importe($subtotalCuponVista - $descuentoVista);
+} catch (Throwable $error) {
+    $cuponMensaje = $error instanceof RuntimeException || $error instanceof InvalidArgumentException ? $error->getMessage() : 'No fue posible validar el cupón.';
+    $cuponVista = null; $descuentoVista = 0;
+    unset($_SESSION['cupon_checkout'], $_SESSION['pago_simulado_aprobado']);
+}
+
 
 
 // =========================================
@@ -599,12 +618,11 @@ require_once("../includes/header.php");
 <link
     rel="stylesheet"
     href="<?= htmlspecialchars(
-        $base_url . "css/checkout.css",
+        $base_url . v_tienda("css/checkout.css"),
         ENT_QUOTES,
         "UTF-8"
     ) ?>"
 >
-
 
 <main class="checkout-page">
 
@@ -1570,6 +1588,16 @@ require_once("../includes/header.php");
                 </div>
 
 
+                <section class="checkout-cupon"><h3>Cupón de descuento</h3>
+                    <?php if ($cuponMensaje !== ''): ?><p role="status"><?= htmlspecialchars($cuponMensaje,ENT_QUOTES,'UTF-8') ?></p><?php endif; ?>
+                    <form action="aplicar_cupon.php" method="POST">
+                        <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf_checkout'],ENT_QUOTES,'UTF-8') ?>">
+                        <?php if ($cuponVista): ?>
+                        <p>Cupón: <code><?= htmlspecialchars($cuponVista['codigo'],ENT_QUOTES,'UTF-8') ?></code></p><button type="submit" name="accion" value="retirar">Retirar cupón</button>
+                        <?php else: ?><label for="codigo-cupon">Código</label><input id="codigo-cupon" name="codigo" maxlength="50" autocomplete="off" required><button type="submit" name="accion" value="aplicar">Aplicar cupón</button><?php endif; ?>
+                    </form>
+                    <?php if ($cuponVista): ?><p>Subtotal: $<?= number_format((float)agranda_cupon_importe($subtotalCuponVista),2,',','.') ?></p><p>Descuento: -$<?= number_format((float)agranda_cupon_importe($descuentoVista),2,',','.') ?></p><?php endif; ?>
+                </section>
                 <div class="checkout-total">
 
                     <span>
@@ -1579,7 +1607,7 @@ require_once("../includes/header.php");
                     <strong>
                         $<?= number_format(
                             $totalCompra,
-                            0,
+                            2,
                             ",",
                             "."
                         ) ?>

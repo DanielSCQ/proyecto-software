@@ -777,6 +777,26 @@
 }
 
 
+/* Enlace de conversación; el estado desactivado conserva el estilo existente. */
+a.contacto-btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+a.contacto-btn-whatsapp:hover {
+    background: rgba(255, 255, 255, .17);
+}
+
+a.contacto-btn-whatsapp:focus-visible {
+    outline: 2px solid #ffad59;
+    outline-offset: 3px;
+}
+
 /* =========================================================
    TABLETS
    ========================================================= */

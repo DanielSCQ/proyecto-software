@@ -2,7 +2,9 @@
 
 session_start();
 
-if (!isset($_SESSION["id_usuario"])) {
+require_once __DIR__ . "/../includes/auth.php";
+
+if (!agranda_admin_autorizado()) {
     header("Location: ../login.php");
     exit();
 }
@@ -116,7 +118,14 @@ while ($producto = $resultadoAsociados->fetch_assoc()) {
 
     <title>Editar Promoción | AGRANDA</title>
 
-    <link rel="stylesheet" href="promociones.css">
+    <link
+        rel="stylesheet"
+        href="<?= htmlspecialchars(
+            v_admin("promociones.css", __DIR__),
+            ENT_QUOTES,
+            "UTF-8"
+        ) ?>"
+    >
 
 </head>
 
@@ -438,7 +447,13 @@ while ($producto = $resultadoAsociados->fetch_assoc()) {
 
 </div>
 
-<script src="../dashboard/dashboard.js"></script>
+<script
+    src="<?= htmlspecialchars(
+        v_admin("../dashboard/dashboard.js", __DIR__),
+        ENT_QUOTES,
+        "UTF-8"
+    ) ?>"
+></script>
 
 <script>
 

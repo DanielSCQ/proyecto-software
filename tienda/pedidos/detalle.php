@@ -48,7 +48,7 @@ if ($posTienda !== false) {
 $clienteLogueado =
     isset($_SESSION["id_usuario"]) &&
     is_numeric($_SESSION["id_usuario"]) &&
-    ($_SESSION["rol"] ?? "") === "cliente";
+    in_array($_SESSION["rol"] ?? null, ["cliente", "administrador"], true);
 
 if (!$clienteLogueado) {
 
@@ -367,6 +367,8 @@ if (!empty($pedido["fecha_pedido"])) {
 // HEADER
 // ==========================================
 
+require_once __DIR__ . '/../../config/cupones.php';
+$cuponPedido = agranda_cupon_detalle($conexion, $idPedido);
 require_once __DIR__ . "/../includes/header.php";
 
 ?>
@@ -661,7 +663,8 @@ require_once __DIR__ . "/../includes/header.php";
                 </div>
 
 
-                <div class="pedido-resumen-linea pedido-resumen-total">
+                <?php if ($cuponPedido): ?><div class="pedido-resumen-linea"><div><p>Subtotal de productos: $<?= number_format((float)$cuponPedido['subtotal'],2,',','.') ?></p><p>Cupón: <code><?= htmlspecialchars($cuponPedido['codigo'],ENT_QUOTES,'UTF-8') ?></code></p><p>Descuento: -$<?= number_format((float)$cuponPedido['descuento_aplicado'],2,',','.') ?></p></div></div><?php endif; ?>
+<div class="pedido-resumen-linea pedido-resumen-total">
 
                     <span>
                         Total
@@ -670,7 +673,7 @@ require_once __DIR__ . "/../includes/header.php";
                     <strong>
                         $<?= number_format(
                             (float) $pedido["total"],
-                            0,
+                            $cuponPedido ? 2 : 0,
                             ",",
                             "."
                         ) ?>

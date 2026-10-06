@@ -209,9 +209,8 @@ if ($stmtProducto) {
 
 <link
     rel="stylesheet"
-    href="<?= $base_url ?>css/carrito.css"
+    href="<?= $base_url . v_tienda('css/carrito.css') ?>"
 >
-
 
 <main class="carrito-page">
 

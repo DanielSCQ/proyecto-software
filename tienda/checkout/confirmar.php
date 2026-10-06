@@ -14,6 +14,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 // =========================================
 
 require_once("../../config/conexion.php");
+require_once __DIR__ . "/../../config/cupones.php";
 
 
 // =========================================
@@ -70,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 
 if (
     !isset($_SESSION["id_usuario"]) ||
-    ($_SESSION["rol"] ?? "") !== "cliente"
+    !in_array($_SESSION["rol"] ?? null, ["cliente", "administrador"], true)
 ) {
 
     header(
@@ -651,7 +652,7 @@ try {
         SELECT id_usuario
         FROM usuarios
         WHERE id_usuario = ?
-          AND rol = 'cliente'
+          AND rol IN ('cliente', 'administrador')
           AND estado = 1
         LIMIT 1
         FOR UPDATE
@@ -744,6 +745,7 @@ try {
     $productosPedido = [];
 
     $totalPedido = 0.00;
+    $totalPedidoCentavos = 0;
 
 
     $sqlProducto = "
@@ -891,11 +893,11 @@ try {
 
 
         $subtotal =
-            $precioUnitario * $cantidad;
+            agranda_cupon_importe(agranda_cupon_centavos($producto['precio']) * $cantidad);
 
 
-        $totalPedido +=
-            $subtotal;
+        $totalPedidoCentavos += agranda_cupon_centavos($subtotal);
+        $totalPedido = agranda_cupon_importe($totalPedidoCentavos);
 
 
         // ---------------------------------
@@ -942,6 +944,22 @@ try {
         );
     }
 
+
+    $cuponAplicado = null;
+    $descuentoCentavos = 0;
+    $seleccionCupon = $_SESSION['cupon_checkout'] ?? null;
+    if ($seleccionCupon !== null) {
+        if (!is_array($seleccionCupon) || (int)($seleccionCupon['id_usuario'] ?? 0) !== $idUsuario || !is_string($seleccionCupon['codigo'] ?? null)) { throw new RuntimeException('El cupón no corresponde a esta cuenta.'); }
+        $cuponAplicado = agranda_cupon_buscar($conexion, $seleccionCupon['codigo'], true);
+        if (!$cuponAplicado) { throw new RuntimeException('El cupón ya no está disponible.'); }
+        $descuentoCentavos = agranda_cupon_validar($conexion, $cuponAplicado, $idUsuario, $totalPedidoCentavos, true);
+    }
+    if ($metodoPago === 'Pago simulado' && (
+        ($autorizacionPago['cupon_codigo'] ?? '') !== ($cuponAplicado['codigo'] ?? '') ||
+        ($autorizacionPago['subtotal_cupon'] ?? null) !== $totalPedidoCentavos ||
+        ($autorizacionPago['descuento_cupon'] ?? null) !== $descuentoCentavos
+    )) { throw new RuntimeException('La compra cambió después del pago simulado. Realiza nuevamente el proceso de pago.'); }
+    $totalPedido = agranda_cupon_importe($totalPedidoCentavos - $descuentoCentavos);
 
     // =====================================
     // CREAR PEDIDO
@@ -1010,6 +1028,15 @@ try {
         throw new Exception(
             "No fue posible identificar el pedido creado."
         );
+    }
+
+    if ($cuponAplicado) {
+        $idCupon = (int)$cuponAplicado['id_cupon'];
+        $descuentoGuardado = agranda_cupon_importe($descuentoCentavos);
+        $stmtUso = $conexion->prepare('INSERT INTO uso_cupones (id_cupon,id_usuario,id_pedido,descuento_aplicado) VALUES (?,?,?,?)');
+        $stmtUso->bind_param('iiis', $idCupon, $idUsuario, $idPedido, $descuentoGuardado); $stmtUso->execute(); $stmtUso->close();
+        $stmtUso = $conexion->prepare('UPDATE cupones SET uso_actual = (SELECT COUNT(*) FROM uso_cupones WHERE id_cupon = ?) WHERE id_cupon = ?');
+        $stmtUso->bind_param('ii', $idCupon, $idCupon); $stmtUso->execute(); $stmtUso->close();
     }
 
     // =====================================
@@ -1549,6 +1576,7 @@ try {
     // =====================================
 
     $conexion->commit();
+    unset($_SESSION['cupon_checkout']);
 
 
     // =========================================
