@@ -27,13 +27,17 @@ error_reporting(E_ALL);
 // CONEXIÓN
 // =================================
 
+require_once __DIR__ . '/seguridad.php';
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    agranda_productos_validar_csrf();
+}
 require_once("../../config/conexion.php");
 
 // =================================
 // VERIFICAR ID DEL PRODUCTO
 // =================================
 
-if (!isset($_GET["id"]) || !ctype_digit($_GET["id"])) {
+if (!isset($_GET["id"]) || !is_string($_GET["id"]) || filter_var($_GET["id"], FILTER_VALIDATE_INT, ["options" => ["min_range" => 1]]) === false) {
 
     header("Location: productos.php");
     exit();
@@ -1200,7 +1204,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             header("Location: productos.php");
             exit();
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
 
             // =================================
             // DESHACER CAMBIOS
@@ -1462,6 +1466,7 @@ $stmtImagen->close();
             <?php } ?>
 
             <form method="POST" enctype="multipart/form-data">
+                <?= agranda_productos_campo_csrf() ?>
 
                 <label>Nombre del producto</label>
 

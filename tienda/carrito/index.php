@@ -1,210 +1,22 @@
 <?php
-
-// =================================
-// SESIÓN
-// =================================
-
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
+if (empty($_SESSION['csrf_carrito']) || !is_string($_SESSION['csrf_carrito'])) {
+    $_SESSION['csrf_carrito'] = bin2hex(random_bytes(32));
 }
-
-
-// =================================
-// CSRF DEL CARRITO
-// =================================
-
-if (
-    empty($_SESSION["csrf_carrito"]) ||
-    !is_string($_SESSION["csrf_carrito"])
-) {
-    $_SESSION["csrf_carrito"] =
-        bin2hex(random_bytes(32));
+require_once __DIR__ . '/../../config/conexion.php';
+require_once __DIR__ . '/../../config/carrito.php';
+$_SESSION['carrito'] = is_array($_SESSION['carrito'] ?? null) ? $_SESSION['carrito'] : [];
+try {
+    $estadoCarrito = agranda_carrito_estado($conexion, $_SESSION['carrito']);
+} catch (Throwable $error) {
+    http_response_code(503);
+    exit('No fue posible consultar tu carrito. Inténtalo nuevamente.');
 }
-
-
-// =================================
-// HEADER
-// =================================
-
-require_once("../includes/header.php");
-
-
-// =================================
-// OBTENER CARRITO DE SESIÓN
-// =================================
-
-$carritoSesion =
-    isset($_SESSION["carrito"]) &&
-    is_array($_SESSION["carrito"])
-        ? $_SESSION["carrito"]
-        : [];
-
-$productosCarrito = [];
-
-$totalCarritoCompra = 0;
-
-
-// =================================
-// CONSULTA DE PRODUCTOS
-// =================================
-
-$sqlProducto = "
-    SELECT
-        p.id_producto,
-        p.nombre,
-        p.codigo_producto,
-        p.precio,
-        p.estado AS producto_estado,
-        c.nombre AS categoria_nombre,
-        c.estado AS categoria_estado,
-        m.nombre AS marca_nombre,
-        COALESCE(i.stock_actual, 0) AS stock_actual,
-        img.ruta_imagen
-
-    FROM productos p
-
-    INNER JOIN categorias c
-        ON c.id_categoria = p.id_categoria
-
-    LEFT JOIN marcas m
-        ON m.id_marca = p.id_marca
-
-    LEFT JOIN inventario i
-        ON i.id_producto = p.id_producto
-
-    LEFT JOIN imagenes_producto img
-        ON img.id_producto = p.id_producto
-        AND img.principal = 1
-        AND img.estado = 1
-
-    WHERE p.id_producto = ?
-
-    LIMIT 1
-";
-
-$stmtProducto =
-    $conexion->prepare($sqlProducto);
-
-
-// =================================
-// CONSTRUIR CARRITO
-// =================================
-
-if ($stmtProducto) {
-
-    foreach ($carritoSesion as $idProducto => $item) {
-
-        $idProducto =
-            filter_var(
-                $idProducto,
-                FILTER_VALIDATE_INT
-            );
-
-        $cantidad =
-            (int) ($item["cantidad"] ?? 0);
-
-
-        if (
-            $idProducto === false ||
-            $idProducto < 1 ||
-            $cantidad < 1
-        ) {
-            continue;
-        }
-
-
-        $stmtProducto->bind_param(
-            "i",
-            $idProducto
-        );
-
-        $stmtProducto->execute();
-
-        $resultado =
-            $stmtProducto->get_result();
-
-        $producto =
-            $resultado->fetch_assoc();
-
-
-        if (!$producto) {
-            continue;
-        }
-
-
-        $precio =
-            (float) $producto["precio"];
-
-        $stock =
-            (int) $producto["stock_actual"];
-
-
-        $disponible =
-            (int) $producto["producto_estado"] === 1 &&
-            (int) $producto["categoria_estado"] === 1 &&
-            $stock > 0;
-
-
-        // Si por alguna razón la cantidad de sesión
-        // supera el stock actual, no usamos una cantidad
-        // mayor para calcular la compra.
-        $cantidadValida =
-            $disponible
-                ? min($cantidad, $stock)
-                : $cantidad;
-
-
-        $subtotal =
-            $disponible
-                ? $precio * $cantidadValida
-                : 0;
-
-
-        if ($disponible) {
-            $totalCarritoCompra += $subtotal;
-        }
-
-
-        $productosCarrito[] = [
-            "id_producto" =>
-                (int) $producto["id_producto"],
-
-            "nombre" =>
-                $producto["nombre"],
-
-            "codigo_producto" =>
-                $producto["codigo_producto"],
-
-            "categoria" =>
-                $producto["categoria_nombre"],
-
-            "marca" =>
-                $producto["marca_nombre"],
-
-            "precio" =>
-                $precio,
-
-            "stock" =>
-                $stock,
-
-            "cantidad" =>
-                $cantidad,
-
-            "subtotal" =>
-                $subtotal,
-
-            "imagen" =>
-                $producto["ruta_imagen"],
-
-            "disponible" =>
-                $disponible
-        ];
-    }
-
-
-    $stmtProducto->close();
-}
-
+$productosCarrito = $estadoCarrito['productos'];
+$avisosCarrito = $_SESSION['carrito_avisos'] ?? [];
+$mensajeCarrito = $_SESSION['carrito_mensaje'] ?? '';
+unset($_SESSION['carrito_avisos'], $_SESSION['carrito_mensaje']);
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <link
@@ -212,7 +24,8 @@ if ($stmtProducto) {
     href="<?= $base_url . v_tienda('css/carrito.css') ?>"
 >
 
-<main class="carrito-page">
+<script src="<?= htmlspecialchars($base_url . v_tienda("js/carrito.js"), ENT_QUOTES, "UTF-8") ?>" defer></script>
+<main class="carrito-page" data-carrito-url="<?= htmlspecialchars($base_url . "carrito/actualizar.php", ENT_QUOTES, "UTF-8") ?>" data-carrito-csrf="<?= htmlspecialchars($_SESSION["csrf_carrito"], ENT_QUOTES, "UTF-8") ?>">
 
     <div class="carrito-container">
 
@@ -238,6 +51,8 @@ if ($stmtProducto) {
         </section>
 
 
+        <p class="carrito-mensaje" role="status" aria-live="polite"><?= htmlspecialchars($mensajeCarrito, ENT_QUOTES, "UTF-8") ?></p>
+        <button type="button" class="carrito-reintentar" hidden>Consultar estado del carrito</button>
         <?php if (empty($productosCarrito)): ?>
 
 
@@ -298,7 +113,7 @@ if ($stmtProducto) {
 
                     <?php foreach ($productosCarrito as $producto): ?>
 
-                        <article class="carrito-item">
+                        <article class="carrito-item" data-producto="<?= $producto["id_producto"] ?>">
 
 
                             <!-- IMAGEN -->
@@ -396,7 +211,7 @@ if ($stmtProducto) {
                                 <?php else: ?>
 
                                     <span class="carrito-stock carrito-stock-agotado">
-                                        Producto no disponible
+                                        <?= htmlspecialchars($producto["disponibilidad_texto"], ENT_QUOTES, "UTF-8") ?>
                                     </span>
 
                                 <?php endif; ?>
@@ -413,12 +228,7 @@ if ($stmtProducto) {
                                 </span>
 
                                 <strong>
-                                    $<?= number_format(
-                                        $producto["precio"],
-                                        0,
-                                        ",",
-                                        "."
-                                    ) ?>
+                                    <?= $producto["precio_formateado"] ?>
                                 </strong>
 
                             </div>
@@ -439,7 +249,7 @@ if ($stmtProducto) {
                                     <!-- RESTAR -->
 
                                     <form
-                                        action="<?= $base_url ?>carrito/actualizar.php"
+                                        action="<?= $base_url ?>carrito/actualizar.php" data-carrito-actualizar
                                         method="POST"
                                     >
 
@@ -468,7 +278,7 @@ if ($stmtProducto) {
                                         <button
                                             type="submit"
                                             aria-label="Restar una unidad"
-                                            <?= $producto["cantidad"] <= 1 ? "disabled" : "" ?>
+                                            <?= !$producto["puede_restar"] ? "disabled" : "" ?>
                                         >
                                             −
                                         </button>
@@ -484,7 +294,7 @@ if ($stmtProducto) {
                                     <!-- SUMAR -->
 
                                     <form
-                                        action="<?= $base_url ?>carrito/actualizar.php"
+                                        action="<?= $base_url ?>carrito/actualizar.php" data-carrito-actualizar
                                         method="POST"
                                     >
 
@@ -513,10 +323,7 @@ if ($stmtProducto) {
                                         <button
                                             type="submit"
                                             aria-label="Agregar una unidad"
-                                            <?= (
-                                                !$producto["disponible"] ||
-                                                $producto["cantidad"] >= $producto["stock"]
-                                            ) ? "disabled" : "" ?>
+                                            <?= !$producto["puede_sumar"] ? "disabled" : "" ?>
                                         >
                                             +
                                         </button>
@@ -537,25 +344,13 @@ if ($stmtProducto) {
                                 </span>
 
                                 <strong>
-                                    <?php if ($producto["disponible"]): ?>
-
-                                        $<?= number_format(
-                                            $producto["subtotal"],
-                                            0,
-                                            ",",
-                                            "."
-                                        ) ?>
-
-                                    <?php else: ?>
-
-                                        —
-
-                                    <?php endif; ?>
+                                    <?= $producto["subtotal_formateado"] ?>
                                 </strong>
 
                             </div>
 
 
+                            <p class="carrito-item-aviso" role="status"><?= htmlspecialchars(in_array($producto["id_producto"], $avisosCarrito, true) ? "La cantidad de este producto fue ajustada al stock disponible." : $producto["mensaje"], ENT_QUOTES, "UTF-8") ?></p>
                             <!-- ELIMINAR -->
 
                             <form
@@ -632,12 +427,7 @@ if ($stmtProducto) {
                         </span>
 
                         <strong>
-                            $<?= number_format(
-                                $totalCarritoCompra,
-                                0,
-                                ",",
-                                "."
-                            ) ?>
+                            <?= $estadoCarrito["total_formateado"] ?>
                         </strong>
 
                     </div>
@@ -646,7 +436,7 @@ if ($stmtProducto) {
                     <button
                         type="button"
                         class="carrito-comprar"
-                        id="btnContinuarCompra"
+                        id="btnContinuarCompra" <?= !$estadoCarrito["puede_continuar"] ? "disabled" : "" ?>
                         data-cliente-logueado="<?= $clienteLogueado ? "1" : "0" ?>"
                         data-checkout="<?= htmlspecialchars(
                             $base_url . "checkout/",
@@ -657,6 +447,7 @@ if ($stmtProducto) {
                         Continuar con la compra
                     </button>
 
+                    <p class="carrito-bloqueo" role="status"><?= htmlspecialchars($estadoCarrito["bloqueo_texto"], ENT_QUOTES, "UTF-8") ?></p>
                     <a
                         href="<?= $base_url ?>productos/"
                         class="carrito-seguir"

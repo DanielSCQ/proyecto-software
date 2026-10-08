@@ -13,6 +13,10 @@ if (!agranda_admin_autorizado()) {
     exit();
 }
 
+require_once __DIR__ . '/seguridad.php';
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    agranda_productos_validar_csrf();
+}
 require_once("../../config/conexion.php");
 
 $errores = [];
@@ -63,6 +67,7 @@ $stmt->close();
 // =================================
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    try {
 
     $nombre = trim($_POST["nombre"] ?? "");
     $estado = $_POST["estado"] ?? "";
@@ -177,6 +182,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Mantener los valores enviados si ocurrió un error
     $atributo["nombre"] = $nombre;
     $atributo["estado"] = $estado;
+    } catch (Throwable $e) {
+        error_log('Operacion de atributo: ' . $e->getMessage());
+        $errores[] = 'No fue posible guardar la característica. Inténtalo nuevamente.';
+    }
 }
 
 ?>
@@ -390,6 +399,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 method="POST"
                 novalidate
             >
+                <?= agranda_productos_campo_csrf() ?>
 
                 <label for="nombre">
                     Nombre de la característica

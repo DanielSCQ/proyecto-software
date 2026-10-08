@@ -69,24 +69,18 @@ $nombreCliente = $clienteLogueado ? htmlspecialchars($_SESSION["nombre"], ENT_QU
 // productos incluso antes de iniciar sesión.
 //
 
-$totalCarrito = 0;
-
-if (
-    isset($_SESSION["carrito"]) &&
-    is_array($_SESSION["carrito"])
-) {
-
-    foreach ($_SESSION["carrito"] as $item) {
-
-        $cantidad =
-            (int) ($item["cantidad"] ?? 0);
-
-        if ($cantidad > 0) {
-            $totalCarrito += $cantidad;
-        }
+require_once __DIR__ . '/../../config/carrito.php';
+try {
+    if (!isset($estadoCarrito)) {
+        // Fuera del carrito, calcular el contador sobre una copia: el header
+        // no altera cantidades de un checkout que ya está en curso.
+        $carritoContador = is_array($_SESSION['carrito'] ?? null) ? $_SESSION['carrito'] : [];
+        $estadoCarrito = agranda_carrito_estado($conexion, $carritoContador);
     }
+    $totalCarrito = $estadoCarrito['cantidad_carrito'];
+} catch (Throwable $error) {
+    $totalCarrito = 0;
 }
-
 ?>
 
 <!DOCTYPE html>

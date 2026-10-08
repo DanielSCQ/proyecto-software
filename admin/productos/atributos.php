@@ -10,6 +10,10 @@ if (!agranda_admin_autorizado()) {
     exit();
 }
 
+require_once __DIR__ . '/seguridad.php';
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    agranda_productos_validar_csrf();
+}
 require_once("../../config/conexion.php");
 
 $errores = [];
@@ -19,6 +23,7 @@ $errores = [];
 // =================================
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    try {
 
     $nombre = trim($_POST["nombre"] ?? "");
     $estado = $_POST["estado"] ?? "";
@@ -108,6 +113,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->close();
         }
     }
+    } catch (Throwable $e) {
+        error_log('Operacion de atributo: ' . $e->getMessage());
+        $errores[] = 'No fue posible guardar la característica. Inténtalo nuevamente.';
+    }
 }
 
 // =================================
@@ -143,7 +152,7 @@ $resultado = $conexion->query($sql);
 
 </head>
 
-<body>
+<body class="atributos-admin">
 
 <div class="contenedor-dashboard">
 
@@ -192,6 +201,9 @@ $resultado = $conexion->query($sql);
 
     <!-- Contenido principal -->
     <main class="contenido">
+        <?php if (isset($_SESSION['productos_mensaje'])): ?>
+            <p role="status"><?= htmlspecialchars($_SESSION['productos_mensaje'], ENT_QUOTES, 'UTF-8') ?></p>
+            <?php unset($_SESSION['productos_mensaje']); endif; ?>
 
         <!-- Encabezado -->
         <header class="encabezado">
@@ -274,6 +286,7 @@ $resultado = $conexion->query($sql);
 
             <!-- FORMULARIO -->
             <form method="POST">
+                <?= agranda_productos_campo_csrf() ?>
 
                 <label for="nombre">
                     Nombre de la característica
@@ -379,14 +392,11 @@ $resultado = $conexion->query($sql);
                                     ✏️
                                 </a>
 
-                                <a
-                                    href="eliminar_atributo.php?id=<?php echo (int) $atributo["id_atributo"]; ?>"
-                                    class="btn-eliminar"
-                                    title="Eliminar característica"
-                                    onclick="return confirmarEliminacion();"
-                                >
-                                    🗑️
-                                </a>
+                                <form method="POST" action="eliminar_atributo.php" onsubmit="return confirmarEliminacion();">
+                                    <?= agranda_productos_campo_csrf() ?>
+                                    <input type="hidden" name="id" value="<?= (int) $atributo["id_atributo"] ?>">
+                                    <button type="submit" class="btn-eliminar" title="Eliminar característica">🗑️</button>
+                                </form>
 
                             </td>
 

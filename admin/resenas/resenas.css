@@ -1,0 +1,66 @@
+.admin-resenas { height: auto; min-height: 100vh; overflow: auto; }
+.admin-resenas .contenedor-dashboard { height: auto; min-height: 100vh; }
+.admin-resenas .contenido { height: auto; overflow: visible; min-width: 0; padding: 28px; }
+.resenas-cabecera { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding: 22px; background: white; border-radius: 12px; }
+.resenas-cabecera p, .resenas-intro, .resenas-resultados { color: #5b665c; line-height: 1.5; }
+.resenas-cabecera h1 { font-size: 1.65rem; margin-top: 6px; overflow-wrap: anywhere; }
+.resenas-cabecera a, .admin-resenas main a { color: #245a2a; }
+.resenas-intro, .resenas-resultados { margin: 18px 0; }
+.resenas-producto-contexto { background:#fff; border:1px solid #e0e6df; border-radius:12px; padding:18px; margin-bottom:18px; overflow-wrap:anywhere; }
+.resenas-producto-contexto h2 { color:#245a2a; font-size:1.2rem; }
+.resenas-producto-contexto p { color:#59635b; margin:8px 0; }
+.resenas-producto-contexto nav { display:flex; gap:10px; flex-wrap:wrap; }
+.resenas-producto-contexto a { padding:9px 12px; border:1px solid #cddbcc; border-radius:6px; text-decoration:none; font-size:.85rem; }
+.resenas-filtros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 20px; border: 1px solid #e0e6df; background: #fff; border-radius: 12px; }
+.resenas-filtros label { display: grid; gap: 8px; min-width: 0; font-weight: 600; font-size: .9rem; }
+.resenas-buscador { grid-column: 1 / -1; }
+.resenas-filtros input, .resenas-filtros select { width: 100%; min-width: 0; padding: 11px; border: 1px solid #aab8ac; border-radius: 6px; font: inherit; background: white; }
+.resenas-filtro-acciones { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.resenas-filtro-acciones button { padding: 11px 24px; border: 0; border-radius: 6px; background: #245a2a; color: white; font: inherit; cursor: pointer; }
+.resenas-listado { display: grid; gap: 18px; }
+.resena-admin, .resenas-vacias { min-width: 0; padding: 22px; border: 1px solid #e0e6df; border-radius: 12px; background: white; overflow-wrap: anywhere; }
+.resena-admin-cabecera, .resena-admin-pie { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.resena-admin-cabecera > div { min-width: 0; max-width: 100%; }
+.resena-admin-cabecera h2 { font-size: 1.1rem; line-height: 1.5; margin: 4px 0; }
+.resena-admin-codigo, .resena-admin-autor, .resena-admin-fechas { font-size: .85rem; color: #59635b; line-height: 1.6; }
+.resena-admin-etiquetas { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+.resena-admin-etiquetas span { padding: 6px 10px; border-radius: 6px; background: #f1f4f0; font-size: .8rem; }
+.resena-admin-etiquetas .publicada { background: #e4f1e6; color: #205326; }
+.resena-admin-etiquetas .oculta { background: #f7ecd7; color: #79500c; }
+.resena-admin-calificacion { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 18px 0 12px; font-size: .85rem; }
+.resena-admin-calificacion > span:first-child { color: #986000; font-size: 24px; letter-spacing: 2px; white-space: nowrap; }
+.resena-admin-comentario { white-space: pre-wrap; line-height: 1.65; margin-bottom: 20px; }
+.resena-admin-pie { border-top: 1px solid #e4e9e3; padding-top: 16px; align-items: center; }
+.resena-admin-acciones, .resenas-paginacion-admin { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.resena-admin-acciones a, .resenas-paginacion-admin a { padding: 10px 14px; border: 1px solid #cddbcc; border-radius: 6px; text-decoration: none; font-size: .85rem; }
+.resenas-paginacion-admin { margin: 22px 0; justify-content: center; }
+.admin-resenas main a:hover { background: #edf4e9; }
+.admin-resenas :is(a, button, input, select):focus-visible { outline: 3px solid #b96913; outline-offset: 3px; }
+.admin-resenas :is(a, button, input, select, summary):focus { outline:3px solid #b96913; outline-offset:3px; }
+.resenas-mensaje { padding: 14px 16px; margin: 18px 0; border: 1px solid #bad0b7; border-radius: 8px; background: #eaf4e6; line-height: 1.6; overflow-wrap: anywhere; }
+.resenas-mensaje.error { background: #fff0e5; border-color: #dfb38f; color: #763b12; }
+.resena-moderacion { margin-top: 18px; border-top: 1px solid #e4e9e3; padding-top: 16px; }
+.resena-moderacion summary { width: fit-content; max-width: 100%; padding: 10px 14px; border: 1px solid #c3996f; border-radius: 6px; background: #fff5eb; color: #744310; font-size: .85rem; font-weight: 600; cursor: pointer; overflow-wrap: anywhere; }
+.resena-moderacion.publicar summary { border-color: #9fbd9b; color: #245a2a; background: #edf5e9; }
+.resena-moderacion summary:hover { filter: brightness(.96); }
+.resena-moderacion summary:focus-visible { outline: 3px solid #b96913; outline-offset: 3px; }
+.resena-moderacion-confirmacion { margin-top: 12px; padding: 16px; border: 1px solid #dbe3d7; border-radius: 8px; background: #f7f9f5; line-height: 1.6; }
+.resena-moderacion-ayuda { margin: 10px 0 14px; color: #59635b; font-size: .85rem; }
+.resena-moderacion button { max-width: 100%; padding: 11px 14px; border: 0; border-radius: 6px; background: #744310; color: #fff; font: inherit; font-size: .85rem; cursor: pointer; white-space: normal; overflow-wrap: anywhere; }
+.resena-moderacion.publicar button { background: #245a2a; }
+@media (max-width: 900px) {
+    .admin-resenas .contenedor-dashboard { flex-direction: column; }
+    .admin-resenas .menu-lateral { position: static; width: 100%; height: auto; padding: 16px; }
+    .admin-resenas .logo-panel { margin-bottom: 12px; }
+    .admin-resenas .logo-panel h1 { font-size: 24px; }
+    .admin-resenas .menu-lateral ul { display: flex; flex-wrap: wrap; gap: 6px; }
+    .admin-resenas .menu-lateral li { margin: 0; }
+    .admin-resenas .menu-lateral a { padding: 10px; }
+    .admin-resenas .contenido { padding: 20px; }
+}
+@media (max-width: 600px) {
+    .admin-resenas .contenido { padding: 12px; }
+    .resenas-filtros { grid-template-columns: 1fr; padding: 16px; }
+    .resena-admin, .resenas-cabecera { padding: 16px; }
+    .resenas-cabecera h1 { font-size: 1.35rem; }
+}

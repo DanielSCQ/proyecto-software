@@ -257,19 +257,23 @@ $_SESSION["carrito"][$productoId] = [
 // CALCULAR TOTAL DE UNIDADES
 // =================================
 
-$totalUnidades = 0;
-
-foreach ($_SESSION["carrito"] as $item) {
-
-    $cantidad =
-        (int) ($item["cantidad"] ?? 0);
-
-    if ($cantidad > 0) {
-        $totalUnidades += $cantidad;
+require_once __DIR__ . '/../../config/carrito.php';
+try {
+    $estadoCarrito = agranda_carrito_estado($conexion, $_SESSION['carrito']);
+    $totalUnidades = $estadoCarrito['cantidad_carrito'];
+    $_SESSION['carrito_avisos'] = array_values(array_unique(array_merge(
+        $_SESSION['carrito_avisos'] ?? [], $estadoCarrito['ajustes'])));
+} catch (Throwable $error) {
+    // Deshacer solamente el incremento de esta petición si no se pudo representar.
+    if ($cantidadActual > 0) {
+        $_SESSION['carrito'][$productoId] = ['cantidad' => $cantidadActual];
+    } else {
+        unset($_SESSION['carrito'][$productoId]);
     }
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'No fue posible actualizar el carrito.'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
-
-
 // =================================
 // RESPUESTA
 // =================================
@@ -281,7 +285,7 @@ echo json_encode([
             ? "Se agregó otra unidad al carrito."
             : "Producto agregado al carrito.",
     "cantidad_producto" =>
-        $nuevaCantidad,
+        $_SESSION["carrito"][$productoId]["cantidad"],
     "cantidad_carrito" =>
         $totalUnidades
 ], JSON_UNESCAPED_UNICODE);

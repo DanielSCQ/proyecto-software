@@ -369,11 +369,23 @@ if (!empty($pedido["fecha_pedido"])) {
 
 require_once __DIR__ . '/../../config/cupones.php';
 $cuponPedido = agranda_cupon_detalle($conexion, $idPedido);
+require_once __DIR__ . '/../../config/resenas.php';
+$accionesResenas = [];
+if ($pedido['estado'] === 'Entregado') {
+    foreach ($productos as $productoResena) {
+        $idProductoResena = (int) $productoResena['id_producto'];
+        $reglasResena = agranda_resena_elegibilidad($conexion, $idUsuario, $idProductoResena);
+        if ($reglasResena['puede_crear'] || $reglasResena['puede_editar']) {
+            $accionesResenas[$idProductoResena] = $reglasResena['resena'] ? 'Ver / Editar reseña' : 'Calificar producto';
+        }
+    }
+}
 require_once __DIR__ . "/../includes/header.php";
 
 ?>
 
 <main class="pedido-detalle-page">
+    <link rel="stylesheet" href="<?= htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8') ?>css/resenas.css">
 
     <section class="pedido-detalle-container">
 
@@ -801,6 +813,9 @@ require_once __DIR__ . "/../includes/header.php";
 
                                 </div>
 
+                                <?php if (isset($accionesResenas[(int) $producto['id_producto']])): ?>
+                                    <a class="resena-pedido-accion" href="<?= htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8') ?>resenas/formulario.php?id_producto=<?= (int) $producto['id_producto'] ?>"><?= htmlspecialchars($accionesResenas[(int) $producto['id_producto']], ENT_QUOTES, 'UTF-8') ?></a>
+                                <?php endif; ?>
                             </div>
 
 

@@ -735,7 +735,7 @@ require_once __DIR__ . "/../includes/header.php";
                     </span>
 
                     <span class="cuenta-menu-contador">
-                        0
+                        <?= count($cuponesDisponibles) ?>
                     </span>
                 </button>
 

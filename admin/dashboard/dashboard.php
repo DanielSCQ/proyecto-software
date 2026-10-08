@@ -296,6 +296,7 @@ if ($stmtConfiguracion) {
                 <li><a href="../clientes/clientes.php">👥 Clientes</a></li>
 
                 <li><a href="../contactos/contactos.php">✉️ Contactos</a></li>
+                <li><a href="../resenas/resenas.php">★ Reseñas</a></li>
 
                 <li><a href="../promociones/promociones.php">🎁 Promociones</a></li>
 

@@ -79,13 +79,105 @@ document.addEventListener("DOMContentLoaded", () => {
             "modalBtnCarrito"
         );    
 
-    let productoActualId = null;    
+    let productoActualId = null;
+    let solicitudProducto = 0;
+    const resumenResenas = document.getElementById('modalProductoResumenResenas');
+    const seccionResenas = document.getElementById('modalProductoResenas');
+    const listaResenas = document.getElementById('modalResenasLista');
+    const resenasVacias = document.getElementById('modalResenasVacias');
+    const todasResenas = document.getElementById('modalResenasTodas');
+    const resenaPropia = document.getElementById('modalResenaPropia');
+    const verOpiniones = document.getElementById('modalVerOpiniones');
+    verOpiniones.addEventListener('click', () => {
+        seccionResenas.scrollIntoView({behavior: 'instant', block: 'start'});
+        document.getElementById('modalResenasTitulo').focus({preventScroll: true});
+    });
+
+    function limpiarResenas() {
+        verOpiniones.hidden = true;
+        resumenResenas.replaceChildren();
+        resumenResenas.hidden = true;
+        listaResenas.replaceChildren();
+        seccionResenas.hidden = true;
+        resenasVacias.hidden = true;
+        for (const enlace of [todasResenas, resenaPropia]) {
+            enlace.hidden = true;
+            enlace.removeAttribute('href');
+            enlace.textContent = '';
+        }
+    }
+
+    function estrellasPublicas(valor, etiqueta) {
+        const grupo = document.createElement('span');
+        grupo.className = 'resenas-estrellas-publicas';
+        grupo.setAttribute('role', 'img');
+        grupo.setAttribute('aria-label', etiqueta);
+        for (let i = 0; i < 5; i++) {
+            const estrella = document.createElement('span');
+            estrella.className = 'resenas-estrella-publica';
+            estrella.setAttribute('aria-hidden', 'true');
+            estrella.style.setProperty('--relleno', `${Math.max(0, Math.min(1, valor - i)) * 100}%`);
+            grupo.append(estrella);
+        }
+        return grupo;
+    }
+
+    function mostrarResenas(producto) {
+        limpiarResenas();
+        const datos = producto.resenas;
+        if (!datos) { return; }
+        if (datos.total > 0 && datos.promedio !== null) {
+            const promedio = Number(datos.promedio_mostrado).toFixed(1);
+            const texto = document.createElement('span');
+            texto.textContent = `${promedio} · ${datos.total} ${datos.total === 1 ? 'reseña' : 'reseñas'}`;
+            resumenResenas.append(estrellasPublicas(Number(datos.promedio), `Calificación promedio: ${promedio} de 5`), texto);
+        } else {
+            resumenResenas.textContent = 'Sin calificaciones';
+            resenasVacias.hidden = false;
+        }
+        resumenResenas.hidden = false;
+        for (const resena of datos.recientes) {
+            const tarjeta = document.createElement('article');
+            tarjeta.className = 'resena-publica';
+            const cliente = document.createElement('h4');
+            cliente.textContent = resena.nombre_cliente;
+            const fecha = document.createElement('time');
+            fecha.dateTime = resena.fecha.replace(' ', 'T');
+            fecha.textContent = new Date(fecha.dateTime).toLocaleDateString('es-CO');
+            const comentario = document.createElement('p');
+            comentario.className = 'resena-publica-comentario';
+            comentario.textContent = resena.comentario;
+            tarjeta.append(cliente, estrellasPublicas(resena.calificacion, `Calificación: ${resena.calificacion} de 5`), fecha, comentario);
+            if (resena.editada) {
+                const editada = document.createElement('span');
+                editada.className = 'resena-publica-editada';
+                editada.textContent = 'Editada';
+                tarjeta.append(editada);
+            }
+            listaResenas.append(tarjeta);
+        }
+        const base = new URL('../resenas/', new URL(modal.dataset.detalleUrl, location.href));
+        if (datos.total > 3) {
+            todasResenas.href = new URL(`index.php?id_producto=${producto.id_producto}`, base).href;
+            todasResenas.textContent = `Ver todas las reseñas (${datos.total})`;
+            todasResenas.hidden = false;
+        }
+        if (datos.accion_propia) {
+            resenaPropia.href = datos.accion_propia.url;
+            resenaPropia.textContent = datos.accion_propia.texto;
+            resenaPropia.hidden = false;
+        }
+        seccionResenas.hidden = false;
+        verOpiniones.hidden = false;
+    }
 
     /* =========================================
        ABRIR MODAL
        ========================================= */
 
     function abrirModal() {
+        contenedor.scrollTop = 0;
+        modal.querySelector('.modal-producto-detalles').open = false;
 
         modal.classList.add("modal-activo");
 
@@ -107,6 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
        ========================================= */
 
     function cerrarModal() {
+        solicitudProducto++;
 
         modal.classList.remove(
             "modal-activo"
@@ -128,6 +221,8 @@ document.addEventListener("DOMContentLoaded", () => {
        ========================================= */
 
     function limpiarModal() {
+        limpiarResenas();
+        contenedor.scrollTop = 0;
 
         imagen.removeAttribute("src");
 
@@ -212,6 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
        ========================================= */
 
     async function cargarProducto(idProducto) {
+        const solicitud = ++solicitudProducto;
 
         limpiarModal();
 
@@ -241,6 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 {
                     method: "GET",
+                    cache: 'no-store',
                     headers: {
                         "Accept": "application/json"
                     }
@@ -258,6 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const datos =
                 await respuesta.json();
+            if (solicitud !== solicitudProducto) { return; }
 
 
             if (
@@ -280,6 +378,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         } catch (error) {
+            if (solicitud !== solicitudProducto) { return; }
+            limpiarResenas();
 
             nombre.textContent =
                 "No fue posible cargar el producto.";
@@ -298,6 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
        ========================================= */
 
     function mostrarProducto(producto) {
+        mostrarResenas(producto);
 
         nombre.textContent =
             producto.nombre || "Producto";

@@ -2,6 +2,7 @@
      MODAL DETALLE DEL PRODUCTO
      ================================= -->
 
+    <link rel="stylesheet" href="<?= htmlspecialchars($base_url . v_tienda('css/resenas.css'), ENT_QUOTES, 'UTF-8') ?>">
     <div
         id="modalProducto"
         class="modal-producto"
@@ -38,6 +39,7 @@
 
             <!-- BOTÓN CERRAR -->
 
+            <div class="modal-producto-cierre">
             <button
                 type="button"
                 class="modal-producto-cerrar"
@@ -46,6 +48,7 @@
             >
                 ×
             </button>
+            </div>
 
 
             <!-- CONTENIDO -->
@@ -94,6 +97,11 @@
                     ></span>
 
 
+                    <div id="modalProductoResumenResenas" class="resenas-resumen" hidden></div>
+                    <button type="button" id="modalVerOpiniones" class="modal-ver-opiniones" aria-controls="modalProductoResenas" hidden><span class="modal-control-icono" aria-hidden="true">☆</span><span>Ver opiniones de clientes</span><span aria-hidden="true">↓</span></button>
+
+                    <details class="modal-producto-detalles">
+                    <summary><span class="modal-control-icono" aria-hidden="true">ⓘ</span><span>Descripción y características</span><span class="modal-detalles-flecha" aria-hidden="true">⌄</span></summary>
                     <p
                         id="modalProductoDescripcion"
                         class="modal-producto-descripcion"
@@ -120,6 +128,7 @@
                     </div>
 
 
+                    </details>
                     <!-- DATOS -->
 
                     <div class="modal-producto-datos">
@@ -229,6 +238,15 @@
 
             </div>
 
+            <section id="modalProductoResenas" class="modal-producto-resenas" aria-labelledby="modalResenasTitulo" hidden>
+                <h3 id="modalResenasTitulo" tabindex="-1">Reseñas de clientes</h3>
+                <p id="modalResenasVacias" hidden>Este producto todavía no tiene reseñas.</p>
+                <div id="modalResenasLista" class="resenas-lista"></div>
+                <div class="resenas-enlaces">
+                    <a id="modalResenasTodas" hidden>Ver todas las reseñas</a>
+                    <a id="modalResenaPropia" hidden></a>
+                </div>
+            </section>
         </div>
 
     </div>

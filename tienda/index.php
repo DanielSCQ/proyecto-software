@@ -4,6 +4,7 @@
 // CONEXIÓN Y HEADER
 // =================================
 require_once("includes/header.php");
+require_once __DIR__ . '/../config/resenas.php';
 
 // =================================
 // IMAGEN HERO CONFIGURABLE
@@ -45,6 +46,7 @@ if ($stmtConfig) {
 ?>
 
 <link rel="stylesheet" href="<?= $base_url . v_tienda('css/inicio.css') ?>">
+<link rel="stylesheet" href="<?= $base_url . v_tienda('css/resenas.css') ?>">
 
 <?php
 
@@ -114,6 +116,9 @@ if ($resultadoProductos) {
 
 ?>
 
+<?php
+$resumenesDestacados = agranda_resena_resumenes_publicos($conexion, array_column($productosDestacados, 'id_producto'));
+?>
 <main>
 
     <!-- =================================
@@ -322,6 +327,14 @@ if ($resultadoProductos) {
                                     </a>
                                 </h3>
 
+                                <?php $valoracion = agranda_resena_valoracion_tarjeta($resumenesDestacados[(int) $producto['id_producto']]); ?>
+                                <p class="producto-valoracion" role="img" aria-label="<?= htmlspecialchars($valoracion['etiqueta'], ENT_QUOTES, 'UTF-8') ?>">
+                                    <?php if ($valoracion['promedio_texto'] !== null): ?>
+                                        <span class="resenas-estrellas-publicas" aria-hidden="true"><?php foreach ($valoracion['rellenos'] as $relleno): ?><span class="resenas-estrella-publica" style="--relleno:<?= $relleno ?>%"></span><?php endforeach; ?></span>
+                                        <span aria-hidden="true"><?= $valoracion['promedio_texto'] ?></span>
+                                        <span class="producto-valoracion-cantidad" aria-hidden="true">(<?= $valoracion['cantidad_texto'] ?>)</span>
+                                    <?php else: ?><span aria-hidden="true">Sin calificaciones</span><?php endif; ?>
+                                </p>
                                 <p class="producto-precio">
                                     $<?= number_format((float) $producto["precio"], 0, ",", ".") ?>
                                 </p>

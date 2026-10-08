@@ -13,16 +13,18 @@ if (!agranda_admin_autorizado()) {
     exit();
 }
 
+require_once __DIR__ . '/seguridad.php';
+agranda_productos_exigir_post();
 require_once("../../config/conexion.php");
 
 // =================================
 // VALIDAR ID
 // =================================
 
-$idAtributo = filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT);
+$idAtributo = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
 
 if ($idAtributo === false || $idAtributo === null || $idAtributo < 1) {
-    header("Location: atributos.php");
+    header("Location: atributos.php", true, 303);
     exit();
 }
 
@@ -67,6 +69,11 @@ try {
 
     // Iniciar transacción
     $conexion->begin_transaction();
+    $bloqueo = $conexion->prepare("SELECT id_atributo FROM atributos_producto WHERE id_atributo = ? FOR UPDATE");
+    $bloqueo->bind_param("i", $idAtributo);
+    $bloqueo->execute();
+    if (!$bloqueo->get_result()->fetch_assoc()) { throw new RuntimeException("Atributo inexistente."); }
+    $bloqueo->close();
 
 
     // =================================
@@ -148,11 +155,11 @@ try {
     // VOLVER A ATRIBUTOS
     // =================================
 
-    header("Location: atributos.php");
+    header("Location: atributos.php", true, 303);
     exit();
 
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
 
     // =================================
     // DESHACER CAMBIOS
@@ -160,16 +167,8 @@ try {
 
     $conexion->rollback();
 
-    // En desarrollo mostramos el error.
-    // Posteriormente podemos cambiarlo por
-    // un mensaje visual para el administrador.
-
-    die(
-        "No fue posible eliminar la característica. " .
-        htmlspecialchars(
-            $e->getMessage(),
-            ENT_QUOTES,
-            "UTF-8"
-        )
-    );
+    error_log('Error al eliminar atributo: ' . $e->getMessage());
+    $_SESSION['productos_mensaje'] = 'No fue posible eliminar la característica. No se eliminaron sus asociaciones.';
+    header('Location: atributos.php', true, 303);
+    exit();
 }

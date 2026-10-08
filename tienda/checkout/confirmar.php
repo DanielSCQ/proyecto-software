@@ -195,8 +195,10 @@ if ($pedidoExistente) {
     header(
         "Location: " .
         $base_url .
-        "pedidos/?confirmado=" .
-        $idPedidoExistente
+        "checkout/exito.php?id=" .
+        $idPedidoExistente,
+        true,
+        303
     );
 
     exit;
@@ -1607,8 +1609,10 @@ try {
     header(
         "Location: " .
         $base_url .
-        "pedidos/?confirmado=" .
-        $idPedido
+        "checkout/exito.php?id=" .
+        $idPedido,
+        true,
+        303
     );
 
     exit;

@@ -1115,3 +1115,42 @@
         font-size: 10px;
     }
 }
+/* Valoración informativa encima del precio; estrellas compartidas con Fase 3. */
+.producto-card .producto-valoracion { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 0 0 8px; font-size: .78rem; line-height: 1.4; color: #586354; overflow-wrap: anywhere; }
+.producto-card .producto-valoracion .resenas-estrellas-publicas { font-size: 16px; gap: 1px; }
+.producto-card .producto-valoracion-cantidad { max-width: 100%; }
+/* Fase 4B: tarjetas de productos; no afecta categorías ni el modal. */
+.productos-grid { gap: 18px; }
+.producto-card { border-color: #e0e6df; border-radius: 12px; box-shadow: 0 2px 8px rgba(24, 55, 29, .035); }
+.producto-card:hover { transform: translateY(-2px); border-color: #b9cbb6; box-shadow: 0 8px 20px rgba(24, 55, 29, .09); }
+.producto-card .producto-imagen { flex: 0 0 auto; width: 100%; height: auto; aspect-ratio: 4 / 3; background: #fff; border-bottom: 1px solid #edf0eb; }
+.producto-card .producto-imagen img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.producto-card:hover .producto-imagen img { transform: none; }
+.producto-card .producto-contenido { min-width: 0; padding: 16px; }
+.producto-card .producto-codigo { margin-bottom: 6px; color: #647060; font-size: 11px; line-height: 1.3; overflow-wrap: anywhere; }
+.producto-card .producto-contenido h3 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; min-height: 2.7em; margin: 0 0 8px; overflow: hidden; font-size: 16px; line-height: 1.35; overflow-wrap: anywhere; }
+.producto-card .producto-valoracion { margin: auto 0 8px; gap: 4px 6px; }
+.producto-card .producto-valoracion .resenas-estrellas-publicas { font-size: 16px; gap: 1px; }
+.producto-card .producto-precio { margin: 0 0 12px; padding-top: 0; font-size: 20px; line-height: 1.2; }
+.producto-card .producto-boton { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 40px; margin-top: 0; padding: 9px 8px; border-radius: 7px; font-size: 12px; line-height: 1.2; }
+.producto-card .producto-boton:focus-visible { outline: 3px solid var(--naranja); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .producto-card, .producto-card .producto-imagen img { transition: none; } .producto-card:hover { transform: none; } }
+.producto-card .producto-imagen { min-height: 211px; max-height: 240px; padding: 0; }
+@media (max-width: 750px) {
+    .productos-grid { gap: 12px; }
+    .producto-card .producto-imagen { min-height: 145px; max-height: 220px; }
+    .producto-card .producto-contenido { padding: 12px; }
+    .producto-card .producto-contenido h3 { font-size: 14px; }
+    .producto-card .producto-precio { font-size: 18px; }
+    .producto-card .producto-boton { min-height: 36px; font-size: 11px; }
+}
+@media (min-width: 521px) and (max-width: 750px) {
+    .producto-card .producto-imagen { min-height: 211px; }
+}
+@media (max-width: 350px) {
+    .productos-grid { gap: 10px; }
+    .producto-card .producto-imagen { min-height: 130px; }
+    .producto-card .producto-contenido { padding: 10px; }
+    .producto-card .producto-codigo { font-size: 10px; }
+    .producto-card .producto-precio { font-size: 17px; }
+}

@@ -1,0 +1,92 @@
+.resena-page { padding: 28px 16px; }
+.resena-panel { max-width: 680px; margin: 0 auto; padding: 24px; background: #fff; border: 1px solid #e4e8e1; border-radius: 12px; overflow-wrap: anywhere; }
+.resena-panel h1 { margin: 22px 0 16px; }
+.resena-panel h2 { font-size: 1.25rem; }
+.resena-referencia, .resena-fechas, .resena-contador { color: #586354; font-size: .9rem; }
+.resena-aviso { padding: 12px; background: #f0f5eb; border-radius: 6px; }
+.resena-calificacion { border: 0; padding: 0; margin: 24px 0; min-width: 0; }
+.resena-calificacion legend { margin-bottom: 10px; }
+.resena-estrellas { display: flex; gap: 6px; width: max-content; max-width: 100%; }
+.resena-estrella { position: relative; display: block; cursor: pointer; }
+.resena-estrella input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.resena-estrella > span:first-of-type { display: block; font-size: 36px; line-height: 44px; color: #75806d; }
+.resena-estrella > span:first-of-type::before { content: '☆'; }
+.resena-estrella:has(input:checked) > span:first-of-type,
+.resena-estrella:has(~ .resena-estrella input:checked) > span:first-of-type { color: #a56500; }
+.resena-estrella:has(input:checked) > span:first-of-type::before,
+.resena-estrella:has(~ .resena-estrella input:checked) > span:first-of-type::before { content: '★'; }
+.resena-estrella:has(input:focus-visible) { outline: 2px solid #294b20; outline-offset: 3px; border-radius: 4px; }
+.resena-sr { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.resena-panel textarea { display: block; box-sizing: border-box; width: 100%; max-width: 100%; margin-top: 8px; padding: 12px; border: 1px solid #aab4a3; border-radius: 6px; font: inherit; resize: vertical; }
+.resena-contador { text-align: right; }
+.resena-guardar { padding: 12px 18px; background: #33562b; color: #fff; border: 0; border-radius: 6px; font: inherit; cursor: pointer; max-width: 100%; }
+.resena-pedido-accion { display: inline-block; margin-top: 12px; color: #33562b; text-decoration: underline; overflow-wrap: anywhere; }
+@media (max-width: 390px) { .resena-panel { padding: 16px; } .resena-page { padding: 20px 10px; } }
+
+/* Lectura pública: el relleno utiliza el promedio real; cada reseña usa un entero. */
+.resenas-estrellas-publicas { display: inline-flex; flex: 0 0 auto; gap: 2px; line-height: 1; font-size: 24px; color: #a56500; }
+.resenas-estrella-publica { position: relative; display: inline-block; width: 1em; height: 1.1em; }
+.resenas-estrella-publica::before { content: '☆'; position: absolute; inset: 0; }
+.resenas-estrella-publica::after { content: '★'; position: absolute; top: 0; left: 0; width: var(--relleno, 0%); overflow: hidden; white-space: nowrap; }
+.resenas-resumen { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 12px 0 20px; }
+.resenas-lista { display: grid; gap: 16px; min-width: 0; }
+.resena-publica { min-width: 0; border-top: 1px solid #dce2d7; padding: 16px 0 0; overflow-wrap: anywhere; }
+.resena-publica h3, .resena-publica h4 { margin: 0 0 10px; font-size: 1rem; }
+.resena-publica time { display: inline-block; margin: 0 0 0 12px; font-size: .85rem; vertical-align: top; }
+.resena-publica-comentario { margin: 12px 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.55; }
+.resena-publica-editada { font-size: .8rem; }
+.resenas-enlaces, .resenas-paginacion { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 20px; }
+.resenas-paginacion a { padding: 8px 0; }
+.resenas-publicas-page a { color: #33562b; }
+.resenas-publicas-page { max-width: 800px; }
+
+/* Formulario inspirado en las tarjetas de Contacto, sin afectar la lectura pública. */
+.resena-form-page { background: #f5f8f2; padding: 36px 16px; }
+.resena-form-page .resena-panel { position: relative; border-radius: 20px; padding: 30px; box-shadow: 0 18px 50px rgba(23,73,30,.09); }
+.resena-form-page .resena-panel::before { content: ''; position: absolute; top: 0; left: 28px; right: 28px; height: 4px; border-radius: 0 0 6px 6px; background: linear-gradient(90deg,#1f5f28,#2e7d32 70%,#f28c28); }
+.resena-volver { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid #c9dcc3; border-radius: 9px; background: #edf5e8; color: #24552b; text-decoration: none; font-size: .85rem; font-weight: 600; }
+.resena-volver:hover { background: #dfedd7; }
+.resena-etiqueta { margin: 26px 0 8px; color: #a85d14; font-size: .75rem; font-weight: 700; letter-spacing: .1em; }
+.resena-form-page .resena-panel h1 { margin: 8px 0 20px; color: #173b1c; font-size: clamp(1.5rem, 4vw, 2rem); }
+.resena-producto { padding: 18px; border: 1px solid #e0e9da; border-radius: 12px; background: #f8fbf5; }
+.resena-producto h2 { margin: 0 0 8px; color: #29492a; line-height: 1.5; }
+.resena-verificada { display: inline-block; margin: 10px 0 0; padding: 6px 10px; border-radius: 6px; background: #e5f0df; color: #295929; font-size: .8rem; font-weight: 600; }
+.resena-form-page .resena-aviso { margin: 18px 0; border: 1px solid #cbdcc1; line-height: 1.6; }
+.resena-form-page .resena-calificacion legend, .resena-form-page label[for="resena-comentario"] { font-weight: 600; color: #29472b; }
+.resena-form-page .resena-estrellas { padding: 8px 10px; border: 1px solid #e0e8da; border-radius: 10px; background: #fbfcf8; }
+.resena-form-page .resena-panel textarea { border-radius: 10px; background: #fafcf9; line-height: 1.6; min-height: 130px; }
+.resena-ayuda { margin: 10px 0 4px; color: #64705f; font-size: .85rem; line-height: 1.5; }
+.resena-limite-excedido { color: #a43c22; font-weight: 700; }
+.resena-form-page .resena-aviso-error { background: #fff1e8; color: #863d1b; border-color: #e8b38f; }
+.resena-form-page .resena-guardar { margin-top: 12px; border-radius: 9px; background: linear-gradient(110deg,#1f5f28,#2e7d32); font-weight: 600; box-shadow: 0 5px 14px #17491e20; }
+.resena-form-page .resena-guardar:hover { background: #17491e; }
+.resena-form-page :is(.resena-volver,.resena-guardar,textarea):focus-visible { outline: 3px solid #d89238; outline-offset: 3px; }
+@media(max-width:390px) { .resena-form-page .resena-panel { padding: 18px; } .resena-producto { padding: 13px; } .resena-form-page .resena-estrellas { gap: 4px; padding: 6px; } }
+
+/* Accesos de reseñas: conservan los enlaces y la elegibilidad existentes. */
+.resena-pedido-accion {
+    display: inline-flex; align-items: center; gap: 7px; max-width: 100%;
+    padding: 8px 11px; border: 1px solid #cbdcc5; border-radius: 7px;
+    background: #edf4e8; color: #33562b; font-size: 12px; font-weight: 600;
+    line-height: 1.45; text-decoration: none; box-sizing: border-box;
+}
+.resena-pedido-accion::before,
+.modal-producto .resenas-enlaces a::before {
+    content: ''; flex: 0 0 16px; width: 16px; height: 16px;
+    background: currentColor; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.2-6.2 3.2 1.2-6.8-5-4.9 6.9-1Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.resena-pedido-accion:hover { background: #e2edda; border-color: #93b283; }
+.resena-pedido-accion:focus-visible,
+.modal-producto .resenas-enlaces a:focus-visible { outline: 3px solid #e2a54c; outline-offset: 3px; }
+.modal-producto .modal-producto-resenas h3 { display: flex; align-items: center; gap: 10px; line-height: 1.5; margin-bottom: 18px; }
+.modal-producto .modal-producto-resenas h3::before { content: ''; flex: 0 0 4px; height: 22px; border-radius: 4px; background: #9bc985; }
+.modal-producto #modalResenasVacias { padding: 16px; border: 1px solid #354033; border-radius: 8px; background: #171e16; color: #d4dfcf; line-height: 1.6; }
+.modal-producto .resenas-enlaces { gap: 10px; padding-top: 18px; border-top: 1px solid #343434; }
+.modal-producto .resenas-enlaces a { display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box; max-width: 100%; padding: 10px 14px; border: 1px solid #527345; border-radius: 7px; background: #1b2b17; color: #d4edc9; text-decoration: none; font-size: .85rem; line-height: 1.5; }
+.modal-producto .resenas-enlaces #modalResenasTodas { background: #1b1e1a; border-color: #535b4f; }
+.modal-producto .resenas-enlaces #modalResenasTodas::before { mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' d='M4 5h16v12H9l-5 4V5Zm4 4h8M8 13h6'/%3E%3C/svg%3E") center / contain no-repeat; }
+.modal-producto .resenas-enlaces a:hover { background: #2b4023; border-color: #9bc985; }
+@media (max-width: 390px) {
+    .resena-pedido-accion { padding: 7px 9px; font-size: 11px; }
+    .modal-producto .resenas-enlaces a { padding: 10px; }
+}

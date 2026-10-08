@@ -16,7 +16,7 @@ require_once("../../config/conexion.php");
 // OBTENER ID DEL CLIENTE
 // =================================
 
-$id_cliente = intval($_GET["id"] ?? 0);
+$id_cliente = filter_var($_GET["id"] ?? null, FILTER_VALIDATE_INT);
 
 if ($id_cliente <= 0) {
     header("Location: clientes.php");
@@ -35,6 +35,7 @@ $sql_cliente = "SELECT
                     u.correo,
                     u.telefono,
                     u.estado,
+                    u.rol,
                     u.fecha_registro,
 
                     COUNT(DISTINCT p.id_pedido) AS cantidad_pedidos,
@@ -47,7 +48,7 @@ $sql_cliente = "SELECT
                 ON u.id_usuario = p.id_usuario
 
                 WHERE u.id_usuario = ?
-                AND u.rol = 'cliente'
+                AND u.rol IN ('cliente', 'administrador')
 
                 GROUP BY
                     u.id_usuario,
@@ -56,6 +57,7 @@ $sql_cliente = "SELECT
                     u.correo,
                     u.telefono,
                     u.estado,
+                    u.rol,
                     u.fecha_registro";
 
 
@@ -384,10 +386,12 @@ $actualizado = isset($_GET["actualizado"])
                     </a>
 
 
+                    <?php if ($cliente['rol'] === 'cliente'): ?>
                     <a href="editar_cliente.php?id=<?php echo (int)$cliente["id_usuario"]; ?>"
                         class="btn-editar">
                         ✏️ Editar
                     </a>
+                    <?php endif; ?>
 
                 </div>
 

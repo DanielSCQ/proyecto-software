@@ -469,7 +469,7 @@ foreach (
                 $stock,
 
             "subtotal" =>
-                $precio * $stock,
+                0,
 
             "imagen" =>
                 $producto["ruta_imagen"],
@@ -534,20 +534,28 @@ foreach (
 $stmtProducto->close();
 $cuponVista = null; $descuentoVista = 0; $subtotalCuponVista = 0;
 $cuponMensaje = $_SESSION['cupon_checkout_exito'] ?? ''; unset($_SESSION['cupon_checkout_exito']);
-try {
-    $subtotalCuponVista = agranda_cupon_subtotal_carrito($conexion, $_SESSION['carrito']);
-    if (isset($_SESSION['cupon_checkout'])) {
-        $seleccion = $_SESSION['cupon_checkout'];
-        if (!is_array($seleccion) || (int)($seleccion['id_usuario'] ?? 0) !== $idUsuario || !is_string($seleccion['codigo'] ?? null)) { throw new RuntimeException('El cupón no corresponde a esta cuenta.'); }
-        $cuponVista = agranda_cupon_buscar($conexion, $seleccion['codigo']);
-        if (!$cuponVista) { throw new RuntimeException('El cupón ya no existe.'); }
-        $descuentoVista = agranda_cupon_validar($conexion, $cuponVista, $idUsuario, $subtotalCuponVista);
+if ($carritoValido) {
+    try {
+        $subtotalCuponVista = agranda_cupon_subtotal_carrito($conexion, $_SESSION['carrito']);
+        if (isset($_SESSION['cupon_checkout'])) {
+            $seleccion = $_SESSION['cupon_checkout'];
+            if (!is_array($seleccion) || (int)($seleccion['id_usuario'] ?? 0) !== $idUsuario || !is_string($seleccion['codigo'] ?? null)) { throw new RuntimeException('El cupón no corresponde a esta cuenta.'); }
+            $cuponVista = agranda_cupon_buscar($conexion, $seleccion['codigo']);
+            if (!$cuponVista) { throw new RuntimeException('El cupón ya no existe.'); }
+            $descuentoVista = agranda_cupon_validar($conexion, $cuponVista, $idUsuario, $subtotalCuponVista);
+        }
+        $totalCompra = agranda_cupon_importe($subtotalCuponVista - $descuentoVista);
+    } catch (Throwable $error) {
+        $cuponMensaje = $error instanceof RuntimeException || $error instanceof InvalidArgumentException ? $error->getMessage() : 'No fue posible validar el cupón.';
+        $cuponVista = null; $descuentoVista = 0;
+        unset($_SESSION['cupon_checkout'], $_SESSION['pago_simulado_aprobado']);
     }
-    $totalCompra = agranda_cupon_importe($subtotalCuponVista - $descuentoVista);
-} catch (Throwable $error) {
-    $cuponMensaje = $error instanceof RuntimeException || $error instanceof InvalidArgumentException ? $error->getMessage() : 'No fue posible validar el cupón.';
-    $cuponVista = null; $descuentoVista = 0;
-    unset($_SESSION['cupon_checkout'], $_SESSION['pago_simulado_aprobado']);
+} else {
+    // No calcular descuentos ni un total definitivo sobre cantidades inválidas.
+    // Conservar la selección del cupón para volver a validarla desde el carrito.
+    $totalCompra = null;
+    $cuponMensaje = 'Los importes y el cupón se recalcularán cuando actualices tu carrito.';
+    unset($_SESSION['pago_simulado_aprobado']);
 }
 
 
@@ -575,7 +583,7 @@ if (empty($productosCheckout)) {
 if (!$carritoValido) {
 
     $mensajeCarrito =
-        "Algunos productos cambiaron de disponibilidad o stock. Revisa tu carrito antes de confirmar la compra.";
+        "El stock o la disponibilidad de uno o más productos cambió. Regresa al carrito para actualizar tu compra.";
 }
 
 
@@ -1547,13 +1555,13 @@ require_once("../includes/header.php");
                                 </strong>
 
                                 <small>
-                                    Cantidad:
+                                    <?= $carritoValido ? 'Cantidad:' : 'Cantidad solicitada:' ?>
                                     <?= (int) $producto["cantidad"] ?>
                                 </small>
 
 
                                 <?php if (
-                                    $producto["disponible"]
+                                    $carritoValido && $producto["disponible"]
                                 ): ?>
 
                                     <span>
@@ -1569,7 +1577,7 @@ require_once("../includes/header.php");
 
                                     <span class="checkout-producto-error">
                                         <?= htmlspecialchars(
-                                            $producto["problema"],
+                                            $producto["problema"] ?: 'Importe pendiente de actualizar.',
                                             ENT_QUOTES,
                                             "UTF-8"
                                         ) ?>
@@ -1590,6 +1598,7 @@ require_once("../includes/header.php");
 
                 <section class="checkout-cupon"><h3>Cupón de descuento</h3>
                     <?php if ($cuponMensaje !== ''): ?><p role="status"><?= htmlspecialchars($cuponMensaje,ENT_QUOTES,'UTF-8') ?></p><?php endif; ?>
+                    <?php if ($carritoValido): ?>
                     <form action="aplicar_cupon.php" method="POST">
                         <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf_checkout'],ENT_QUOTES,'UTF-8') ?>">
                         <?php if ($cuponVista): ?>
@@ -1597,6 +1606,7 @@ require_once("../includes/header.php");
                         <?php else: ?><label for="codigo-cupon">Código</label><input id="codigo-cupon" name="codigo" maxlength="50" autocomplete="off" required><button type="submit" name="accion" value="aplicar">Aplicar cupón</button><?php endif; ?>
                     </form>
                     <?php if ($cuponVista): ?><p>Subtotal: $<?= number_format((float)agranda_cupon_importe($subtotalCuponVista),2,',','.') ?></p><p>Descuento: -$<?= number_format((float)agranda_cupon_importe($descuentoVista),2,',','.') ?></p><?php endif; ?>
+                    <?php endif; ?>
                 </section>
                 <div class="checkout-total">
 
@@ -1605,12 +1615,16 @@ require_once("../includes/header.php");
                     </span>
 
                     <strong>
+                        <?php if ($carritoValido): ?>
                         $<?= number_format(
                             $totalCompra,
                             2,
                             ",",
                             "."
                         ) ?>
+                        <?php else: ?>
+                            Pendiente de actualizar
+                        <?php endif; ?>
                     </strong>
 
                 </div>

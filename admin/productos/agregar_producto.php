@@ -10,6 +10,7 @@ if (!agranda_admin_autorizado()) {
     exit();
 }
 
+require_once __DIR__ . '/seguridad.php';
 require_once("../../config/conexion.php");
 
     $sqlCategorias = "SELECT id_categoria, nombre
@@ -154,6 +155,7 @@ require_once("../../config/conexion.php");
             <div class="principal">
 
             <form action="acciones_productos.php" method="POST" enctype="multipart/form-data">
+                <?= agranda_productos_campo_csrf() ?>
 
                 <input type="hidden" name="accion" value="agregar">
 
